@@ -27,6 +27,7 @@ namespace CryptoTickerBot.Exchanges
 			Url = new Uri ( "https://koinex.in/" );
 			TickerUrl = new Uri (
 				"wss://ws-ap2.pusher.com/app/9197b0bfdf3f71a4064e?protocol=7&client=js&version=4.1.0&flash=false" );
+			Id = CryptoExchange.Koinex;
 		}
 
 		public override async Task GetExchangeData ( CancellationToken ct )

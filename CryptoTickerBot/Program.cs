@@ -27,28 +27,28 @@ namespace CryptoTickerBot
 		private static SheetsService service;
 		private static readonly object SheetUpdateLock = new object ( );
 
-		private static readonly Dictionary<string, string> SheetsRanges = new Dictionary<string, string>
+		private static readonly Dictionary<CryptoExchange, string> SheetsRanges = new Dictionary<CryptoExchange, string>
 		{
-			["BitBay"] = "A3:D6",
-			["Koinex"] = "A12:D15",
-			["Binance"] = "A20:D23",
-			["CoinDelta"] = "A29:D32",
-			["Coinbase"] = "A37:D40",
+			[CryptoExchange.BitBay] = "A3:D6",
+			[CryptoExchange.Koinex] = "A12:D15",
+			[CryptoExchange.Binance] = "A20:D23",
+			[CryptoExchange.CoinDelta] = "A29:D32",
+			[CryptoExchange.Coinbase] = "A37:D40",
 		};
 
-		private static readonly HashSet<string> PendingUpdates = new HashSet<string> ( );
+		private static readonly HashSet<CryptoExchange> PendingUpdates = new HashSet<CryptoExchange> ( );
 
 		public static void Main ( string[] args )
 		{
 			FiatConverter.StartMonitor ( );
 
-			var exchanges = new Dictionary<string, CryptoExchangeBase>
+			var exchanges = new Dictionary<CryptoExchange, CryptoExchangeBase>
 			{
-				["Koinex"] = new KoinexExchange ( ),
-				["BitBay"] = new BitBayExchange ( ),
-				["Binance"] = new BinanceExchange ( ),
-				["CoinDelta"] = new CoinDeltaExchange ( ),
-				["Coinbase"] = new CoinbaseExchange ( ),
+				[CryptoExchange.Koinex] = new KoinexExchange ( ),
+				[CryptoExchange.BitBay] = new BitBayExchange ( ),
+				[CryptoExchange.Binance] = new BinanceExchange ( ),
+				[CryptoExchange.CoinDelta] = new CoinDeltaExchange ( ),
+				[CryptoExchange.Coinbase] = new CoinbaseExchange ( ),
 			};
 
 			foreach ( var exchange in exchanges.Values )
@@ -56,7 +56,7 @@ namespace CryptoTickerBot
 				exchange.Changed += ( e, coin ) =>
 				{
 					lock ( SheetUpdateLock )
-						PendingUpdates.Add ( e.Name );
+						PendingUpdates.Add ( e.Id );
 				};
 				exchange.Changed += ( e, coin ) => WriteLine ( $"{e.Name,-10} {e[coin.Symbol]}" );
 				exchange.GetExchangeData ( CancellationToken.None );
@@ -71,7 +71,7 @@ namespace CryptoTickerBot
 				Thread.Sleep ( 1 );
 		}
 
-		private static void StartAutoSheetsUpdater ( IReadOnlyDictionary<string, CryptoExchangeBase> exchanges )
+		private static void StartAutoSheetsUpdater ( IReadOnlyDictionary<CryptoExchange, CryptoExchangeBase> exchanges )
 		{
 			Task.Run ( ( ) =>
 			{
@@ -81,11 +81,11 @@ namespace CryptoTickerBot
 				{
 					lock ( SheetUpdateLock )
 					{
-						foreach ( var name in PendingUpdates )
+						foreach ( var id in PendingUpdates )
 						{
-							var range = SheetsRanges[name];
-							UpdateSheet ( range, exchanges[name] );
-							WriteLine ( $"Updated Sheets for {name}" );
+							var range = SheetsRanges[id];
+							UpdateSheet ( range, exchanges[id] );
+							WriteLine ( $"Updated Sheets for {id}" );
 						}
 						PendingUpdates.Clear ( );
 					}

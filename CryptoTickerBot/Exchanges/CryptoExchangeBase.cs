@@ -6,11 +6,21 @@ using System.Threading.Tasks;
 
 namespace CryptoTickerBot.Exchanges
 {
+	public enum CryptoExchange
+	{
+		Koinex,
+		BitBay,
+		Binance,
+		CoinDelta,
+		Coinbase
+	}
+
 	public abstract class CryptoExchangeBase
 	{
 		public string Name { get; protected set; }
 		public Uri Url { get; protected set; }
 		public Uri TickerUrl { get; protected set; }
+		public CryptoExchange Id { get; protected set; }
 		public Dictionary<string, CryptoCoin> ExchangeData { get; protected set; }
 		public abstract Task GetExchangeData ( CancellationToken ct );
 

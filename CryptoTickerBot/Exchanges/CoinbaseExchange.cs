@@ -22,6 +22,7 @@ namespace CryptoTickerBot.Exchanges
 			Name = "Coinbase";
 			Url = new Uri ( "https://www.coinbase.com/" );
 			TickerUrl = new Uri ( "https://api.coinbase.com/v2/prices/" );
+			Id = CryptoExchange.Coinbase;
 		}
 
 		public override async Task GetExchangeData ( CancellationToken ct )

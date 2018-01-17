@@ -9,6 +9,14 @@ namespace CryptoTickerBot.Exchanges
 {
 	public class BitBayExchange : CryptoExchangeBase
 	{
+		public BitBayExchange ( )
+		{
+			Name = "BitBay";
+			Url = new Uri ( "https://bitbay.net/en" );
+			TickerUrl = new Uri ( "https://api.bitbay.net/rest/trading/ticker" );
+			Id = CryptoExchange.BitBay;
+		}
+
 		public override async Task GetExchangeData ( CancellationToken ct )
 		{
 			ExchangeData = new Dictionary<string, CryptoCoin> ( );
@@ -47,13 +55,6 @@ namespace CryptoTickerBot.Exchanges
 
 			if ( old != ExchangeData[symbol] )
 				OnChanged ( this, old );
-		}
-
-		public BitBayExchange ( )
-		{
-			Name = "BitBay";
-			Url = new Uri ( "https://bitbay.net/en" );
-			TickerUrl = new Uri ( "https://api.bitbay.net/rest/trading/ticker" );
 		}
 	}
 }

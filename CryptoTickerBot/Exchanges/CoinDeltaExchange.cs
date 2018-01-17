@@ -15,6 +15,7 @@ namespace CryptoTickerBot.Exchanges
 			Name = "CoinDelta";
 			Url = new Uri ( "https://coindelta.com/" );
 			TickerUrl = new Uri ( "https://coindelta.com/api/v1/public/getticker/" );
+			Id = CryptoExchange.CoinDelta;
 		}
 
 		public override async Task GetExchangeData ( CancellationToken ct )
