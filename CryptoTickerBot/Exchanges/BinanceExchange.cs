@@ -31,18 +31,25 @@ namespace CryptoTickerBot.Exchanges
 
 					ws.OnMessage += ( sender, args ) =>
 					{
-						var json = args.Data;
-						var data = JsonConvert.DeserializeObject<dynamic> ( json );
-
-						foreach ( var datum in data )
+						try
 						{
-							var s = (string) datum.s;
-							var symbol = s.Substring ( 0, 3 );
-							if ( !s.EndsWith ( "USDT" ) )
-								continue;
-							Update ( datum, symbol );
+							var json = args.Data;
+							var data = JsonConvert.DeserializeObject<dynamic> ( json );
 
-							LastUpdate = DateTime.Now;
+							foreach ( var datum in data )
+							{
+								var s = (string) datum.s;
+								var symbol = s.Substring ( 0, 3 );
+								if ( !s.EndsWith ( "USDT" ) )
+									continue;
+								Update ( datum, symbol );
+
+								LastUpdate = DateTime.Now;
+							}
+						}
+						catch ( Exception e )
+						{
+							Console.WriteLine ( e );
 						}
 					};
 
