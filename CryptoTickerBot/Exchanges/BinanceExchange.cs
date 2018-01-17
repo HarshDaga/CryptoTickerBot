@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using WebSocketSharp;
+// ReSharper disable AccessToDisposedClosure
 
 namespace CryptoTickerBot.Exchanges
 {
@@ -25,9 +26,7 @@ namespace CryptoTickerBot.Exchanges
 			{
 				using ( var ws = new WebSocket ( TickerUrl ) )
 				{
-					ws.ConnectAsync ( );
-					while ( ws.ReadyState == WebSocketState.Connecting )
-						await Task.Delay ( 1, ct );
+					await Task.Run ( ( ) => ws.Connect ( ), ct );
 
 					ws.OnMessage += ( sender, args ) =>
 					{

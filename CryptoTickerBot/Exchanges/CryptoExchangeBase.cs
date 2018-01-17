@@ -12,7 +12,11 @@ namespace CryptoTickerBot.Exchanges
 		BitBay,
 		Binance,
 		CoinDelta,
-		Coinbase
+		Coinbase,
+		Kraken,
+		Bitstamp,
+		Bitfinex,
+		Poloniex,
 	}
 
 	public abstract class CryptoExchangeBase

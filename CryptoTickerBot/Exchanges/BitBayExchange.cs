@@ -19,6 +19,7 @@ namespace CryptoTickerBot.Exchanges
 		public override async Task GetExchangeData ( CancellationToken ct )
 		{
 			ExchangeData = new Dictionary<string, CryptoCoin> ( );
+
 			var tickers = new List<(string symbol, string url)>
 			{
 				("BTC", "https://bitbay.net/API/Public/BTC/ticker.json"),

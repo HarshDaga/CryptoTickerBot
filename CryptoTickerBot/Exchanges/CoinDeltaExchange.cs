@@ -25,7 +25,7 @@ namespace CryptoTickerBot.Exchanges
 			{
 				//var json = await WebRequests.GetAsync ( TickerUrl );
 				//var data = JsonConvert.DeserializeObject<dynamic> ( json );
-				var data = await TickerUrl.GetJsonListAsync ( ct );
+				var data = await TickerUrl.GetJsonAsync ( ct );
 
 				foreach ( var datum in data )
 				{
@@ -49,8 +49,7 @@ namespace CryptoTickerBot.Exchanges
 
 			var old = ExchangeData[symbol].Clone ( );
 
-			decimal InrToUsd ( dynamic amount ) =>
-				FiatConverter.Convert ( (decimal) amount, FiatCurrency.INR, FiatCurrency.USD );
+			decimal InrToUsd ( decimal amount ) => FiatConverter.Convert ( amount, FiatCurrency.INR, FiatCurrency.USD );
 
 			ExchangeData[symbol].LowestAsk = InrToUsd ( data.Ask );
 			ExchangeData[symbol].HighestBid = InrToUsd ( data.Bid );

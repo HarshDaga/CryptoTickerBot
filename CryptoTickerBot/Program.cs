@@ -33,8 +33,9 @@ namespace CryptoTickerBot
 			[CryptoExchange.BitBay] = "A3:D6",
 			[CryptoExchange.Koinex] = "A12:D15",
 			[CryptoExchange.Binance] = "A20:D23",
-			[CryptoExchange.CoinDelta] = "A29:D32",
+			//[CryptoExchange.CoinDelta] = "A29:D32",
 			[CryptoExchange.Coinbase] = "A37:D40",
+			[CryptoExchange.Kraken] = "A29:D32",
 		};
 
 		private static ConcurrentQueue<CryptoExchange> pendingUpdates =
@@ -49,8 +50,9 @@ namespace CryptoTickerBot
 				[CryptoExchange.Koinex] = new KoinexExchange ( ),
 				[CryptoExchange.BitBay] = new BitBayExchange ( ),
 				[CryptoExchange.Binance] = new BinanceExchange ( ),
-				[CryptoExchange.CoinDelta] = new CoinDeltaExchange ( ),
+				//[CryptoExchange.CoinDelta] = new CoinDeltaExchange ( ),
 				[CryptoExchange.Coinbase] = new CoinbaseExchange ( ),
+				[CryptoExchange.Kraken] = new KrakenExchange ( ),
 			};
 
 			foreach ( var exchange in exchanges.Values )
@@ -122,7 +124,7 @@ namespace CryptoTickerBot
 			var requestBody = new BatchUpdateValuesRequest
 			{
 				ValueInputOption = "USER_ENTERED",
-				Data = new List<ValueRange> { valueRange }
+				Data = new List<ValueRange> {valueRange}
 			};
 
 			var request = service.Spreadsheets.Values.BatchUpdate ( requestBody, sheetId );
