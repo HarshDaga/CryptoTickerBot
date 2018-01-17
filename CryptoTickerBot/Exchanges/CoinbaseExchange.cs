@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CryptoTickerBot.Helpers;
+using CryptoTickerBot.Extensions;
 using Newtonsoft.Json;
+using WebSocketSharp;
 
 namespace CryptoTickerBot.Exchanges
 {
@@ -20,36 +22,45 @@ namespace CryptoTickerBot.Exchanges
 		public CoinbaseExchange ( )
 		{
 			Name = "Coinbase";
-			Url = new Uri ( "https://www.coinbase.com/" );
-			TickerUrl = new Uri ( "https://api.coinbase.com/v2/prices/" );
+			Url = "https://www.coinbase.com/";
+			TickerUrl = "wss://ws-feed.gdax.com/";
 			Id = CryptoExchange.Coinbase;
 		}
 
 		public override async Task GetExchangeData ( CancellationToken ct )
 		{
 			ExchangeData = new Dictionary<string, CryptoCoin> ( );
-			while ( !ct.IsCancellationRequested )
+
+			try
 			{
-				foreach ( var symbol in Symbols )
+				using ( var ws = new WebSocket ( TickerUrl ) )
 				{
-					var tickerBuy = $"{TickerUrl}{symbol}-USD/buy";
-					var tickerSell = $"{TickerUrl}{symbol}-USD/sell";
-					var tickerSpot = $"{TickerUrl}{symbol}-USD/spot";
+					await ConnectAndSubscribe ( ws, ct );
 
-					var buy = JsonConvert.DeserializeObject<dynamic> ( await WebRequests.GetAsync ( tickerBuy ) );
-					var sell = JsonConvert.DeserializeObject<dynamic> ( await WebRequests.GetAsync ( tickerSell ) );
-					var spot = JsonConvert.DeserializeObject<dynamic> ( await WebRequests.GetAsync ( tickerSpot ) );
+					ws.OnMessage += Ws_OnMessage;
 
-					dynamic data = new System.Dynamic.ExpandoObject ( );
-					data.buy = buy;
-					data.sell = sell;
-					data.spot = spot;
-
-					Update ( data, symbol );
+					await Task.Delay ( int.MaxValue, ct );
 				}
-
-				await Task.Delay ( 1000, ct );
 			}
+			catch ( Exception e )
+			{
+				Console.WriteLine ( e );
+				throw;
+			}
+		}
+
+		private void Ws_OnMessage ( object sender, MessageEventArgs e )
+		{
+			var json = e.Data;
+			var data = JsonConvert.DeserializeObject<dynamic> ( json );
+			if ( data.type != "ticker" )
+				return;
+
+			var symbol = ( (string) data.product_id ).Substring ( 0, 3 );
+
+			Update ( data, symbol );
+
+			LastUpdate = DateTime.Now;
 		}
 
 		protected override void Update ( dynamic data, string symbol )
@@ -59,12 +70,21 @@ namespace CryptoTickerBot.Exchanges
 
 			var old = ExchangeData[symbol].Clone ( );
 
-			ExchangeData[symbol].LowestAsk = data.buy.data.amount;
-			ExchangeData[symbol].HighestBid = data.sell.data.amount;
-			ExchangeData[symbol].Rate = data.spot.data.amount;
+			ExchangeData[symbol].LowestAsk = data.best_ask;
+			ExchangeData[symbol].HighestBid = data.best_bid;
+			ExchangeData[symbol].Rate = data.price;
 
 			if ( old != ExchangeData[symbol] )
 				OnChanged ( this, old );
+		}
+
+		private static async Task ConnectAndSubscribe ( WebSocket ws, CancellationToken ct )
+		{
+			await Task.Run ( ( ) => ws.Connect ( ), ct );
+
+			var productIds = string.Join ( ",", KnownSymbols.Select ( x => $"\"{x}-USD\"" ) );
+			await ws.SendStringAsync (
+				$"{{\"type\":\"subscribe\",\"product_ids\":[{productIds}],\"channels\":[\"ticker\"]}}" );
 		}
 	}
 }

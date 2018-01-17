@@ -18,11 +18,21 @@ namespace CryptoTickerBot.Exchanges
 	public abstract class CryptoExchangeBase
 	{
 		public string Name { get; protected set; }
-		public Uri Url { get; protected set; }
-		public Uri TickerUrl { get; protected set; }
+		public string Url { get; protected set; }
+		public string TickerUrl { get; protected set; }
 		public CryptoExchange Id { get; protected set; }
 		public Dictionary<string, CryptoCoin> ExchangeData { get; protected set; }
+		public bool IsComplete => ExchangeData.Count == KnownSymbols.Count;
+		public DateTime LastUpdate { get; protected set; }
 		public abstract Task GetExchangeData ( CancellationToken ct );
+
+		protected static readonly List<string> KnownSymbols = new List<string>
+		{
+			"BTC",
+			"LTC",
+			"ETH",
+			"BCH"
+		};
 
 		protected CryptoExchangeBase ( )
 		{

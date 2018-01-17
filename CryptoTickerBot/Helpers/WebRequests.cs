@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Flurl.Http;
 
 // ReSharper disable AssignNullToNotNullAttribute
 
@@ -25,18 +27,7 @@ namespace CryptoTickerBot.Helpers
 
 		public static string Get ( Uri uri ) => Get ( uri.ToString ( ) );
 
-		public static async Task<string> GetAsync ( string uri )
-		{
-			var request = (HttpWebRequest) WebRequest.Create ( uri );
-			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-
-			using ( var response = (HttpWebResponse) await request.GetResponseAsync ( ) )
-			using ( var stream = response.GetResponseStream ( ) )
-			using ( var reader = new StreamReader ( stream ) )
-			{
-				return await reader.ReadToEndAsync ( );
-			}
-		}
+		public static async Task<string> GetAsync ( string uri ) => await uri.GetStringAsync ( );
 
 		public static async Task<string> GetAsync ( Uri uri ) => await GetAsync ( uri.ToString ( ) );
 

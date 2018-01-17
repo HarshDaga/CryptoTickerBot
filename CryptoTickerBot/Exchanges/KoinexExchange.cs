@@ -16,17 +16,16 @@ namespace CryptoTickerBot.Exchanges
 		private static readonly Dictionary<string, string> ToSymBol = new Dictionary<string, string>
 		{
 			["bitcoin"] = "BTC",
-			["litecoin"] = "LTC",
+			["bitcoin_cash"] = "BCH",
 			["ether"] = "ETH",
-			["bitcoin_cash"] = "BCH"
+			["litecoin"] = "LTC",
 		};
 
 		public KoinexExchange ( )
 		{
 			Name = "Koinex";
-			Url = new Uri ( "https://koinex.in/" );
-			TickerUrl = new Uri (
-				"wss://ws-ap2.pusher.com/app/9197b0bfdf3f71a4064e?protocol=7&client=js&version=4.1.0&flash=false" );
+			Url = "https://koinex.in/";
+			TickerUrl = "wss://ws-ap2.pusher.com/app/9197b0bfdf3f71a4064e?protocol=7&client=js&version=4.1.0&flash=false";
 			Id = CryptoExchange.Koinex;
 		}
 
@@ -36,7 +35,7 @@ namespace CryptoTickerBot.Exchanges
 
 			try
 			{
-				using ( var ws = new WebSocket ( TickerUrl.ToString ( ) ) )
+				using ( var ws = new WebSocket ( TickerUrl ) )
 				{
 					await ConnectAndSubscribe ( ws, ct );
 
@@ -89,13 +88,11 @@ namespace CryptoTickerBot.Exchanges
 
 		private static async Task ConnectAndSubscribe ( WebSocket ws, CancellationToken ct )
 		{
-			ws.ConnectAsync ( );
-			while ( ws.ReadyState == WebSocketState.Connecting )
-				await Task.Delay ( 1, ct );
-			await ws.SendStringAsync ( "{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"my-channel-bitcoin\"}}" );
-			await ws.SendStringAsync ( "{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"my-channel-ether\"}}" );
-			await ws.SendStringAsync ( "{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"my-channel-litecoin\"}}" );
-			await ws.SendStringAsync ( "{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"my-channel-bitcoin_cash\"}}" );
+			await Task.Run ( ( ) => ws.Connect ( ), ct );
+
+			foreach ( var channel in ToSymBol.Keys )
+				await ws.SendStringAsync (
+					$"{{\"event\":\"pusher:subscribe\",\"data\":{{\"channel\":\"my-channel-{channel}\"}}}}" );
 		}
 	}
 }

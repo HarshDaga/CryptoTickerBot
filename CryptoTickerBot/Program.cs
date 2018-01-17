@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Exchanges;
@@ -25,7 +27,6 @@ namespace CryptoTickerBot
 		private const string SheetName = "Tickers";
 		private static string sheetId;
 		private static SheetsService service;
-		private static readonly object SheetUpdateLock = new object ( );
 
 		private static readonly Dictionary<CryptoExchange, string> SheetsRanges = new Dictionary<CryptoExchange, string>
 		{
@@ -36,7 +37,8 @@ namespace CryptoTickerBot
 			[CryptoExchange.Coinbase] = "A37:D40",
 		};
 
-		private static readonly HashSet<CryptoExchange> PendingUpdates = new HashSet<CryptoExchange> ( );
+		private static ConcurrentQueue<CryptoExchange> pendingUpdates =
+			new ConcurrentQueue<CryptoExchange> ( );
 
 		public static void Main ( string[] args )
 		{
@@ -55,11 +57,11 @@ namespace CryptoTickerBot
 			{
 				exchange.Changed += ( e, coin ) =>
 				{
-					lock ( SheetUpdateLock )
-						PendingUpdates.Add ( e.Id );
+					if ( !pendingUpdates.Contains ( e.Id ) )
+						pendingUpdates.Enqueue ( e.Id );
 				};
 				exchange.Changed += ( e, coin ) => WriteLine ( $"{e.Name,-10} {e[coin.Symbol]}" );
-				exchange.GetExchangeData ( CancellationToken.None );
+				Task.Run ( ( ) => exchange.GetExchangeData ( CancellationToken.None ) );
 			}
 
 			sheetId = File.ReadAllText ( "sheet.id" );
@@ -79,15 +81,17 @@ namespace CryptoTickerBot
 				var updateTimer = new Timer ( 1000 );
 				updateTimer.Elapsed += ( sender, eventArgs ) =>
 				{
-					lock ( SheetUpdateLock )
+					while ( pendingUpdates.TryDequeue ( out var id ) )
 					{
-						foreach ( var id in PendingUpdates )
+						if ( !exchanges[id].IsComplete )
 						{
-							var range = SheetsRanges[id];
-							UpdateSheet ( range, exchanges[id] );
-							WriteLine ( $"Updated Sheets for {id}" );
+							WriteLine ( $"Sheets not updated for {id}. Only {exchanges[id].ExchangeData.Count} coins updated." );
+							continue;
 						}
-						PendingUpdates.Clear ( );
+
+						var range = SheetsRanges[id];
+						UpdateSheet ( range, exchanges[id] );
+						WriteLine ( $"Updated Sheets for {id}" );
 					}
 				};
 				updateTimer.Start ( );
@@ -118,7 +122,7 @@ namespace CryptoTickerBot
 			var requestBody = new BatchUpdateValuesRequest
 			{
 				ValueInputOption = "USER_ENTERED",
-				Data = new List<ValueRange> {valueRange}
+				Data = new List<ValueRange> { valueRange }
 			};
 
 			var request = service.Spreadsheets.Values.BatchUpdate ( requestBody, sheetId );

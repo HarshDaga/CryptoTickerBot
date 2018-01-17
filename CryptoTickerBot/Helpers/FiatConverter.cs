@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Timers;
+using Flurl.Http;
 using Newtonsoft.Json;
 
 namespace CryptoTickerBot.Helpers
@@ -47,6 +48,8 @@ namespace CryptoTickerBot.Helpers
 		public static Dictionary<FiatCurrency, decimal> UsdTo { get; private set; } =
 			new Dictionary<FiatCurrency, decimal> ( );
 
+		private const string TickerUrl = "http://api.fixer.io/latest?base=USD";
+
 		public static void StartMonitor ( )
 		{
 			var timer = new Timer ( 60 * 60 * 100 );
@@ -59,7 +62,7 @@ namespace CryptoTickerBot.Helpers
 		{
 			try
 			{
-				var json = WebRequests.Get ( "http://api.fixer.io/latest?base=USD" );
+				var json = TickerUrl.GetStringAsync ( ).Result;
 				var data = JsonConvert.DeserializeObject<dynamic> ( json );
 				UsdTo = JsonConvert.DeserializeObject<Dictionary<FiatCurrency, decimal>> ( data.rates.ToString ( ) );
 				UsdTo[FiatCurrency.USD] = 1m;

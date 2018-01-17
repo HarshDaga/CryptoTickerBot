@@ -34,6 +34,12 @@
     <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Flurl, Version=2.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Flurl.2.6.0\lib\net45\Flurl.dll</HintPath>
+    </Reference>
+    <Reference Include="Flurl.Http, Version=2.1.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Flurl.Http.2.1.1\lib\net45\Flurl.Http.dll</HintPath>
+    </Reference>
     <Reference Include="Google.Apis, Version=1.32.0.0, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Apis.1.32.0\lib\net45\Google.Apis.dll</HintPath>
     </Reference>
@@ -91,6 +97,7 @@
     <Compile Include="Exchanges\CoinDeltaExchange.cs" />
     <Compile Include="Extensions\ClientWebSocketExtensions.cs" />
     <Compile Include="CryptoCoin.cs" />
+    <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="Helpers\FiatConverter.cs" />
     <Compile Include="Exchanges\CryptoExchangeBase.cs" />
     <Compile Include="Exchanges\KoinexExchange.cs" />

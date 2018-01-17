@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -13,8 +12,8 @@ namespace CryptoTickerBot.Exchanges
 		public BinanceExchange ( )
 		{
 			Name = "Binance";
-			Url = new Uri ( "https://www.binance.com/" );
-			TickerUrl = new Uri ( "wss://stream2.binance.com:9443/ws/!ticker@arr@3000ms" );
+			Url = "https://www.binance.com/";
+			TickerUrl = "wss://stream2.binance.com:9443/ws/!ticker@arr@3000ms";
 			Id = CryptoExchange.Binance;
 		}
 
@@ -24,7 +23,7 @@ namespace CryptoTickerBot.Exchanges
 
 			try
 			{
-				using ( var ws = new WebSocket ( TickerUrl.ToString ( ) ) )
+				using ( var ws = new WebSocket ( TickerUrl ) )
 				{
 					ws.ConnectAsync ( );
 					while ( ws.ReadyState == WebSocketState.Connecting )
@@ -42,6 +41,8 @@ namespace CryptoTickerBot.Exchanges
 							if ( !s.EndsWith ( "USDT" ) )
 								continue;
 							Update ( datum, symbol );
+
+							LastUpdate = DateTime.Now;
 						}
 					};
 
@@ -59,7 +60,7 @@ namespace CryptoTickerBot.Exchanges
 		{
 			if ( symbol == "BCC" )
 				symbol = "BCH";
-			if ( !new[] {"BTC", "ETH", "LTC", "BCH"}.Contains ( symbol ) )
+			if ( !KnownSymbols.Contains ( symbol ) )
 				return;
 
 			if ( !ExchangeData.ContainsKey ( symbol ) )

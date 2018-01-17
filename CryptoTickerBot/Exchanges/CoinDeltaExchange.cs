@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Helpers;
-using Newtonsoft.Json;
+using Flurl.Http;
 
 namespace CryptoTickerBot.Exchanges
 {
@@ -13,8 +12,8 @@ namespace CryptoTickerBot.Exchanges
 		public CoinDeltaExchange ( )
 		{
 			Name = "CoinDelta";
-			Url = new Uri ( "https://coindelta.com/" );
-			TickerUrl = new Uri ( "https://coindelta.com/api/v1/public/getticker/" );
+			Url = "https://coindelta.com/";
+			TickerUrl = "https://coindelta.com/api/v1/public/getticker/";
 			Id = CryptoExchange.CoinDelta;
 		}
 
@@ -24,14 +23,17 @@ namespace CryptoTickerBot.Exchanges
 
 			while ( !ct.IsCancellationRequested )
 			{
-				var json = await WebRequests.GetAsync ( TickerUrl );
-				var data = JsonConvert.DeserializeObject<dynamic> ( json );
+				//var json = await WebRequests.GetAsync ( TickerUrl );
+				//var data = JsonConvert.DeserializeObject<dynamic> ( json );
+				var data = await TickerUrl.GetJsonListAsync ( ct );
 
 				foreach ( var datum in data )
 				{
 					var marketname = ( (string) datum.MarketName ).Split ( '-' );
 					if ( marketname[1] == "inr" )
 						Update ( datum, marketname[0].ToUpper ( ) );
+
+					LastUpdate = DateTime.Now;
 				}
 				await Task.Delay ( 1000, ct );
 			}
@@ -39,7 +41,7 @@ namespace CryptoTickerBot.Exchanges
 
 		protected override void Update ( dynamic data, string symbol )
 		{
-			if ( !( new[] {"BTC", "ETH", "LTC", "BCH"} ).Contains ( symbol ) )
+			if ( !KnownSymbols.Contains ( symbol ) )
 				return;
 
 			if ( !ExchangeData.ContainsKey ( symbol ) )
@@ -47,7 +49,8 @@ namespace CryptoTickerBot.Exchanges
 
 			var old = ExchangeData[symbol].Clone ( );
 
-			decimal InrToUsd ( decimal amount ) => FiatConverter.Convert ( amount, FiatCurrency.INR, FiatCurrency.USD );
+			decimal InrToUsd ( dynamic amount ) =>
+				FiatConverter.Convert ( (decimal) amount, FiatCurrency.INR, FiatCurrency.USD );
 
 			ExchangeData[symbol].LowestAsk = InrToUsd ( data.Ask );
 			ExchangeData[symbol].HighestBid = InrToUsd ( data.Bid );
