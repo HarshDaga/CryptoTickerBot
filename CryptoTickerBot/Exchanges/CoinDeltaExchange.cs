@@ -32,7 +32,7 @@ namespace CryptoTickerBot.Exchanges
 					if ( marketname[1] == "inr" )
 						Update ( datum, marketname[0].ToUpper ( ) );
 				}
-				await Task.Delay ( 1000, ct )
+				await Task.Delay ( 1000, ct );
 			}
 		}
 
