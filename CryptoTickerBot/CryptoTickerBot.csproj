@@ -87,6 +87,8 @@
   <ItemGroup>
     <Compile Include="Exchanges\BinanceExchange.cs" />
     <Compile Include="Exchanges\BitBayExchange.cs" />
+    <Compile Include="Exchanges\CoinbaseExchange.cs" />
+    <Compile Include="Exchanges\CoinDeltaExchange.cs" />
     <Compile Include="Extensions\ClientWebSocketExtensions.cs" />
     <Compile Include="CryptoCoin.cs" />
     <Compile Include="Helpers\FiatConverter.cs" />

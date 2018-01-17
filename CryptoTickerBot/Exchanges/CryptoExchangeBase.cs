@@ -14,6 +14,11 @@ namespace CryptoTickerBot.Exchanges
 		public Dictionary<string, CryptoCoin> ExchangeData { get; protected set; }
 		public abstract Task GetExchangeData ( CancellationToken ct );
 
+		protected CryptoExchangeBase ( )
+		{
+			ExchangeData = new Dictionary<string, CryptoCoin> ( );
+		}
+
 		protected abstract void Update ( dynamic data, string symbol );
 
 		public CryptoCoin this [ string symbol ]

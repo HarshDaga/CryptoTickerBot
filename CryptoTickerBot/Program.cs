@@ -32,6 +32,7 @@ namespace CryptoTickerBot
 			["BitBay"] = "A3:D6",
 			["Koinex"] = "A12:D15",
 			["Binance"] = "A20:D23",
+			["CoinDelta"] = "A29:D32",
 		};
 
 		private static readonly HashSet<string> PendingUpdates = new HashSet<string> ( );
@@ -44,7 +45,8 @@ namespace CryptoTickerBot
 			{
 				["Koinex"] = new KoinexExchange ( ),
 				["BitBay"] = new BitBayExchange ( ),
-				["Binance"] = new BinanceExchange ( )
+				["Binance"] = new BinanceExchange ( ),
+				["CoinDelta"] = new CoinDeltaExchange ( ),
 			};
 
 			foreach ( var exchange in exchanges.Values )

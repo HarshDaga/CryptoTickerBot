@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,8 @@ namespace CryptoTickerBot.Helpers
 			}
 		}
 
+		public static string Get ( Uri uri ) => Get ( uri.ToString ( ) );
+
 		public static async Task<string> GetAsync ( string uri )
 		{
 			var request = (HttpWebRequest) WebRequest.Create ( uri );
@@ -34,6 +37,8 @@ namespace CryptoTickerBot.Helpers
 				return await reader.ReadToEndAsync ( );
 			}
 		}
+
+		public static async Task<string> GetAsync ( Uri uri ) => await GetAsync ( uri.ToString ( ) );
 
 		public static string Post ( string uri, string data, string contentType, string method = "POST" )
 		{
