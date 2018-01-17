@@ -11,22 +11,15 @@ using WebSocketSharp;
 
 namespace CryptoTickerBot.Exchanges
 {
-	public class KoinexExchange : ICryptoExchange
+	public class KoinexExchange : CryptoExchangeBase
 	{
-		public string Name { get; }
-		public Uri Url { get; }
-		public Uri TickerUrl { get; }
-		public Dictionary<string, CryptoCoin> ExchangeData { get; private set; }
-
 		private static readonly Dictionary<string, string> ToSymBol = new Dictionary<string, string>
 		{
 			["bitcoin"] = "BTC",
 			["litecoin"] = "LTC",
 			["ether"] = "ETH",
-			["bitcoin_cash"] = "BCH",
+			["bitcoin_cash"] = "BCH"
 		};
-
-		public event Action<ICryptoExchange, CryptoCoin> OnChanged;
 
 		public KoinexExchange ( )
 		{
@@ -36,7 +29,7 @@ namespace CryptoTickerBot.Exchanges
 				"wss://ws-ap2.pusher.com/app/9197b0bfdf3f71a4064e?protocol=7&client=js&version=4.1.0&flash=false" );
 		}
 
-		public async Task GetExchangeData ( CancellationToken ct )
+		public override async Task GetExchangeData ( CancellationToken ct )
 		{
 			ExchangeData = new Dictionary<string, CryptoCoin> ( );
 
@@ -75,7 +68,7 @@ namespace CryptoTickerBot.Exchanges
 			Update ( data, symbol );
 		}
 
-		private void Update ( dynamic data, string symbol )
+		protected override void Update ( dynamic data, string symbol )
 		{
 			if ( !ExchangeData.ContainsKey ( symbol ) )
 				ExchangeData[symbol] = new CryptoCoin ( symbol );
@@ -90,10 +83,10 @@ namespace CryptoTickerBot.Exchanges
 			ExchangeData[symbol].Rate = InrToUsd ( info.message.data.last_traded_price );
 
 			if ( old != ExchangeData[symbol] )
-				OnChanged?.BeginInvoke ( this, old, null, null );
+				OnChanged ( this, old );
 		}
 
-		private async Task ConnectAndSubscribe ( WebSocket ws, CancellationToken ct )
+		private static async Task ConnectAndSubscribe ( WebSocket ws, CancellationToken ct )
 		{
 			ws.ConnectAsync ( );
 			while ( ws.ReadyState == WebSocketState.Connecting )
@@ -102,7 +95,6 @@ namespace CryptoTickerBot.Exchanges
 			await ws.SendStringAsync ( "{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"my-channel-ether\"}}" );
 			await ws.SendStringAsync ( "{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"my-channel-litecoin\"}}" );
 			await ws.SendStringAsync ( "{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"my-channel-bitcoin_cash\"}}" );
-			await ws.SendStringAsync ( "{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"my-channel-ripple\"}}" );
 		}
 	}
 }

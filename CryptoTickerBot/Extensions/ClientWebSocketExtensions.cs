@@ -3,6 +3,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using WebSocket = WebSocketSharp.WebSocket;
 
 namespace CryptoTickerBot.Extensions
 {
@@ -22,7 +23,7 @@ namespace CryptoTickerBot.Extensions
 			return Encoding.UTF8.GetString ( bytesReceived.Array ?? throw new OutOfMemoryException ( ), 0, result.Count );
 		}
 
-		public static async Task SendStringAsync ( this WebSocketSharp.WebSocket ws, string str )
+		public static async Task SendStringAsync ( this WebSocket ws, string str )
 		{
 			var finished = false;
 			ws.SendAsync ( str, b => finished = b );

@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using WebSocketSharp;
 
 namespace CryptoTickerBot.Exchanges
 {
-	public class BinanceExchange : ICryptoExchange
+	public class BinanceExchange : CryptoExchangeBase
 	{
-		public string Name { get; }
-		public Uri Url { get; }
-		public Uri TickerUrl { get; }
-		public Dictionary<string, CryptoCoin> ExchangeData { get; private set; }
-
-		public async Task GetExchangeData ( CancellationToken ct )
+		public override async Task GetExchangeData ( CancellationToken ct )
 		{
 			ExchangeData = new Dictionary<string, CryptoCoin> ( );
 
@@ -28,7 +25,7 @@ namespace CryptoTickerBot.Exchanges
 					ws.OnMessage += ( sender, args ) =>
 					{
 						var json = args.Data;
-						var data = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic> ( json );
+						var data = JsonConvert.DeserializeObject<dynamic> ( json );
 
 						foreach ( var datum in data )
 						{
@@ -50,10 +47,12 @@ namespace CryptoTickerBot.Exchanges
 			}
 		}
 
-		private void Update ( dynamic datum, string symbol )
+		protected override void Update ( dynamic datum, string symbol )
 		{
 			if ( symbol == "BCC" )
 				symbol = "BCH";
+			if ( !new[] {"BTC", "ETH", "LTC", "BCH"}.Contains ( symbol ) )
+				return;
 
 			if ( !ExchangeData.ContainsKey ( symbol ) )
 				ExchangeData[symbol] = new CryptoCoin ( symbol );
@@ -65,10 +64,8 @@ namespace CryptoTickerBot.Exchanges
 			ExchangeData[symbol].Rate = datum.w;
 
 			if ( old != ExchangeData[symbol] )
-				OnChanged?.BeginInvoke ( this, old, null, null );
+				OnChanged ( this, old );
 		}
-
-		public event Action<ICryptoExchange, CryptoCoin> OnChanged;
 
 		public BinanceExchange ( )
 		{

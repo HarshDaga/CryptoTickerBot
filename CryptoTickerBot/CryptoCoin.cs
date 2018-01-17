@@ -37,5 +37,8 @@ namespace CryptoTickerBot
 		public static bool operator != ( CryptoCoin coin1, CryptoCoin coin2 ) => !( coin1 == coin2 );
 
 		public override string ToString ( ) => $"{Symbol}: Highest Bid = {HighestBid,-10:C} Lowest Ask = {LowestAsk,-10:C}";
+
+		public IList<object> ToSheetsRow ( ) =>
+			new List<object> {Symbol, LowestAsk, HighestBid, Rate};
 	}
 }

@@ -7,14 +7,9 @@ using Newtonsoft.Json;
 
 namespace CryptoTickerBot.Exchanges
 {
-	public class BitBayExchange : ICryptoExchange
+	public class BitBayExchange : CryptoExchangeBase
 	{
-		public string Name { get; }
-		public Uri Url { get; }
-		public Uri TickerUrl { get; }
-		public Dictionary<string, CryptoCoin> ExchangeData { get; private set; }
-
-		public async Task GetExchangeData ( CancellationToken ct )
+		public override async Task GetExchangeData ( CancellationToken ct )
 		{
 			ExchangeData = new Dictionary<string, CryptoCoin> ( );
 			var tickers = new List<(string symbol, string url)>
@@ -22,7 +17,7 @@ namespace CryptoTickerBot.Exchanges
 				("BTC", "https://bitbay.net/API/Public/BTC/ticker.json"),
 				("ETH", "https://bitbay.net/API/Public/ETH/ticker.json"),
 				("LTC", "https://bitbay.net/API/Public/LTC/ticker.json"),
-				("BCH", "https://bitbay.net/API/Public/BCC/ticker.json"),
+				("BCH", "https://bitbay.net/API/Public/BCC/ticker.json")
 			};
 
 			while ( !ct.IsCancellationRequested )
@@ -33,13 +28,13 @@ namespace CryptoTickerBot.Exchanges
 					var json = await WebRequests.GetAsync ( ticker.url );
 					var data = JsonConvert.DeserializeObject<dynamic> ( json );
 
-					Update ( symbol, data );
+					Update ( data, symbol );
 				}
 				await Task.Delay ( 1000, ct );
 			}
 		}
 
-		private void Update ( string symbol, dynamic data )
+		protected override void Update ( dynamic data, string symbol )
 		{
 			if ( !ExchangeData.ContainsKey ( symbol ) )
 				ExchangeData[symbol] = new CryptoCoin ( symbol );
@@ -51,10 +46,8 @@ namespace CryptoTickerBot.Exchanges
 			ExchangeData[symbol].Rate = data.last;
 
 			if ( old != ExchangeData[symbol] )
-				OnChanged?.BeginInvoke ( this, old, null, null );
+				OnChanged ( this, old );
 		}
-
-		public event Action<ICryptoExchange, CryptoCoin> OnChanged;
 
 		public BitBayExchange ( )
 		{
