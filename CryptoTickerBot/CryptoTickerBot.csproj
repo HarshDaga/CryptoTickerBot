@@ -122,6 +122,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Bot.cs" />
+    <Compile Include="Core\Settings.cs" />
     <Compile Include="CryptoCompare.cs" />
     <Compile Include="Exchanges\BinanceExchange.cs" />
     <Compile Include="Exchanges\BitBayExchange.cs" />
