@@ -39,7 +39,7 @@ namespace CryptoTickerBot
 			[CryptoExchange.Kraken] = "A29:D32",
 		};
 
-		private static ConcurrentQueue<CryptoExchange> pendingUpdates =
+		private static readonly ConcurrentQueue<CryptoExchange> PendingUpdates =
 			new ConcurrentQueue<CryptoExchange> ( );
 
 		public static void Main ( string[] args )
@@ -60,8 +60,8 @@ namespace CryptoTickerBot
 			{
 				exchange.Changed += ( e, coin ) =>
 				{
-					if ( !pendingUpdates.Contains ( e.Id ) )
-						pendingUpdates.Enqueue ( e.Id );
+					if ( !PendingUpdates.Contains ( e.Id ) )
+						PendingUpdates.Enqueue ( e.Id );
 				};
 				exchange.Changed += ( e, coin ) => WriteLine ( $"{e.Name,-10} {e[coin.Symbol]}" );
 				Task.Run ( ( ) => exchange.GetExchangeData ( CancellationToken.None ) );
@@ -72,8 +72,7 @@ namespace CryptoTickerBot
 
 			StartAutoSheetsUpdater ( exchanges );
 
-			while ( true )
-				Thread.Sleep ( 1 );
+			Thread.Sleep ( int.MaxValue );
 		}
 
 		private static void StartAutoSheetsUpdater ( IReadOnlyDictionary<CryptoExchange, CryptoExchangeBase> exchanges )
@@ -84,7 +83,7 @@ namespace CryptoTickerBot
 				var updateTimer = new Timer ( 1000 );
 				updateTimer.Elapsed += ( sender, eventArgs ) =>
 				{
-					while ( pendingUpdates.TryDequeue ( out var id ) )
+					while ( PendingUpdates.TryDequeue ( out var id ) )
 					{
 						if ( !exchanges[id].IsComplete )
 						{
