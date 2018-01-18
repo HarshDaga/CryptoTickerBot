@@ -82,18 +82,32 @@ namespace CryptoTickerBot.Core
 				var updateTimer = new Timer ( 1000 );
 				updateTimer.Elapsed += async ( sender, eventArgs ) =>
 				{
-					while ( PendingUpdates.TryDequeue ( out var id ) )
+					try
 					{
-						if ( !exchanges[id].IsComplete )
+						var valueRanges = new List<ValueRange> ( );
+						while ( PendingUpdates.TryDequeue ( out var id ) )
 						{
-							Console.WriteLine ( $"Sheets not updated for {id}. Only {exchanges[id].ExchangeData.Count} coins updated." );
-							Console.WriteLine ( $"{exchanges[id].ExchangeData.Keys.Join ( ", " )}." );
-							continue;
-						}
+							var exchange = exchanges[id];
+							if ( !exchange.IsComplete )
+							{
+								Console.WriteLine ( $"Sheets not updated for {id}. Only {exchange.ExchangeData.Count} coins updated." );
+								Console.WriteLine ( $"{exchange.ExchangeData.Keys.Join ( ", " )}." );
+								continue;
+							}
 
-						var range = Settings.Instance.SheetsRanges[id];
-						await UpdateSheet ( range, exchanges[id] );
-						Console.WriteLine ( $"Updated Sheets for {id}" );
+							var range = Settings.Instance.SheetsRanges[id];
+							valueRanges.Add ( new ValueRange
+							{
+								Values = exchange.ToSheetRows ( ),
+								Range = $"{Settings.Instance.SheetName}!{range}"
+							} );
+							Console.WriteLine ( $"Updated Sheets for {id}" );
+						}
+						await UpdateSheet ( valueRanges );
+					}
+					catch ( Exception e )
+					{
+						Console.WriteLine ( e );
 					}
 				};
 				updateTimer.Start ( );
@@ -111,25 +125,25 @@ namespace CryptoTickerBot.Core
 			} );
 		}
 
-		private static async Task UpdateSheet (
-			string range,
-			CryptoExchangeBase exchange
-		)
+		private static async Task UpdateSheet ( IList<ValueRange> valueRanges )
 		{
-			var valueRange = new ValueRange
+			try
 			{
-				Values = exchange.ToSheetRows ( ),
-				Range = $"{Settings.Instance.SheetName}!{range}"
-			};
-			var requestBody = new BatchUpdateValuesRequest
+				var requestBody = new BatchUpdateValuesRequest
+				{
+					ValueInputOption = "USER_ENTERED",
+					Data = valueRanges
+				};
+
+				var request = service.Spreadsheets.Values.BatchUpdate ( requestBody, Settings.Instance.SheetId );
+
+				await request.ExecuteAsync ( );
+			}
+			catch ( Google.GoogleApiException e )
 			{
-				ValueInputOption = "USER_ENTERED",
-				Data = new List<ValueRange> {valueRange}
-			};
-
-			var request = service.Spreadsheets.Values.BatchUpdate ( requestBody, Settings.Instance.SheetId );
-
-			await request.ExecuteAsync ( );
+				if ( e.Error.Code == 429 )
+					Console.WriteLine ( "ERROR: Too many Google Api requests. Cooling down." );
+			}
 		}
 
 		private static UserCredential GetCredentials ( )
