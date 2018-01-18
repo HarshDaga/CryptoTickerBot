@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Exchanges;
+using CryptoTickerBot.Extensions;
 using CryptoTickerBot.Helpers;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
@@ -88,6 +89,7 @@ namespace CryptoTickerBot
 						if ( !exchanges[id].IsComplete )
 						{
 							WriteLine ( $"Sheets not updated for {id}. Only {exchanges[id].ExchangeData.Count} coins updated." );
+							WriteLine ( $"{exchanges[id].ExchangeData.Keys.Join ( ", " )}." );
 							continue;
 						}
 

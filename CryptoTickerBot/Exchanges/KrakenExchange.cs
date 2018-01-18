@@ -17,6 +17,8 @@ namespace CryptoTickerBot.Exchanges
 			Id = CryptoExchange.Kraken;
 		}
 
+		#region JSON Structure
+
 		private class Root
 		{
 			[JsonProperty ( "error" )]
@@ -70,6 +72,8 @@ namespace CryptoTickerBot.Exchanges
 			[JsonProperty ( "o" )]
 			public decimal Open { get; set; }
 		}
+
+		#endregion
 
 		public override async Task GetExchangeData ( CancellationToken ct )
 		{

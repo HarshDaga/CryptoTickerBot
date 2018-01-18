@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using CryptoTickerBot.Extensions;
 using CryptoTickerBot.Helpers;
-using Newtonsoft.Json;
-using WebSocketSharp;
+using PusherClient;
 
 // ReSharper disable StringIndexOfIsCultureSpecific.1
 
@@ -21,6 +19,8 @@ namespace CryptoTickerBot.Exchanges
 			["litecoin"] = "LTC",
 		};
 
+		private const string ApplicationKey = "9197b0bfdf3f71a4064e";
+
 		public KoinexExchange ( )
 		{
 			Name = "Koinex";
@@ -33,30 +33,20 @@ namespace CryptoTickerBot.Exchanges
 		{
 			ExchangeData = new Dictionary<string, CryptoCoin> ( );
 
-			try
+			var pusher = new Pusher ( ApplicationKey, new PusherOptions { Cluster = "ap2" } );
+			pusher.Error += ( sender, error ) => Console.WriteLine ( error );
+			pusher.Connect ( );
+			foreach ( var name in ToSymBol.Keys )
 			{
-				using ( var ws = new WebSocket ( TickerUrl ) )
-				{
-					await ConnectAndSubscribe ( ws, ct );
-
-					ws.OnMessage += Ws_OnMessage;
-
-					await Task.Delay ( int.MaxValue, ct );
-				}
+				var channel = pusher.Subscribe ( $"my-channel-{name}" );
+				channel.BindAll ( Listener );
 			}
-			catch ( Exception e )
-			{
-				Console.WriteLine ( e );
-				throw;
-			}
+
+			await Task.Delay ( int.MaxValue, ct );
 		}
 
-		private void Ws_OnMessage ( object sender, MessageEventArgs e )
+		private void Listener ( string eventName, dynamic data )
 		{
-			var json = e.Data;
-			var data = JsonConvert.DeserializeObject<dynamic> ( json );
-
-			var eventName = (string) data.@event;
 			if ( !eventName.EndsWith ( "_market_data" ) )
 				return;
 
@@ -65,7 +55,7 @@ namespace CryptoTickerBot.Exchanges
 				return;
 			var symbol = ToSymBol[prefix];
 
-			Update ( data, symbol );
+			Update ( data.message.data, symbol );
 		}
 
 		protected override void Update ( dynamic data, string symbol )
@@ -73,26 +63,16 @@ namespace CryptoTickerBot.Exchanges
 			if ( !ExchangeData.ContainsKey ( symbol ) )
 				ExchangeData[symbol] = new CryptoCoin ( symbol );
 
-			var info = JsonConvert.DeserializeObject<dynamic> ( (string) data.data );
 			var old = ExchangeData[symbol].Clone ( );
 
 			decimal InrToUsd ( decimal amount ) => FiatConverter.Convert ( amount, FiatCurrency.INR, FiatCurrency.USD );
 
-			ExchangeData[symbol].LowestAsk = InrToUsd ( info.message.data.lowest_ask );
-			ExchangeData[symbol].HighestBid = InrToUsd ( info.message.data.highest_bid );
-			ExchangeData[symbol].Rate = InrToUsd ( info.message.data.last_traded_price );
+			ExchangeData[symbol].LowestAsk = InrToUsd ( data.lowest_ask );
+			ExchangeData[symbol].HighestBid = InrToUsd ( data.highest_bid );
+			ExchangeData[symbol].Rate = InrToUsd ( data.last_traded_price );
 
 			if ( old != ExchangeData[symbol] )
 				OnChanged ( this, old );
-		}
-
-		private static async Task ConnectAndSubscribe ( WebSocket ws, CancellationToken ct )
-		{
-			await Task.Run ( ( ) => ws.Connect ( ), ct );
-
-			foreach ( var channel in ToSymBol.Keys )
-				await ws.SendStringAsync (
-					$"{{\"event\":\"pusher:subscribe\",\"data\":{{\"channel\":\"my-channel-{channel}\"}}}}" );
 		}
 	}
 }

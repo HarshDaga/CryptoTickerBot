@@ -4,7 +4,7 @@ namespace CryptoTickerBot.Extensions
 {
 	public static class ListExtensions
 	{
-		public static string Join ( this IEnumerable<string> enumerable, string delimiter ) =>
+		public static string Join<T> ( this IEnumerable<T> enumerable, string delimiter ) =>
 			string.Join ( delimiter, enumerable );
 	}
 }
