@@ -40,8 +40,9 @@ namespace CryptoTickerBot.Exchanges
 						Update ( data, symbol );
 
 						LastUpdate = DateTime.Now;
+
+						await Task.Delay ( 1000, ct );
 					}
-					await Task.Delay ( 1000, ct );
 				}
 			}
 			catch ( Exception e )
