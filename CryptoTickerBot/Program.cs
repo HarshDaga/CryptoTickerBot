@@ -64,7 +64,15 @@ namespace CryptoTickerBot
 						PendingUpdates.Enqueue ( e.Id );
 				};
 				exchange.Changed += ( e, coin ) => WriteLine ( $"{e.Name,-10} {e[coin.Symbol]}" );
-				Task.Run ( ( ) => exchange.GetExchangeData ( CancellationToken.None ) );
+				try
+				{
+					Task.Run ( ( ) => exchange.GetExchangeData ( CancellationToken.None ) );
+				}
+				catch ( Exception e )
+				{
+					WriteLine ( e );
+					throw;
+				}
 			}
 
 			sheetId = File.ReadAllText ( "sheet.id" );

@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using CryptoTickerBot.Extensions;
 using CryptoTickerBot.Helpers;
-using PusherClient;
+using WebSocketSharp;
+using static Newtonsoft.Json.JsonConvert;
 
 // ReSharper disable StringIndexOfIsCultureSpecific.1
 
@@ -19,8 +21,6 @@ namespace CryptoTickerBot.Exchanges
 			["litecoin"] = "LTC",
 		};
 
-		private const string ApplicationKey = "9197b0bfdf3f71a4064e";
-
 		public KoinexExchange ( )
 		{
 			Name = "Koinex";
@@ -33,20 +33,29 @@ namespace CryptoTickerBot.Exchanges
 		{
 			ExchangeData = new Dictionary<string, CryptoCoin> ( );
 
-			var pusher = new Pusher ( ApplicationKey, new PusherOptions { Cluster = "ap2" } );
-			pusher.Error += ( sender, error ) => Console.WriteLine ( error );
-			pusher.Connect ( );
-			foreach ( var name in ToSymBol.Keys )
+			try
 			{
-				var channel = pusher.Subscribe ( $"my-channel-{name}" );
-				channel.BindAll ( Listener );
-			}
+				using ( var ws = new WebSocket ( TickerUrl ) )
+				{
+					await ConnectAndSubscribe ( ws, ct );
 
-			await Task.Delay ( int.MaxValue, ct );
+					ws.OnMessage += Ws_OnMessage;
+
+					await Task.Delay ( int.MaxValue, ct );
+				}
+			}
+			catch ( Exception e )
+			{
+				Console.WriteLine ( e );
+			}
 		}
 
-		private void Listener ( string eventName, dynamic data )
+		private void Ws_OnMessage ( object sender, MessageEventArgs e )
 		{
+			var json = e.Data;
+			var data = DeserializeObject<dynamic> ( json );
+
+			var eventName = (string) data.@event;
 			if ( !eventName.EndsWith ( "_market_data" ) )
 				return;
 
@@ -55,7 +64,7 @@ namespace CryptoTickerBot.Exchanges
 				return;
 			var symbol = ToSymBol[prefix];
 
-			Update ( data.message.data, symbol );
+			Update ( DeserializeObject<dynamic> ( (string) data.data ).message.data, symbol );
 		}
 
 		protected override void Update ( dynamic data, string symbol )
@@ -73,6 +82,16 @@ namespace CryptoTickerBot.Exchanges
 
 			if ( old != ExchangeData[symbol] )
 				OnChanged ( this, old );
+		}
+
+		public static async Task ConnectAndSubscribe ( WebSocket ws, CancellationToken ct )
+		{
+			ws.ConnectAsync ( );
+			while ( ws.ReadyState == WebSocketState.Connecting )
+				await Task.Delay ( 1, ct );
+
+			foreach( var name in ToSymBol.Keys)
+				await ws.SendStringAsync ( $"{{\"event\":\"pusher:subscribe\",\"data\":{{\"channel\":\"my-channel-{name}\"}}}}" );
 		}
 	}
 }
