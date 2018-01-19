@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CryptoTickerBot.Extensions;
 using NLog;
+using Tababular;
 
 namespace CryptoTickerBot.Exchanges
 {
@@ -78,7 +80,23 @@ namespace CryptoTickerBot.Exchanges
 		public void OnChanged ( CryptoExchangeBase exchange, CryptoCoin coin ) =>
 			Changed?.Invoke ( exchange, coin );
 
-		public override string ToString ( ) =>
-			ExchangeData.Values.OrderBy ( coin => coin.Symbol ).Aggregate ( Name, ( current, coin ) => current + $"\n{coin}" );
+		public override string ToString ( )
+		{
+			var formatter = new TableFormatter ( );
+			var objects = new List<object> ( );
+
+			foreach ( var coin in ExchangeData.Values.OrderBy ( x => x.Symbol ) )
+			{
+				objects.Add ( new
+				{
+					coin.Symbol,
+					Bid = $"{coin.HighestBid:C}",
+					Ask = $"{coin.LowestAsk:C}",
+					Spread = $"{coin.SpreadPercentange:P}"
+				} );
+			}
+
+			return formatter.FormatObjects ( objects );
+		}
 	}
 }

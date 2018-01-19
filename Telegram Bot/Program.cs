@@ -9,6 +9,8 @@ using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.InlineQueryResults;
+using Telegram.Bot.Types.InputMessageContents;
 using Telegram_Bot.Extensions;
 
 namespace Telegram_Bot
@@ -29,6 +31,8 @@ namespace Telegram_Bot
 
 				bot = new TelegramBotClient ( BotToken );
 				bot.OnMessage += BotClientOnMessage;
+				bot.OnInlineQuery += BotClientOnInlineQuery;
+				bot.OnReceiveError += BotClientOnReceiveError;
 
 				me = bot.GetMeAsync ( ).Result;
 				Logger.Info ( $"Hello! My name is {me.FirstName}" );
@@ -42,6 +46,39 @@ namespace Telegram_Bot
 				Logger.Error ( e );
 				throw;
 			}
+		}
+
+		private static void BotClientOnReceiveError ( object sender, ReceiveErrorEventArgs receiveErrorEventArgs )
+		{
+			Logger.Error (
+				receiveErrorEventArgs.ApiRequestException,
+				$"Error Code: {receiveErrorEventArgs.ApiRequestException.ErrorCode}"
+			);
+		}
+
+		private static async void BotClientOnInlineQuery ( object sender, InlineQueryEventArgs eventArgs )
+		{
+			Logger.Debug ( $"Received inline query from: {eventArgs.InlineQuery.From.Username}" );
+
+			var inlineQueryResults = exchanges.Values
+				.Select ( exchange => new InlineQueryResultArticle
+				{
+					Id = exchange.Name,
+					HideUrl = true,
+					Title = exchange.Name,
+					Url = exchange.Url,
+					InputMessageContent = new InputTextMessageContent
+					{
+						MessageText = $"```\n{exchange.Name}\n{exchange.ToString ( )}\n```",
+						ParseMode = ParseMode.Markdown
+					}
+				} )
+				.ToList<InlineQueryResult> ( );
+
+			await bot.AnswerInlineQueryAsync (
+				eventArgs.InlineQuery.Id,
+				inlineQueryResults.ToArray ( )
+			);
 		}
 
 		private static void StartCryptoTickerBot ( )

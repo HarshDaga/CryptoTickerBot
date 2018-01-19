@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using CryptoTickerBot.Exchanges;
-using Tababular;
 
 namespace CryptoTickerBot.Extensions
 {
@@ -11,25 +10,12 @@ namespace CryptoTickerBot.Extensions
 
 		public static string ToTable ( this IEnumerable<CryptoExchangeBase> exchanges )
 		{
-			var formatter = new TableFormatter ( );
-			var objects = new List<object> ( );
 			var tables = new List<string> ( );
 
 			foreach ( var exchange in exchanges )
 			{
 				tables.Add ( exchange.Name );
-				objects.Clear ( );
-				foreach ( var coin in exchange.ExchangeData.Values )
-				{
-					objects.Add ( new
-					{
-						coin.Symbol,
-						Bid = $"{coin.HighestBid:C}",
-						Ask = $"{coin.LowestAsk:C}",
-						Spread = $"{coin.SpreadPercentange:P}"
-					} );
-				}
-				tables.Add ( formatter.FormatObjects ( objects ) );
+				tables.Add ( exchange.ToString ( ) );
 			}
 			return tables.Join ( "\n" );
 		}
