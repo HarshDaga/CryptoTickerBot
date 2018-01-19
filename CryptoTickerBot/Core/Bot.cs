@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using CryptoTickerBot.Exchanges;
 using CryptoTickerBot.Extensions;
 using CryptoTickerBot.Helpers;
+using Google;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
@@ -27,36 +28,37 @@ namespace CryptoTickerBot.Core
 		private static readonly ConcurrentQueue<CryptoExchange> PendingUpdates =
 			new ConcurrentQueue<CryptoExchange> ( );
 
-		public static Task Start ( string[] args )
+		public static Dictionary<CryptoExchange, CryptoExchangeBase> Exchanges =
+			new Dictionary<CryptoExchange, CryptoExchangeBase>
+			{
+				[CryptoExchange.Koinex] = new KoinexExchange ( ),
+				[CryptoExchange.BitBay] = new BitBayExchange ( ),
+				[CryptoExchange.Binance] = new BinanceExchange ( ),
+				//[CryptoExchange.CoinDelta] = new CoinDeltaExchange ( ),
+				[CryptoExchange.Coinbase] = new CoinbaseExchange ( ),
+				[CryptoExchange.Kraken] = new KrakenExchange ( )
+			};
+
+		public static Task Start ( string[] args = null )
 		{
 			return Task.Run ( async ( ) =>
 				{
 					FiatConverter.StartMonitor ( );
 
-					var exchanges = new Dictionary<CryptoExchange, CryptoExchangeBase>
-					{
-						[CryptoExchange.Koinex] = new KoinexExchange ( ),
-						[CryptoExchange.BitBay] = new BitBayExchange ( ),
-						[CryptoExchange.Binance] = new BinanceExchange ( ),
-						//[CryptoExchange.CoinDelta] = new CoinDeltaExchange ( ),
-						[CryptoExchange.Coinbase] = new CoinbaseExchange ( ),
-						[CryptoExchange.Kraken] = new KrakenExchange ( ),
-					};
-
-					InitExchanges ( exchanges );
+					InitExchanges ( );
 
 					CreateSheetsService ( );
 
-					StartAutoSheetsUpdater ( exchanges );
+					StartAutoSheetsUpdater ( );
 
 					await Task.Delay ( int.MaxValue );
 				}
 			);
 		}
 
-		private static void InitExchanges ( Dictionary<CryptoExchange, CryptoExchangeBase> exchanges )
+		private static void InitExchanges ( )
 		{
-			foreach ( var exchange in exchanges.Values )
+			foreach ( var exchange in Exchanges.Values )
 			{
 				exchange.Changed += ( e, coin ) =>
 				{
@@ -77,7 +79,7 @@ namespace CryptoTickerBot.Core
 			}
 		}
 
-		private static void StartAutoSheetsUpdater ( IReadOnlyDictionary<CryptoExchange, CryptoExchangeBase> exchanges )
+		private static void StartAutoSheetsUpdater ( )
 		{
 			Task.Run ( ( ) =>
 			{
@@ -90,7 +92,7 @@ namespace CryptoTickerBot.Core
 						var valueRanges = new List<ValueRange> ( );
 						while ( PendingUpdates.TryDequeue ( out var id ) )
 						{
-							var exchange = exchanges[id];
+							var exchange = Exchanges[id];
 							if ( !exchange.IsComplete )
 							{
 								Logger.Warn (
@@ -143,7 +145,7 @@ namespace CryptoTickerBot.Core
 
 				await request.ExecuteAsync ( );
 			}
-			catch ( Google.GoogleApiException e )
+			catch ( GoogleApiException e )
 			{
 				if ( e.Error.Code == 429 )
 					Logger.Error ( e, "Too many Google Api requests. Cooling down." );

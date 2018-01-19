@@ -11,14 +11,6 @@ namespace CryptoTickerBot.Exchanges
 {
 	public class CoinbaseExchange : CryptoExchangeBase
 	{
-		private static readonly List<string> Symbols = new List<string>
-		{
-			"BTC",
-			"ETH",
-			"BCH",
-			"LTC"
-		};
-
 		public CoinbaseExchange ( )
 		{
 			Name = "Coinbase";

@@ -17,6 +17,8 @@ namespace CryptoTickerBot
 		public decimal HighestBid { get; set; }
 		public decimal LowestAsk { get; set; }
 		public decimal Rate { get; set; }
+		public decimal Spread => LowestAsk - HighestBid;
+		public decimal SpreadPercentange => Spread / ( LowestAsk + HighestBid ) * 2;
 
 		public virtual decimal Buy ( decimal amountInUsd ) => amountInUsd / HighestBid;
 

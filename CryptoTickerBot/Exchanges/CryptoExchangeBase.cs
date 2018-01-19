@@ -17,7 +17,7 @@ namespace CryptoTickerBot.Exchanges
 		Kraken,
 		Bitstamp,
 		Bitfinex,
-		Poloniex,
+		Poloniex
 	}
 
 	public abstract class CryptoExchangeBase
@@ -77,5 +77,8 @@ namespace CryptoTickerBot.Exchanges
 
 		public void OnChanged ( CryptoExchangeBase exchange, CryptoCoin coin ) =>
 			Changed?.Invoke ( exchange, coin );
+
+		public override string ToString ( ) =>
+			ExchangeData.Values.OrderBy ( coin => coin.Symbol ).Aggregate ( Name, ( current, coin ) => current + $"\n{coin}" );
 	}
 }

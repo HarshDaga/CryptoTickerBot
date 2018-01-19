@@ -17,7 +17,7 @@ namespace CryptoTickerBot.Exchanges
 			["bitcoin"] = "BTC",
 			["bitcoin_cash"] = "BCH",
 			["ether"] = "ETH",
-			["litecoin"] = "LTC",
+			["litecoin"] = "LTC"
 		};
 
 		public KoinexExchange ( )

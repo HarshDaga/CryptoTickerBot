@@ -22,7 +22,7 @@ namespace CryptoTickerBot.Core
 			[CryptoExchange.Binance] = "A20:D23",
 			//[CryptoExchange.CoinDelta] = "A29:D32",
 			[CryptoExchange.Coinbase] = "A37:D40",
-			[CryptoExchange.Kraken] = "A29:D32",
+			[CryptoExchange.Kraken] = "A29:D32"
 		};
 
 		public string ApplicationName { get; set; } = "Crypto Ticker Bot";
