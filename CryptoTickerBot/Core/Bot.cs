@@ -64,7 +64,7 @@ namespace CryptoTickerBot.Core
 				exchange.Changed += ( e, coin ) => Console.WriteLine ( $"{e.Name,-10} {e[coin.Symbol]}" );
 				try
 				{
-					Task.Run ( ( ) => exchange.GetExchangeData ( CancellationToken.None ) );
+					Task.Run ( ( ) => exchange.StartMonitor ( ) );
 				}
 				catch ( Exception e )
 				{

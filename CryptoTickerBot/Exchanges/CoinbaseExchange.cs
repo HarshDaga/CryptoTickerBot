@@ -31,21 +31,13 @@ namespace CryptoTickerBot.Exchanges
 		{
 			ExchangeData = new Dictionary<string, CryptoCoin> ( );
 
-			try
+			using ( var ws = new WebSocket ( TickerUrl ) )
 			{
-				using ( var ws = new WebSocket ( TickerUrl ) )
-				{
-					await ConnectAndSubscribe ( ws, ct );
+				await ConnectAndSubscribe ( ws, ct );
 
-					ws.OnMessage += Ws_OnMessage;
+				ws.OnMessage += Ws_OnMessage;
 
-					await Task.Delay ( int.MaxValue, ct );
-				}
-			}
-			catch ( Exception e )
-			{
-				Console.WriteLine ( e );
-				throw;
+				await Task.Delay ( int.MaxValue, ct );
 			}
 		}
 

@@ -33,20 +33,13 @@ namespace CryptoTickerBot.Exchanges
 		{
 			ExchangeData = new Dictionary<string, CryptoCoin> ( );
 
-			try
+			using ( var ws = new WebSocket ( TickerUrl ) )
 			{
-				using ( var ws = new WebSocket ( TickerUrl ) )
-				{
-					await ConnectAndSubscribe ( ws, ct );
+				await ConnectAndSubscribe ( ws, ct );
 
-					ws.OnMessage += Ws_OnMessage;
+				ws.OnMessage += Ws_OnMessage;
 
-					await Task.Delay ( int.MaxValue, ct );
-				}
-			}
-			catch ( Exception e )
-			{
-				Console.WriteLine ( e );
+				await Task.Delay ( int.MaxValue, ct );
 			}
 		}
 
@@ -90,7 +83,7 @@ namespace CryptoTickerBot.Exchanges
 			while ( ws.ReadyState == WebSocketState.Connecting )
 				await Task.Delay ( 1, ct );
 
-			foreach( var name in ToSymBol.Keys)
+			foreach ( var name in ToSymBol.Keys )
 				await ws.SendStringAsync ( $"{{\"event\":\"pusher:subscribe\",\"data\":{{\"channel\":\"my-channel-{name}\"}}}}" );
 		}
 	}

@@ -28,26 +28,19 @@ namespace CryptoTickerBot.Exchanges
 				("BCH", "https://bitbay.net/API/Public/BCC/ticker.json")
 			};
 
-			try
+			while ( !ct.IsCancellationRequested )
 			{
-				while ( !ct.IsCancellationRequested )
+				foreach ( var ticker in tickers )
 				{
-					foreach ( var ticker in tickers )
-					{
-						var symbol = ticker.symbol;
-						var data = await ticker.url.GetJsonAsync ( ct );
+					var symbol = ticker.symbol;
+					var data = await ticker.url.GetJsonAsync ( ct );
 
-						Update ( data, symbol );
+					Update ( data, symbol );
 
-						LastUpdate = DateTime.Now;
+					LastUpdate = DateTime.Now;
 
-						await Task.Delay ( 1000, ct );
-					}
+					await Task.Delay ( 1000, ct );
 				}
-			}
-			catch ( Exception e )
-			{
-				Console.WriteLine ( e );
 			}
 		}
 

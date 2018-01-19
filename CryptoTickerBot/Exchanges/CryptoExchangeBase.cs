@@ -30,6 +30,22 @@ namespace CryptoTickerBot.Exchanges
 		public DateTime LastUpdate { get; protected set; }
 		public abstract Task GetExchangeData ( CancellationToken ct );
 
+		public async Task StartMonitor ( CancellationToken ct = default )
+		{
+			while ( !ct.IsCancellationRequested )
+			{
+				try
+				{
+					await GetExchangeData ( ct );
+				}
+				catch ( Exception e )
+				{
+					Console.WriteLine ( e );
+					await Task.Delay ( 2000, ct );
+				}
+			}
+		}
+
 		protected static readonly List<string> KnownSymbols = new List<string>
 		{
 			"BTC",
