@@ -7,16 +7,15 @@ namespace CryptoTickerBot.Core
 {
 	public class Settings
 	{
-		private static Settings instance;
 		private static readonly object LoadLock;
 
-		public static Settings Instance => instance;
+		public static Settings Instance { get; private set; }
 
 		private const string SETTINGSFILE = "Settings.json";
 
-		#region Defaults
+		#region Properties
 
-		private static Dictionary<CryptoExchange, string> sheetsRanges = new Dictionary<CryptoExchange, string>
+		public Dictionary<CryptoExchange, string> SheetsRanges { get; set; } = new Dictionary<CryptoExchange, string>
 		{
 			[CryptoExchange.BitBay] = "A3:D6",
 			[CryptoExchange.Koinex] = "A12:D15",
@@ -26,51 +25,26 @@ namespace CryptoTickerBot.Core
 			[CryptoExchange.Kraken] = "A29:D32",
 		};
 
-		private static string applicationName = "Crypto Ticker Bot";
-		private static string sheetName = "Tickers";
-		private static string sheetId;
+		public string ApplicationName { get; set; } = "Crypto Ticker Bot";
 
-		#endregion Defaults
+		public string SheetName { get; set; } = "Tickers";
 
-		#region Properties
-
-		public Dictionary<CryptoExchange, string> SheetsRanges
-		{
-			get => sheetsRanges;
-			set => sheetsRanges = value;
-		}
-
-		public string ApplicationName
-		{
-			get => applicationName;
-			set => applicationName = value;
-		}
-
-		public string SheetName
-		{
-			get => sheetName;
-			set => sheetName = value;
-		}
-
-		public string SheetId
-		{
-			get => sheetId;
-			set => sheetId = value;
-		}
+		public string SheetId { get; set; }
 
 		#endregion Properties
 
 		static Settings ( )
 		{
 			LoadLock = new object ( );
-			instance = new Settings ( );
+			Instance = new Settings ( );
 			Load ( );
 			Save ( );
 		}
 
 		public static void Save ( )
 		{
-			File.WriteAllText ( SETTINGSFILE, JsonConvert.SerializeObject ( instance, Formatting.Indented ) );
+			lock ( LoadLock )
+				File.WriteAllText ( SETTINGSFILE, JsonConvert.SerializeObject ( Instance, Formatting.Indented ) );
 		}
 
 		public static void Load ( )
@@ -78,7 +52,7 @@ namespace CryptoTickerBot.Core
 			lock ( LoadLock )
 			{
 				if ( File.Exists ( SETTINGSFILE ) )
-					instance = JsonConvert.DeserializeObject<Settings> ( File.ReadAllText ( SETTINGSFILE ) );
+					Instance = JsonConvert.DeserializeObject<Settings> ( File.ReadAllText ( SETTINGSFILE ) );
 			}
 		}
 	}
