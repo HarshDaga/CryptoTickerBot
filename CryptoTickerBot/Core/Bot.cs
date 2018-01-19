@@ -84,7 +84,11 @@ namespace CryptoTickerBot.Core
 			Task.Run ( ( ) =>
 			{
 				Thread.Sleep ( 10000 );
-				var updateTimer = new Timer ( 1000 );
+				var updateTimer = new Timer ( 1000 )
+				{
+					Enabled = true,
+					AutoReset = false
+				};
 				updateTimer.Elapsed += async ( sender, eventArgs ) =>
 				{
 					try
@@ -110,6 +114,7 @@ namespace CryptoTickerBot.Core
 							Logger.Info ( $"Updated Sheets for {id}" );
 						}
 						await UpdateSheet ( valueRanges );
+						( sender as Timer )?.Start ( );
 					}
 					catch ( Exception e )
 					{
@@ -148,7 +153,10 @@ namespace CryptoTickerBot.Core
 			catch ( GoogleApiException e )
 			{
 				if ( e.Error.Code == 429 )
+				{
 					Logger.Error ( e, "Too many Google Api requests. Cooling down." );
+					await Task.Delay ( 5000 );
+				}
 			}
 		}
 
