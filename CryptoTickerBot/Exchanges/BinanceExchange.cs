@@ -3,13 +3,18 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using NLog;
 using WebSocketSharp;
+using Logger = NLog.Logger;
+
 // ReSharper disable AccessToDisposedClosure
 
 namespace CryptoTickerBot.Exchanges
 {
 	public class BinanceExchange : CryptoExchangeBase
 	{
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
+
 		public BinanceExchange ( )
 		{
 			Name = "Binance";
@@ -22,43 +27,35 @@ namespace CryptoTickerBot.Exchanges
 		{
 			ExchangeData = new Dictionary<string, CryptoCoin> ( );
 
-			try
+			using ( var ws = new WebSocket ( TickerUrl ) )
 			{
-				using ( var ws = new WebSocket ( TickerUrl ) )
+				await Task.Run ( ( ) => ws.Connect ( ), ct );
+
+				ws.OnMessage += ( sender, args ) =>
 				{
-					await Task.Run ( ( ) => ws.Connect ( ), ct );
-
-					ws.OnMessage += ( sender, args ) =>
+					try
 					{
-						try
+						var json = args.Data;
+						var data = JsonConvert.DeserializeObject<dynamic> ( json );
+
+						foreach ( var datum in data )
 						{
-							var json = args.Data;
-							var data = JsonConvert.DeserializeObject<dynamic> ( json );
+							var s = (string) datum.s;
+							var symbol = s.Substring ( 0, 3 );
+							if ( !s.EndsWith ( "USDT" ) )
+								continue;
+							Update ( datum, symbol );
 
-							foreach ( var datum in data )
-							{
-								var s = (string) datum.s;
-								var symbol = s.Substring ( 0, 3 );
-								if ( !s.EndsWith ( "USDT" ) )
-									continue;
-								Update ( datum, symbol );
-
-								LastUpdate = DateTime.Now;
-							}
+							LastUpdate = DateTime.Now;
 						}
-						catch ( Exception e )
-						{
-							Console.WriteLine ( e );
-						}
-					};
+					}
+					catch ( Exception e )
+					{
+						Logger.Error ( e );
+					}
+				};
 
-					await Task.Delay ( int.MaxValue, ct );
-				}
-			}
-			catch ( Exception e )
-			{
-				Console.WriteLine ( e );
-				throw;
+				await Task.Delay ( int.MaxValue, ct );
 			}
 		}
 

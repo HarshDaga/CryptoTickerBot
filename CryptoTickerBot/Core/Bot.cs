@@ -13,12 +13,14 @@ using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using Google.Apis.Util.Store;
+using NLog;
 using Timer = System.Timers.Timer;
 
 namespace CryptoTickerBot.Core
 {
 	public static class Bot
 	{
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 		private static readonly string[] Scopes = {SheetsService.Scope.Spreadsheets};
 		private static SheetsService service;
 
@@ -62,13 +64,14 @@ namespace CryptoTickerBot.Core
 						PendingUpdates.Enqueue ( e.Id );
 				};
 				exchange.Changed += ( e, coin ) => Console.WriteLine ( $"{e.Name,-10} {e[coin.Symbol]}" );
+				exchange.Changed += ( e, coin ) => Logger.Debug ( $"{e.Name,-10} {e[coin.Symbol]}" );
 				try
 				{
 					Task.Run ( ( ) => exchange.StartMonitor ( ) );
 				}
 				catch ( Exception e )
 				{
-					Console.WriteLine ( e );
+					Logger.Error ( e );
 					throw;
 				}
 			}
@@ -90,8 +93,9 @@ namespace CryptoTickerBot.Core
 							var exchange = exchanges[id];
 							if ( !exchange.IsComplete )
 							{
-								Console.WriteLine ( $"Sheets not updated for {id}. Only {exchange.ExchangeData.Count} coins updated." );
-								Console.WriteLine ( $"{exchange.ExchangeData.Keys.Join ( ", " )}." );
+								Logger.Warn (
+									$"Sheets not updated for {id}. Only {exchange.ExchangeData.Count} coins updated." +
+									$" {exchange.ExchangeData.Keys.Join ( ", " )}." );
 								continue;
 							}
 
@@ -101,13 +105,13 @@ namespace CryptoTickerBot.Core
 								Values = exchange.ToSheetRows ( ),
 								Range = $"{Settings.Instance.SheetName}!{range}"
 							} );
-							Console.WriteLine ( $"Updated Sheets for {id}" );
+							Logger.Info ( $"Updated Sheets for {id}" );
 						}
 						await UpdateSheet ( valueRanges );
 					}
 					catch ( Exception e )
 					{
-						Console.WriteLine ( e );
+						Logger.Error ( e );
 					}
 				};
 				updateTimer.Start ( );
@@ -142,7 +146,7 @@ namespace CryptoTickerBot.Core
 			catch ( Google.GoogleApiException e )
 			{
 				if ( e.Error.Code == 429 )
-					Console.WriteLine ( "ERROR: Too many Google Api requests. Cooling down." );
+					Logger.Error ( e, "Too many Google Api requests. Cooling down." );
 			}
 		}
 
@@ -163,7 +167,7 @@ namespace CryptoTickerBot.Core
 					"user",
 					CancellationToken.None,
 					new FileDataStore ( credPath, true ) ).Result;
-				Console.WriteLine ( "Credential file saved to: " + credPath );
+				Logger.Info ( "Credential file saved to: " + credPath );
 			}
 
 			return credential;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using NLog;
 
 namespace CryptoTickerBot.Exchanges
 {
@@ -21,6 +22,8 @@ namespace CryptoTickerBot.Exchanges
 
 	public abstract class CryptoExchangeBase
 	{
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
+
 		public string Name { get; protected set; }
 		public string Url { get; protected set; }
 		public string TickerUrl { get; protected set; }
@@ -40,7 +43,7 @@ namespace CryptoTickerBot.Exchanges
 				}
 				catch ( Exception e )
 				{
-					Console.WriteLine ( e );
+					Logger.Error ( e );
 					await Task.Delay ( 2000, ct );
 				}
 			}

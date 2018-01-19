@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -20,7 +19,6 @@ namespace CryptoTickerBot.Extensions
 		{
 			var bytesReceived = new ArraySegment<byte> ( new byte[bufferSize] );
 			var result = await ws.ReceiveAsync ( bytesReceived, CancellationToken.None );
-			Console.WriteLine ( result.Count );
 			return Encoding.UTF8.GetString ( bytesReceived.Array ?? throw new OutOfMemoryException ( ), 0, result.Count );
 		}
 

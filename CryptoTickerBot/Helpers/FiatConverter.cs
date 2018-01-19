@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using Flurl.Http;
 using Newtonsoft.Json;
+using NLog;
 
 namespace CryptoTickerBot.Helpers
 {
@@ -45,6 +46,8 @@ namespace CryptoTickerBot.Helpers
 
 	public static class FiatConverter
 	{
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
+
 		public static Dictionary<FiatCurrency, decimal> UsdTo { get; private set; } =
 			new Dictionary<FiatCurrency, decimal> ( );
 
@@ -67,10 +70,11 @@ namespace CryptoTickerBot.Helpers
 				UsdTo = JsonConvert.DeserializeObject<Dictionary<FiatCurrency, decimal>> ( data.rates.ToString ( ) );
 				UsdTo[FiatCurrency.USD] = 1m;
 				Console.WriteLine ( data.rates );
+				Logger.Info ( "Fetched Fiat currency rates." );
 			}
 			catch ( Exception e )
 			{
-				Console.WriteLine ( e );
+				Logger.Error ( e );
 				throw;
 			}
 		}
