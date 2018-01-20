@@ -5,7 +5,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace Telegram_Bot.Extensions
+namespace TelegramBot.Extensions
 {
 	public static class TelegramBotClientExtensions
 	{

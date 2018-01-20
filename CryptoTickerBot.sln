@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoTickerBot", "CryptoTickerBot\CryptoTickerBot.csproj", "{E5B5113A-89F5-4211-97EF-388130A85FFA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Telegram Bot", "Telegram Bot\Telegram Bot.csproj", "{DAD483B5-F8A5-426B-9B40-ABDA25B17CE3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelegramBot", "TelegramBot\TelegramBot.csproj", "{DAD483B5-F8A5-426B-9B40-ABDA25B17CE3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

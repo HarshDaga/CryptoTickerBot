@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using Newtonsoft.Json;
 
-namespace Telegram_Bot
+namespace TelegramBot
 {
 	public class Settings
 	{
