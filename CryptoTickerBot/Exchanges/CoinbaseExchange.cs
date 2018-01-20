@@ -40,6 +40,7 @@ namespace CryptoTickerBot.Exchanges
 		public override async Task GetExchangeData ( CancellationToken ct )
 		{
 			ExchangeData = new Dictionary<string, CryptoCoin> ( );
+			Observables = new Dictionary<string, IObserver<CryptoCoin>> ( );
 
 			using ( var ws = new WebSocket ( TickerUrl ) )
 			{
@@ -65,21 +66,11 @@ namespace CryptoTickerBot.Exchanges
 			LastUpdate = DateTime.Now;
 		}
 
-		protected override void Update ( dynamic data, string symbol )
+		protected override void DeserializeData ( dynamic data, string symbol )
 		{
-			if ( !ExchangeData.ContainsKey ( symbol ) )
-				ExchangeData[symbol] = new CryptoCoin ( symbol );
-
-			var old = ExchangeData[symbol].Clone ( );
-
 			ExchangeData[symbol].LowestAsk = data.best_ask;
 			ExchangeData[symbol].HighestBid = data.best_bid;
 			ExchangeData[symbol].Rate = data.price;
-
-			ApplyFees ( symbol );
-
-			if ( old != ExchangeData[symbol] )
-				OnChanged ( this, old );
 		}
 
 		private static async Task ConnectAndSubscribe ( WebSocket ws, CancellationToken ct )

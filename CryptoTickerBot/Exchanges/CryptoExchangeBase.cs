@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
+using CryptoTickerBot.Core;
 using CryptoTickerBot.Helpers;
 using NLog;
 using Tababular;
@@ -31,6 +33,7 @@ namespace CryptoTickerBot.Exchanges
 		public string TickerUrl { get; protected set; }
 		public CryptoExchange Id { get; protected set; }
 		public Dictionary<string, CryptoCoin> ExchangeData { get; protected set; }
+		public Dictionary<string, IObserver<CryptoCoin>> Observables { get; protected set; }
 		public Dictionary<string, decimal> DepositFees { get; protected set; }
 		public Dictionary<string, decimal> WithdrawalFees { get; protected set; }
 		public decimal BuyFees { get; protected set; }
@@ -68,7 +71,28 @@ namespace CryptoTickerBot.Exchanges
 			ExchangeData = new Dictionary<string, CryptoCoin> ( );
 		}
 
-		protected abstract void Update ( dynamic data, string symbol );
+		protected void Update ( dynamic data, string symbol )
+		{
+			if ( !ExchangeData.ContainsKey ( symbol ) )
+			{
+				ExchangeData[symbol] = new CryptoCoin ( symbol );
+				Observables[symbol] = new ReplaySubject<CryptoCoin> ( Settings.Instance.HistorySpan );
+			}
+
+			var old = ExchangeData[symbol].Clone ( );
+
+			DeserializeData ( data, symbol );
+
+			ApplyFees ( symbol );
+
+			if ( old != ExchangeData[symbol] )
+			{
+				OnChanged ( this, old );
+				Observables[symbol].OnNext ( ExchangeData[symbol] );
+			}
+		}
+
+		protected abstract void DeserializeData ( dynamic data, string symbol );
 
 		protected void ApplyFees ( string symbol )
 		{

@@ -20,6 +20,7 @@ namespace CryptoTickerBot.Exchanges
 		public override async Task GetExchangeData ( CancellationToken ct )
 		{
 			ExchangeData = new Dictionary<string, CryptoCoin> ( );
+			Observables = new Dictionary<string, IObserver<CryptoCoin>> ( );
 
 			while ( !ct.IsCancellationRequested )
 			{
@@ -39,24 +40,13 @@ namespace CryptoTickerBot.Exchanges
 			}
 		}
 
-		protected override void Update ( dynamic data, string symbol )
+		protected override void DeserializeData ( dynamic data, string symbol )
 		{
-			if ( !KnownSymbols.Contains ( symbol ) )
-				return;
-
-			if ( !ExchangeData.ContainsKey ( symbol ) )
-				ExchangeData[symbol] = new CryptoCoin ( symbol );
-
-			var old = ExchangeData[symbol].Clone ( );
-
 			decimal InrToUsd ( decimal amount ) => FiatConverter.Convert ( amount, FiatCurrency.INR, FiatCurrency.USD );
 
 			ExchangeData[symbol].LowestAsk = InrToUsd ( data.Ask );
 			ExchangeData[symbol].HighestBid = InrToUsd ( data.Bid );
 			ExchangeData[symbol].Rate = InrToUsd ( data.Last );
-
-			if ( old != ExchangeData[symbol] )
-				OnChanged ( this, old );
 		}
 	}
 }

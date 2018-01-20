@@ -96,6 +96,7 @@ namespace CryptoTickerBot.Exchanges
 		public override async Task GetExchangeData ( CancellationToken ct )
 		{
 			ExchangeData = new Dictionary<string, CryptoCoin> ( );
+			Observables = new Dictionary<string, IObserver<CryptoCoin>> ( );
 
 			while ( !ct.IsCancellationRequested )
 			{
@@ -112,23 +113,13 @@ namespace CryptoTickerBot.Exchanges
 			}
 		}
 
-		protected override void Update ( dynamic data, string symbol )
+		protected override void DeserializeData ( dynamic data, string symbol )
 		{
 			KrakenCoinInfo coinInfo = data;
-
-			if ( !ExchangeData.ContainsKey ( symbol ) )
-				ExchangeData[symbol] = new CryptoCoin ( symbol );
-
-			var old = ExchangeData[symbol].Clone ( );
 
 			ExchangeData[symbol].LowestAsk = coinInfo.Ask[0];
 			ExchangeData[symbol].HighestBid = coinInfo.Bid[0];
 			ExchangeData[symbol].Rate = coinInfo.LastTrade[0];
-
-			ApplyFees ( symbol );
-
-			if ( old != ExchangeData[symbol] )
-				OnChanged ( this, old );
 		}
 	}
 }

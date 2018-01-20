@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using CryptoTickerBot.Exchanges;
 using Newtonsoft.Json;
@@ -30,6 +31,7 @@ namespace CryptoTickerBot.Core
 		public string SheetName { get; set; } = "Tickers";
 
 		public string SheetId { get; set; }
+		public TimeSpan HistorySpan { get; set; } = TimeSpan.FromMinutes ( 60 );
 
 		#endregion Properties
 

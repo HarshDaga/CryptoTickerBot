@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Extensions;
@@ -49,6 +50,7 @@ namespace CryptoTickerBot.Exchanges
 		public override async Task GetExchangeData ( CancellationToken ct )
 		{
 			ExchangeData = new Dictionary<string, CryptoCoin> ( );
+			Observables = new Dictionary<string, IObserver<CryptoCoin>> ( );
 
 			using ( var ws = new WebSocket ( TickerUrl ) )
 			{
@@ -77,23 +79,13 @@ namespace CryptoTickerBot.Exchanges
 			Update ( DeserializeObject<dynamic> ( (string) data.data ).message.data, symbol );
 		}
 
-		protected override void Update ( dynamic data, string symbol )
+		protected override void DeserializeData ( dynamic data, string symbol )
 		{
-			if ( !ExchangeData.ContainsKey ( symbol ) )
-				ExchangeData[symbol] = new CryptoCoin ( symbol );
-
-			var old = ExchangeData[symbol].Clone ( );
-
 			decimal InrToUsd ( decimal amount ) => FiatConverter.Convert ( amount, FiatCurrency.INR, FiatCurrency.USD );
 
 			ExchangeData[symbol].LowestAsk = InrToUsd ( data.lowest_ask );
 			ExchangeData[symbol].HighestBid = InrToUsd ( data.highest_bid );
 			ExchangeData[symbol].Rate = InrToUsd ( data.last_traded_price );
-
-			ApplyFees ( symbol );
-
-			if ( old != ExchangeData[symbol] )
-				OnChanged ( this, old );
 		}
 
 		public static async Task ConnectAndSubscribe ( WebSocket ws, CancellationToken ct )
