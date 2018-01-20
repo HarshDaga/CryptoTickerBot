@@ -117,6 +117,7 @@
     <Compile Include="Exchanges\BitBayExchange.cs" />
     <Compile Include="Exchanges\CoinbaseExchange.cs" />
     <Compile Include="Exchanges\CoinDeltaExchange.cs" />
+    <Compile Include="Exchanges\CryptoExchangeObserver.cs" />
     <Compile Include="Exchanges\KrakenExchange.cs" />
     <Compile Include="Extensions\ClientWebSocketExtensions.cs" />
     <Compile Include="CryptoCoin.cs" />

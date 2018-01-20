@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -34,7 +33,7 @@ namespace CryptoTickerBot.Exchanges
 		public string TickerUrl { get; protected set; }
 		public CryptoExchange Id { get; protected set; }
 		public Dictionary<string, CryptoCoin> ExchangeData { get; protected set; }
-		public ConcurrentDictionary<string, ImmutableHashSet<IObserver<CryptoCoin>>> Observables { get; protected set; }
+		public ImmutableHashSet<IObserver<CryptoCoin>> Observers { get; protected set; }
 		public Dictionary<string, decimal> DepositFees { get; protected set; }
 		public Dictionary<string, decimal> WithdrawalFees { get; protected set; }
 		public decimal BuyFees { get; protected set; }
@@ -71,39 +70,31 @@ namespace CryptoTickerBot.Exchanges
 		protected CryptoExchangeBase ( )
 		{
 			ExchangeData = new Dictionary<string, CryptoCoin> ( );
+			Observers = ImmutableHashSet<IObserver<CryptoCoin>>.Empty;
 		}
 
 		public IDisposable Subscribe ( IObserver<CryptoCoin> observer )
 		{
-			foreach ( var symbol in Observables.Keys )
-				Observables[symbol] = Observables[symbol].Add ( observer );
+			Observers = Observers.Add ( observer );
 
-			return Disposable.Create ( ( ) =>
-			{
-				foreach ( var symbol in Observables.Keys )
-					Observables[symbol] = Observables[symbol].Remove ( observer );
-			} );
+			return Disposable.Create ( ( ) => Observers = Observers.Remove ( observer ) );
 		}
 
 		protected void Update ( dynamic data, string symbol )
 		{
-			if ( !ExchangeData.ContainsKey ( symbol ) )
-			{
-				ExchangeData[symbol] = new CryptoCoin ( symbol );
-				Observables[symbol] = ImmutableHashSet<IObserver<CryptoCoin>>.Empty;
-			}
+			CryptoCoin old = null;
+			if ( ExchangeData.ContainsKey ( symbol ) )
+				old = ExchangeData[symbol].Clone ( );
+			ExchangeData[symbol] = new CryptoCoin ( symbol );
 
-			var old = ExchangeData[symbol].Clone ( );
 
 			DeserializeData ( data, symbol );
 
 			ApplyFees ( symbol );
 
-			if ( old != ExchangeData[symbol] )
+			if ( ExchangeData[symbol] != old )
 			{
-				OnChanged ( this, old );
-				foreach ( var observer in Observables[symbol] )
-					observer.OnNext ( ExchangeData[symbol] );
+				OnChanged ( this, ExchangeData[symbol] );
 			}
 		}
 
@@ -128,8 +119,12 @@ namespace CryptoTickerBot.Exchanges
 
 		public event Action<CryptoExchangeBase, CryptoCoin> Changed;
 
-		public void OnChanged ( CryptoExchangeBase exchange, CryptoCoin coin ) =>
+		public void OnChanged ( CryptoExchangeBase exchange, CryptoCoin coin )
+		{
 			Changed?.Invoke ( exchange, coin );
+			foreach ( var observer in Observers )
+				observer.OnNext ( ExchangeData[coin.Symbol].Clone ( ) );
+		}
 
 		public override string ToString ( )
 		{

@@ -39,6 +39,9 @@ namespace CryptoTickerBot.Core
 				[CryptoExchange.Kraken] = new KrakenExchange ( )
 			};
 
+		public static Dictionary<CryptoExchange, CryptoExchangeObserver> Observers =
+			new Dictionary<CryptoExchange, CryptoExchangeObserver> ( );
+
 		public static Task Start ( string[] args = null )
 		{
 			return Task.Run ( async ( ) =>
@@ -60,12 +63,15 @@ namespace CryptoTickerBot.Core
 		{
 			foreach ( var exchange in Exchanges.Values )
 			{
+				Observers[exchange.Id] = new CryptoExchangeObserver ( exchange );
 				exchange.Changed += ( e, coin ) =>
 				{
 					if ( !PendingUpdates.Contains ( e.Id ) )
 						PendingUpdates.Enqueue ( e.Id );
 				};
-				exchange.Changed += ( e, coin ) => Logger.Debug ( $"{e.Name,-10} {e[coin.Symbol]}" );
+				var observer = Observers[exchange.Id];
+				observer.Next += ( e, coin ) => Logger.Debug ( $"{e.Name,-10} {e[coin.Symbol]}" );
+				exchange.Subscribe ( observer );
 				try
 				{
 					Task.Run ( ( ) => exchange.StartMonitor ( ) );
