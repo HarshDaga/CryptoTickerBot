@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CryptoTickerBot.Helpers;
 using NLog;
 using Tababular;
 
@@ -103,6 +104,25 @@ namespace CryptoTickerBot.Exchanges
 					coin.Symbol,
 					Bid = $"{coin.HighestBid:C}",
 					Ask = $"{coin.LowestAsk:C}",
+					Spread = $"{coin.SpreadPercentange:P}"
+				} );
+			}
+
+			return formatter.FormatObjects ( objects );
+		}
+
+		public string ToString ( FiatCurrency fiat )
+		{
+			var formatter = new TableFormatter ( );
+			var objects = new List<object> ( );
+
+			foreach ( var coin in ExchangeData.Values.OrderBy ( x => x.Symbol ) )
+			{
+				objects.Add ( new
+				{
+					coin.Symbol,
+					Bid = $"{FiatConverter.ToString ( coin.HighestBid, FiatCurrency.USD, fiat )}",
+					Ask = $"{FiatConverter.ToString ( coin.LowestAsk, FiatCurrency.USD, fiat )}",
 					Spread = $"{coin.SpreadPercentange:P}"
 				} );
 			}

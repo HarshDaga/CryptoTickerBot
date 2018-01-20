@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CryptoTickerBot.Exchanges;
 using CryptoTickerBot.Extensions;
+using CryptoTickerBot.Helpers;
 using NLog;
 using Telegram.Bot;
 using Telegram.Bot.Args;
@@ -61,25 +62,36 @@ namespace Telegram_Bot
 			Logger.Debug ( $"Received inline query from: {eventArgs.InlineQuery.From.Username}" );
 
 			var inlineQueryResults = exchanges.Values
-				.Select ( exchange => new InlineQueryResultArticle
-				{
-					Id = exchange.Name,
-					HideUrl = true,
-					Title = exchange.Name,
-					Url = exchange.Url,
-					InputMessageContent = new InputTextMessageContent
-					{
-						MessageText = $"```\n{exchange.Name}\n{exchange.ToString ( )}\n```",
-						ParseMode = ParseMode.Markdown
-					}
-				} )
+				.Select ( x => ToInlineQueryResult ( x, x.Name ) )
 				.ToList<InlineQueryResult> ( );
+
+			inlineQueryResults.Add ( ToInlineQueryResult ( exchanges[CryptoExchange.Koinex], "Koinex INR", FiatCurrency.INR ) );
+			inlineQueryResults.Add ( ToInlineQueryResult ( exchanges[CryptoExchange.BitBay], "BitBay PLN", FiatCurrency.PLN ) );
 
 			await bot.AnswerInlineQueryAsync (
 				eventArgs.InlineQuery.Id,
-				inlineQueryResults.ToArray ( )
+				inlineQueryResults.ToArray ( ),
+				0
 			);
 		}
+
+		private static InlineQueryResultArticle ToInlineQueryResult (
+			CryptoExchangeBase exchange,
+			string name,
+			FiatCurrency fiat = FiatCurrency.USD
+		) =>
+			new InlineQueryResultArticle
+			{
+				Id = name,
+				HideUrl = true,
+				Title = name,
+				Url = exchange.Url,
+				InputMessageContent = new InputTextMessageContent
+				{
+					MessageText = $"```\n{name}\n{exchange.ToString ( fiat )}\n```",
+					ParseMode = ParseMode.Markdown
+				}
+			};
 
 		private static void StartCryptoTickerBot ( )
 		{

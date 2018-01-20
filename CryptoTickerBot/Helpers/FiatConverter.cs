@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 using Flurl.Http;
@@ -53,6 +55,32 @@ namespace CryptoTickerBot.Helpers
 
 		private const string TickerUrl = "http://api.fixer.io/latest?base=USD";
 
+		private static readonly IDictionary<FiatCurrency, string> Map;
+
+		static FiatConverter ( )
+		{
+			Map = CultureInfo
+				.GetCultures ( CultureTypes.AllCultures )
+				.Where ( c => !c.IsNeutralCulture )
+				.Select ( culture =>
+				{
+					try
+					{
+						return new RegionInfo ( culture.LCID );
+					}
+					catch
+					{
+						return null;
+					}
+				} )
+				.Where ( ri => ri != null && Enum.GetNames ( typeof ( FiatCurrency ) ).Contains ( ri.ISOCurrencySymbol ) )
+				.GroupBy ( ri => ri.ISOCurrencySymbol )
+				.ToDictionary (
+					x => (FiatCurrency) Enum.Parse ( typeof ( FiatCurrency ), x.Key ),
+					x => x.First ( ).CurrencySymbol
+				);
+		}
+
 		public static void StartMonitor ( )
 		{
 			var timer = new Timer ( 60 * 60 * 100 );
@@ -83,5 +111,13 @@ namespace CryptoTickerBot.Helpers
 
 		public static decimal Convert ( decimal amount, FiatCurrency from, FiatCurrency to ) =>
 			amount * UsdTo[to] / UsdTo[from];
+
+		public static string ToString ( decimal amount, FiatCurrency from, FiatCurrency to )
+		{
+			var result = Convert ( amount, from, to );
+			var symbol = Map[to];
+
+			return $"{symbol}{result:N}";
+		}
 	}
 }

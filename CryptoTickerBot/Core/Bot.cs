@@ -149,12 +149,16 @@ namespace CryptoTickerBot.Core
 
 				await request.ExecuteAsync ( );
 			}
-			catch ( GoogleApiException e )
+			catch ( Exception e )
 			{
-				if ( e.Error.Code == 429 )
+				if ( e is GoogleApiException gae && gae.Error.Code == 429 )
 				{
-					Logger.Error ( e, "Too many Google Api requests. Cooling down." );
+					Logger.Error ( gae, "Too many Google Api requests. Cooling down." );
 					await Task.Delay ( 5000 );
+				}
+				else
+				{
+					Logger.Error ( e );
 				}
 			}
 		}
