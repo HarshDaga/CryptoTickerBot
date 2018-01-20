@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
-using System.Reactive.Subjects;
+using System.Reactive.Disposables;
 using System.Threading;
 using System.Threading.Tasks;
-using CryptoTickerBot.Core;
 using CryptoTickerBot.Helpers;
 using NLog;
 using Tababular;
@@ -24,7 +25,7 @@ namespace CryptoTickerBot.Exchanges
 		Poloniex
 	}
 
-	public abstract class CryptoExchangeBase
+	public abstract class CryptoExchangeBase : IObservable<CryptoCoin>
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
@@ -33,13 +34,14 @@ namespace CryptoTickerBot.Exchanges
 		public string TickerUrl { get; protected set; }
 		public CryptoExchange Id { get; protected set; }
 		public Dictionary<string, CryptoCoin> ExchangeData { get; protected set; }
-		public Dictionary<string, IObserver<CryptoCoin>> Observables { get; protected set; }
+		public ConcurrentDictionary<string, ImmutableHashSet<IObserver<CryptoCoin>>> Observables { get; protected set; }
 		public Dictionary<string, decimal> DepositFees { get; protected set; }
 		public Dictionary<string, decimal> WithdrawalFees { get; protected set; }
 		public decimal BuyFees { get; protected set; }
 		public decimal SellFees { get; protected set; }
 		public bool IsComplete => ExchangeData.Count == KnownSymbols.Count;
 		public DateTime LastUpdate { get; protected set; }
+
 		public abstract Task GetExchangeData ( CancellationToken ct );
 
 		public async Task StartMonitor ( CancellationToken ct = default )
@@ -71,12 +73,24 @@ namespace CryptoTickerBot.Exchanges
 			ExchangeData = new Dictionary<string, CryptoCoin> ( );
 		}
 
+		public IDisposable Subscribe ( IObserver<CryptoCoin> observer )
+		{
+			foreach ( var symbol in Observables.Keys )
+				Observables[symbol] = Observables[symbol].Add ( observer );
+
+			return Disposable.Create ( ( ) =>
+			{
+				foreach ( var symbol in Observables.Keys )
+					Observables[symbol] = Observables[symbol].Remove ( observer );
+			} );
+		}
+
 		protected void Update ( dynamic data, string symbol )
 		{
 			if ( !ExchangeData.ContainsKey ( symbol ) )
 			{
 				ExchangeData[symbol] = new CryptoCoin ( symbol );
-				Observables[symbol] = new ReplaySubject<CryptoCoin> ( Settings.Instance.HistorySpan );
+				Observables[symbol] = ImmutableHashSet<IObserver<CryptoCoin>>.Empty;
 			}
 
 			var old = ExchangeData[symbol].Clone ( );
@@ -88,7 +102,8 @@ namespace CryptoTickerBot.Exchanges
 			if ( old != ExchangeData[symbol] )
 			{
 				OnChanged ( this, old );
-				Observables[symbol].OnNext ( ExchangeData[symbol] );
+				foreach ( var observer in Observables[symbol] )
+					observer.OnNext ( ExchangeData[symbol] );
 			}
 		}
 

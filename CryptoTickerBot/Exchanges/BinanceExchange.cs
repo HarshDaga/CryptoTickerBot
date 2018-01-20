@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -44,7 +47,7 @@ namespace CryptoTickerBot.Exchanges
 		public override async Task GetExchangeData ( CancellationToken ct )
 		{
 			ExchangeData = new Dictionary<string, CryptoCoin> ( );
-			Observables = new Dictionary<string, IObserver<CryptoCoin>> ( );
+			Observables = new ConcurrentDictionary<string, ImmutableHashSet<IObserver<CryptoCoin>>> ( );
 
 			using ( var ws = new WebSocket ( TickerUrl ) )
 			{
