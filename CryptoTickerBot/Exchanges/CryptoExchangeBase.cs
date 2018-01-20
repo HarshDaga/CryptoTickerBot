@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CryptoTickerBot.Extensions;
 using NLog;
 using Tababular;
 
@@ -31,6 +30,10 @@ namespace CryptoTickerBot.Exchanges
 		public string TickerUrl { get; protected set; }
 		public CryptoExchange Id { get; protected set; }
 		public Dictionary<string, CryptoCoin> ExchangeData { get; protected set; }
+		public Dictionary<string, decimal> DepositFees { get; protected set; }
+		public Dictionary<string, decimal> WithdrawalFees { get; protected set; }
+		public decimal BuyFees { get; protected set; }
+		public decimal SellFees { get; protected set; }
 		public bool IsComplete => ExchangeData.Count == KnownSymbols.Count;
 		public DateTime LastUpdate { get; protected set; }
 		public abstract Task GetExchangeData ( CancellationToken ct );
@@ -65,6 +68,14 @@ namespace CryptoTickerBot.Exchanges
 		}
 
 		protected abstract void Update ( dynamic data, string symbol );
+
+		protected void ApplyFees ( string symbol )
+		{
+			var coin = ExchangeData[symbol];
+			coin.LowestAsk += coin.LowestAsk * BuyFees / 100m;
+			coin.HighestBid += coin.HighestBid * SellFees / 100m;
+			ExchangeData[symbol] = coin;
+		}
 
 		public CryptoCoin this [ string symbol ]
 		{

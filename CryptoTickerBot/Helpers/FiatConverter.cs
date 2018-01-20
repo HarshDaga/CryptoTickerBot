@@ -57,26 +57,28 @@ namespace CryptoTickerBot.Helpers
 		{
 			var timer = new Timer ( 60 * 60 * 100 );
 			FetchRates ( );
-			timer.Elapsed += ( sender, args ) => Task.Run ( ( ) => FetchRates ( ) );
+			timer.Elapsed += ( sender, args ) => Task.Run ( ( ) =>
+			{
+				try
+				{
+					FetchRates ( );
+				}
+				catch ( Exception e )
+				{
+					Logger.Error ( e );
+				}
+			} );
 			timer.Start ( );
 		}
 
 		public static void FetchRates ( )
 		{
-			try
-			{
-				var json = TickerUrl.GetStringAsync ( ).Result;
-				var data = JsonConvert.DeserializeObject<dynamic> ( json );
-				UsdTo = JsonConvert.DeserializeObject<Dictionary<FiatCurrency, decimal>> ( data.rates.ToString ( ) );
-				UsdTo[FiatCurrency.USD] = 1m;
-				Console.WriteLine ( data.rates );
-				Logger.Info ( "Fetched Fiat currency rates." );
-			}
-			catch ( Exception e )
-			{
-				Logger.Error ( e );
-				throw;
-			}
+			var json = TickerUrl.GetStringAsync ( ).Result;
+			var data = JsonConvert.DeserializeObject<dynamic> ( json );
+			UsdTo = JsonConvert.DeserializeObject<Dictionary<FiatCurrency, decimal>> ( data.rates.ToString ( ) );
+			UsdTo[FiatCurrency.USD] = 1m;
+			Console.WriteLine ( data.rates );
+			Logger.Info ( "Fetched Fiat currency rates." );
 		}
 
 		public static decimal Convert ( decimal amount, FiatCurrency from, FiatCurrency to ) =>

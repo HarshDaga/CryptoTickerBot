@@ -14,6 +14,24 @@ namespace CryptoTickerBot.Exchanges
 			Url = "https://bitbay.net/en";
 			TickerUrl = "https://api.bitbay.net/rest/trading/ticker";
 			Id = CryptoExchange.BitBay;
+
+			WithdrawalFees = new Dictionary<string, decimal>
+			{
+				["BTC"] = 0.0009m,
+				["ETH"] = 0.00126m,
+				["LTC"] = 0.005m,
+				["BCH"] = 0.0006m
+			};
+			DepositFees = new Dictionary<string, decimal>
+			{
+				["BTC"] = 0m,
+				["ETH"] = 0m,
+				["LTC"] = 0m,
+				["BCH"] = 0m
+			};
+
+			BuyFees = 0.3m;
+			SellFees = 0.3m;
 		}
 
 		public override async Task GetExchangeData ( CancellationToken ct )
@@ -54,6 +72,8 @@ namespace CryptoTickerBot.Exchanges
 			ExchangeData[symbol].LowestAsk = (decimal) data.ask;
 			ExchangeData[symbol].HighestBid = (decimal) data.bid;
 			ExchangeData[symbol].Rate = (decimal) data.last;
+
+			ApplyFees ( symbol );
 
 			if ( old != ExchangeData[symbol] )
 				OnChanged ( this, old );

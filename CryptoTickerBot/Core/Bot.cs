@@ -65,7 +65,6 @@ namespace CryptoTickerBot.Core
 					if ( !PendingUpdates.Contains ( e.Id ) )
 						PendingUpdates.Enqueue ( e.Id );
 				};
-				exchange.Changed += ( e, coin ) => Console.WriteLine ( $"{e.Name,-10} {e[coin.Symbol]}" );
 				exchange.Changed += ( e, coin ) => Logger.Debug ( $"{e.Name,-10} {e[coin.Symbol]}" );
 				try
 				{

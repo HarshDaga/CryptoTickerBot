@@ -15,6 +15,24 @@ namespace CryptoTickerBot.Exchanges
 			Url = "https://www.kraken.com/";
 			TickerUrl = "https://api.kraken.com/0/public/Ticker?pair=XBTUSD,BCHUSD,ETHUSD,LTCUSD";
 			Id = CryptoExchange.Kraken;
+
+			WithdrawalFees = new Dictionary<string, decimal>
+			{
+				["BTC"] = 0.00025m,
+				["ETH"] = 0.005m,
+				["LTC"] = 0.02m,
+				["BCH"] = 0.001m
+			};
+			DepositFees = new Dictionary<string, decimal>
+			{
+				["BTC"] = 0m,
+				["ETH"] = 0m,
+				["LTC"] = 0m,
+				["BCH"] = 0m
+			};
+
+			BuyFees = 0.26m;
+			SellFees = 0.26m;
 		}
 
 		#region JSON Structure
@@ -106,6 +124,8 @@ namespace CryptoTickerBot.Exchanges
 			ExchangeData[symbol].LowestAsk = coinInfo.Ask[0];
 			ExchangeData[symbol].HighestBid = coinInfo.Bid[0];
 			ExchangeData[symbol].Rate = coinInfo.LastTrade[0];
+
+			ApplyFees ( symbol );
 
 			if ( old != ExchangeData[symbol] )
 				OnChanged ( this, old );
