@@ -27,10 +27,12 @@ namespace CryptoTickerBot
 		public string Symbol { get; }
 		public decimal HighestBid { get; set; }
 		public decimal LowestAsk { get; set; }
-		public decimal Average => ( HighestBid + LowestAsk ) / 2;
+		public decimal SellPrice => HighestBid;
+		public decimal BuyPrice => LowestAsk;
+		public decimal Average => ( SellPrice + BuyPrice ) / 2;
 		public decimal Rate { get; set; }
-		public decimal Spread => LowestAsk - HighestBid;
-		public decimal SpreadPercentange => Spread / ( LowestAsk + HighestBid ) * 2;
+		public decimal Spread => SellPrice - BuyPrice;
+		public decimal SpreadPercentange => Spread / ( SellPrice + BuyPrice ) * 2;
 		public DateTime Time { get; }
 
 		public CryptoCoin (
@@ -50,9 +52,9 @@ namespace CryptoTickerBot
 			other != null && Symbol == other.Symbol &&
 			HighestBid == other.HighestBid && LowestAsk == other.LowestAsk;
 
-		public virtual decimal Buy ( decimal amountInUsd ) => amountInUsd / HighestBid;
+		public virtual decimal Buy ( decimal amountInUsd ) => amountInUsd / BuyPrice;
 
-		public virtual decimal Sell ( decimal quantity ) => LowestAsk * quantity;
+		public virtual decimal Sell ( decimal quantity ) => SellPrice * quantity;
 
 		public override bool Equals ( object obj ) => Equals ( obj as CryptoCoin );
 

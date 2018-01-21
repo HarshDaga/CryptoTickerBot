@@ -189,10 +189,10 @@ namespace TelegramBot
 			var minInvestment = fees / best.profit;
 
 			var reply =
-				$"Buy  {best.first} From: {from.Name,-12} @ {from[best.first].LowestAsk:C}\n" +
-				$"Sell {best.first} To:   {to.Name,-12} @ {to[best.first].HighestBid:C}\n" +
-				$"Buy  {best.second} From: {to.Name,-12} @ {to[best.second].LowestAsk:C}\n" +
-				$"Sell {best.second} To:   {from.Name,-12} @ {from[best.second].HighestBid:C}\n" +
+				$"Buy  {best.first} From: {from.Name,-12} @ {from[best.first].BuyPrice:C}\n" +
+				$"Sell {best.first} To:   {to.Name,-12} @ {to[best.first].SellPrice:C}\n" +
+				$"Buy  {best.second} From: {to.Name,-12} @ {to[best.second].BuyPrice:C}\n" +
+				$"Sell {best.second} To:   {from.Name,-12} @ {from[best.second].SellPrice:C}\n" +
 				$"Expected profit:    {best.profit:P}\n" +
 				$"Estimated fees:     {fees:C}\n" +
 				$"Minimum Investment: {minInvestment:C}";

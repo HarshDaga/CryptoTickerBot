@@ -32,8 +32,8 @@ namespace CryptoTickerBot.Helpers
 
 			foreach ( var symbol in symbols )
 			{
-				var buy = Exchanges[from].ExchangeData[symbol].LowestAsk;
-				var sell = Exchanges[to].ExchangeData[symbol].HighestBid;
+				var buy = Exchanges[from].ExchangeData[symbol].BuyPrice;
+				var sell = Exchanges[to].ExchangeData[symbol].SellPrice;
 				result[symbol] = ( sell - buy ) / buy;
 			}
 
