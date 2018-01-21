@@ -42,6 +42,9 @@ namespace CryptoTickerBot.Core
 		public static Dictionary<CryptoExchange, CryptoExchangeObserver> Observers =
 			new Dictionary<CryptoExchange, CryptoExchangeObserver> ( );
 
+		public static CryptoCompareTable CompareTable { get; set; } =
+			new CryptoCompareTable ( );
+
 		public static Task Start ( string[] args = null )
 		{
 			return Task.Run ( async ( ) =>
@@ -72,6 +75,7 @@ namespace CryptoTickerBot.Core
 				var observer = Observers[exchange.Id];
 				observer.Next += ( e, coin ) => Logger.Debug ( $"{e.Name,-10} {e[coin.Symbol]}" );
 				exchange.Subscribe ( observer );
+				CompareTable.AddExchange ( exchange );
 				try
 				{
 					Task.Run ( ( ) => exchange.StartMonitor ( ) );
@@ -119,11 +123,14 @@ namespace CryptoTickerBot.Core
 							Logger.Info ( $"Updated Sheets for {id}" );
 						}
 						await UpdateSheet ( valueRanges );
-						( sender as Timer )?.Start ( );
 					}
 					catch ( Exception e )
 					{
 						Logger.Error ( e );
+					}
+					finally
+					{
+						( sender as Timer )?.Start ( );
 					}
 				};
 				updateTimer.Start ( );

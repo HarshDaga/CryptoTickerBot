@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using CryptoTickerBot.Exchanges;
 using CryptoTickerBot.Extensions;
@@ -13,6 +14,7 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InlineQueryResults;
 using Telegram.Bot.Types.InputMessageContents;
 using TelegramBot.Extensions;
+using CTB = CryptoTickerBot.Core.Bot;
 
 namespace TelegramBot
 {
@@ -95,8 +97,8 @@ namespace TelegramBot
 
 		private static void StartCryptoTickerBot ( )
 		{
-			exchanges = CryptoTickerBot.Core.Bot.Exchanges;
-			CryptoTickerBot.Core.Bot.Start ( );
+			exchanges = CTB.Exchanges;
+			CTB.Start ( );
 		}
 
 		private static async void BotClientOnMessage ( object sender, MessageEventArgs messageEventArgs )
@@ -117,8 +119,58 @@ namespace TelegramBot
 				case "/fetch":
 					await HandleFetch ( message );
 					break;
+
+				case "/compare":
+					await HandleCompare ( message );
+					break;
 			}
 		}
+
+		private static async Task HandleCompare ( Message message )
+		{
+			var compare = CTB.CompareTable.GetAll ( );
+
+			CryptoCompareTable.RemoveExchange ( compare, CryptoExchange.Binance );
+
+			var table = new StringBuilder ( );
+			foreach ( var from in compare )
+			{
+				table.AppendLine ( $"{from.Key}" );
+				table.AppendLine ( $"{"Symbol",-8}{from.Value.Keys.Select ( x => $"{x,-10}" ).Join ( "" )}" );
+
+				var symbols = ExtractSymbols ( from );
+
+				foreach ( var symbol in symbols )
+				{
+					table.Append ( $"{symbol,-8}" );
+					foreach ( var value in from.Value )
+						table.Append (
+							value.Value.ContainsKey ( symbol )
+								? $"{value.Value[symbol],-10:P}"
+								: $"{"",-10}"
+						);
+					table.AppendLine ( );
+				}
+				table.AppendLine ( );
+			}
+
+			Logger.Info ( $"Sending compare data to {message.From.Username}" );
+			await bot.ReplyTextMessageAsync (
+				message,
+				$"```\n{table}```",
+				ParseMode.Markdown );
+		}
+
+		private static List<string> ExtractSymbols (
+			KeyValuePair<CryptoExchange, Dictionary<CryptoExchange, Dictionary<string, decimal>>> from
+		) =>
+			@from.Value.Values.Aggregate (
+				new List<string> ( ),
+				( current, to ) =>
+					current.Union ( to.Keys )
+						.OrderBy ( x => x )
+						.ToList ( )
+			);
 
 		private static async Task HandleFetch ( Message message )
 		{
