@@ -24,6 +24,15 @@ namespace CryptoTickerBot
 
 	public class CryptoCoin : IEquatable<CryptoCoin>
 	{
+		public string Symbol { get; }
+		public decimal HighestBid { get; set; }
+		public decimal LowestAsk { get; set; }
+		public decimal Average => ( HighestBid + LowestAsk ) / 2;
+		public decimal Rate { get; set; }
+		public decimal Spread => LowestAsk - HighestBid;
+		public decimal SpreadPercentange => Spread / ( LowestAsk + HighestBid ) * 2;
+		public DateTime Time { get; }
+
 		public CryptoCoin (
 			string symbol,
 			decimal highestBid = 0m, decimal lowestAsk = 0m,
@@ -37,24 +46,15 @@ namespace CryptoTickerBot
 			Time = DateTime.Now;
 		}
 
-		public string Symbol { get; }
-		public decimal HighestBid { get; set; }
-		public decimal LowestAsk { get; set; }
-		public decimal Average => ( HighestBid + LowestAsk ) / 2;
-		public decimal Rate { get; set; }
-		public decimal Spread => LowestAsk - HighestBid;
-		public decimal SpreadPercentange => Spread / ( LowestAsk + HighestBid ) * 2;
-		public DateTime Time { get; }
+		public bool Equals ( CryptoCoin other ) =>
+			other != null && Symbol == other.Symbol &&
+			HighestBid == other.HighestBid && LowestAsk == other.LowestAsk;
 
 		public virtual decimal Buy ( decimal amountInUsd ) => amountInUsd / HighestBid;
 
 		public virtual decimal Sell ( decimal quantity ) => LowestAsk * quantity;
 
 		public override bool Equals ( object obj ) => Equals ( obj as CryptoCoin );
-
-		public bool Equals ( CryptoCoin other ) =>
-			other != null && Symbol == other.Symbol &&
-			HighestBid == other.HighestBid && LowestAsk == other.LowestAsk;
 
 		public override int GetHashCode ( ) =>
 			-1758840423 + EqualityComparer<string>.Default.GetHashCode ( Symbol );
