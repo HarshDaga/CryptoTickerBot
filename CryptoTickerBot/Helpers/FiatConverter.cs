@@ -48,14 +48,13 @@ namespace CryptoTickerBot.Helpers
 
 	public static class FiatConverter
 	{
+		private const string TickerUrl = "http://api.fixer.io/latest?base=USD";
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
+
+		private static readonly IDictionary<FiatCurrency, string> Map;
 
 		public static Dictionary<FiatCurrency, decimal> UsdTo { get; private set; } =
 			new Dictionary<FiatCurrency, decimal> ( );
-
-		private const string TickerUrl = "http://api.fixer.io/latest?base=USD";
-
-		private static readonly IDictionary<FiatCurrency, string> Map;
 
 		static FiatConverter ( )
 		{

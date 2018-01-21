@@ -35,6 +35,34 @@ namespace CryptoTickerBot.Exchanges
 			SellFees = 0.26m;
 		}
 
+		public override async Task GetExchangeData ( CancellationToken ct )
+		{
+			ExchangeData = new Dictionary<string, CryptoCoin> ( );
+
+			while ( !ct.IsCancellationRequested )
+			{
+				var data = await TickerUrl.GetJsonAsync<Root> ( ct );
+
+				Update ( data.Result.Btc, "BTC" );
+				Update ( data.Result.Bch, "BCH" );
+				Update ( data.Result.Eth, "ETH" );
+				Update ( data.Result.Ltc, "LTC" );
+
+				LastUpdate = DateTime.Now;
+
+				await Task.Delay ( 2000, ct );
+			}
+		}
+
+		protected override void DeserializeData ( dynamic data, string symbol )
+		{
+			KrakenCoinInfo coinInfo = data;
+
+			ExchangeData[symbol].LowestAsk = coinInfo.Ask[0];
+			ExchangeData[symbol].HighestBid = coinInfo.Bid[0];
+			ExchangeData[symbol].Rate = coinInfo.LastTrade[0];
+		}
+
 		#region JSON Structure
 
 		private class Root
@@ -92,33 +120,5 @@ namespace CryptoTickerBot.Exchanges
 		}
 
 		#endregion
-
-		public override async Task GetExchangeData ( CancellationToken ct )
-		{
-			ExchangeData = new Dictionary<string, CryptoCoin> ( );
-
-			while ( !ct.IsCancellationRequested )
-			{
-				var data = await TickerUrl.GetJsonAsync<Root> ( ct );
-
-				Update ( data.Result.Btc, "BTC" );
-				Update ( data.Result.Bch, "BCH" );
-				Update ( data.Result.Eth, "ETH" );
-				Update ( data.Result.Ltc, "LTC" );
-
-				LastUpdate = DateTime.Now;
-
-				await Task.Delay ( 2000, ct );
-			}
-		}
-
-		protected override void DeserializeData ( dynamic data, string symbol )
-		{
-			KrakenCoinInfo coinInfo = data;
-
-			ExchangeData[symbol].LowestAsk = coinInfo.Ask[0];
-			ExchangeData[symbol].HighestBid = coinInfo.Bid[0];
-			ExchangeData[symbol].Rate = coinInfo.LastTrade[0];
-		}
 	}
 }

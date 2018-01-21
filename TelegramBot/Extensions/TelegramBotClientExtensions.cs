@@ -14,7 +14,7 @@ namespace TelegramBot.Extensions
 			ParseMode parseMode = ParseMode.Default,
 			bool disableWebPagePreview = false, bool disableNotification = false,
 			int replyToMessageId = 0, IReplyMarkup replyMarkup = null,
-			CancellationToken cancellationToken = default ( CancellationToken ) ) =>
+			CancellationToken cancellationToken = default ) =>
 			await bot.SendTextMessageAsync (
 				message.Chat.Id, text, parseMode,
 				disableWebPagePreview, disableNotification,

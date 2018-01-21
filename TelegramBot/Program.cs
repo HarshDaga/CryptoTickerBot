@@ -151,6 +151,7 @@ namespace TelegramBot
 						);
 					table.AppendLine ( );
 				}
+
 				table.AppendLine ( );
 			}
 
@@ -161,10 +162,10 @@ namespace TelegramBot
 				ParseMode.Markdown );
 		}
 
-		private static List<string> ExtractSymbols (
+		private static IList<string> ExtractSymbols (
 			KeyValuePair<CryptoExchange, Dictionary<CryptoExchange, Dictionary<string, decimal>>> from
 		) =>
-			@from.Value.Values.Aggregate (
+			from.Value.Values.Aggregate (
 				new List<string> ( ),
 				( current, to ) =>
 					current.Union ( to.Keys )

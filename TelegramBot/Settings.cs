@@ -5,11 +5,10 @@ namespace TelegramBot
 {
 	public class Settings
 	{
+		private const string SETTINGSFILE = "TelegramSettings.json";
 		private static readonly object LoadLock;
 
 		public static Settings Instance { get; private set; }
-
-		private const string SETTINGSFILE = "TelegramSettings.json";
 
 		#region Properties
 

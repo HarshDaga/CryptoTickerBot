@@ -122,6 +122,7 @@ namespace CryptoTickerBot.Core
 							} );
 							Logger.Info ( $"Updated Sheets for {id}" );
 						}
+
 						await UpdateSheet ( valueRanges );
 					}
 					catch ( Exception e )

@@ -7,11 +7,9 @@ namespace CryptoTickerBot.Exchanges
 {
 	public class CryptoExchangeObserver : IObserver<CryptoCoin>
 	{
-		public CryptoExchangeBase Exchange { get; }
 		private readonly Dictionary<string, List<CryptoCoin>> history;
 		private readonly Dictionary<string, List<PriceChange>> priceChanges;
-
-		public event Action<CryptoExchangeBase, CryptoCoin> Next;
+		public CryptoExchangeBase Exchange { get; }
 
 		public CryptoExchangeObserver ( CryptoExchangeBase exchange )
 		{
@@ -27,6 +25,7 @@ namespace CryptoTickerBot.Exchanges
 				history[coin.Symbol] = new List<CryptoCoin> ( );
 				priceChanges[coin.Symbol] = new List<PriceChange> ( );
 			}
+
 			if ( history[coin.Symbol].Any ( ) )
 				priceChanges[coin.Symbol].Add ( coin - history[coin.Symbol].Last ( ) );
 			history[coin.Symbol].Add ( coin );
@@ -41,6 +40,8 @@ namespace CryptoTickerBot.Exchanges
 		public void OnCompleted ( )
 		{
 		}
+
+		public event Action<CryptoExchangeBase, CryptoCoin> Next;
 
 		public IList<CryptoCoin> History ( string symbol, TimeSpan timeSpan )
 		{

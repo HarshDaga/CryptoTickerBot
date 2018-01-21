@@ -47,7 +47,6 @@ namespace CryptoTickerBot.Exchanges
 			};
 
 			while ( !ct.IsCancellationRequested )
-			{
 				foreach ( var ticker in tickers )
 				{
 					var symbol = ticker.symbol;
@@ -59,7 +58,6 @@ namespace CryptoTickerBot.Exchanges
 
 					await Task.Delay ( 1000, ct );
 				}
-			}
 		}
 
 		protected override void DeserializeData ( dynamic data, string symbol )

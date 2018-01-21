@@ -29,6 +29,7 @@ namespace CryptoTickerBot.Extensions
 				tables.Add ( exchange.Name );
 				tables.Add ( exchange.ToString ( ) );
 			}
+
 			return tables.Join ( "\n" );
 		}
 

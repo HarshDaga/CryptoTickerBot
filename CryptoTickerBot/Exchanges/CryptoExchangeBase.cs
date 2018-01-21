@@ -28,6 +28,14 @@ namespace CryptoTickerBot.Exchanges
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
+		protected static readonly List<string> KnownSymbols = new List<string>
+		{
+			"BTC",
+			"LTC",
+			"ETH",
+			"BCH"
+		};
+
 		public string Name { get; protected set; }
 		public string Url { get; protected set; }
 		public string TickerUrl { get; protected set; }
@@ -41,31 +49,11 @@ namespace CryptoTickerBot.Exchanges
 		public bool IsComplete => ExchangeData.Count == KnownSymbols.Count;
 		public DateTime LastUpdate { get; protected set; }
 
-		public abstract Task GetExchangeData ( CancellationToken ct );
-
-		public async Task StartMonitor ( CancellationToken ct = default )
+		public CryptoCoin this [ string symbol ]
 		{
-			while ( !ct.IsCancellationRequested )
-			{
-				try
-				{
-					await GetExchangeData ( ct );
-				}
-				catch ( Exception e )
-				{
-					Logger.Error ( e );
-					await Task.Delay ( 2000, ct );
-				}
-			}
+			get => ExchangeData[symbol];
+			set => ExchangeData[symbol] = value;
 		}
-
-		protected static readonly List<string> KnownSymbols = new List<string>
-		{
-			"BTC",
-			"LTC",
-			"ETH",
-			"BCH"
-		};
 
 		protected CryptoExchangeBase ( )
 		{
@@ -80,6 +68,22 @@ namespace CryptoTickerBot.Exchanges
 			return Disposable.Create ( ( ) => Observers = Observers.Remove ( observer ) );
 		}
 
+		public abstract Task GetExchangeData ( CancellationToken ct );
+
+		public async Task StartMonitor ( CancellationToken ct = default )
+		{
+			while ( !ct.IsCancellationRequested )
+				try
+				{
+					await GetExchangeData ( ct );
+				}
+				catch ( Exception e )
+				{
+					Logger.Error ( e );
+					await Task.Delay ( 2000, ct );
+				}
+		}
+
 		protected void Update ( dynamic data, string symbol )
 		{
 			CryptoCoin old = null;
@@ -92,10 +96,7 @@ namespace CryptoTickerBot.Exchanges
 
 			ApplyFees ( symbol );
 
-			if ( ExchangeData[symbol] != old )
-			{
-				OnChanged ( this, ExchangeData[symbol] );
-			}
+			if ( ExchangeData[symbol] != old ) OnChanged ( this, ExchangeData[symbol] );
 		}
 
 		protected abstract void DeserializeData ( dynamic data, string symbol );
@@ -106,12 +107,6 @@ namespace CryptoTickerBot.Exchanges
 			coin.LowestAsk += coin.LowestAsk * BuyFees / 100m;
 			coin.HighestBid += coin.HighestBid * SellFees / 100m;
 			ExchangeData[symbol] = coin;
-		}
-
-		public CryptoCoin this [ string symbol ]
-		{
-			get => ExchangeData[symbol];
-			set => ExchangeData[symbol] = value;
 		}
 
 		public List<IList<object>> ToSheetRows ( ) =>
@@ -132,7 +127,6 @@ namespace CryptoTickerBot.Exchanges
 			var objects = new List<object> ( );
 
 			foreach ( var coin in ExchangeData.Values.OrderBy ( x => x.Symbol ) )
-			{
 				objects.Add ( new
 				{
 					coin.Symbol,
@@ -140,7 +134,6 @@ namespace CryptoTickerBot.Exchanges
 					Ask = $"{coin.LowestAsk:C}",
 					Spread = $"{coin.SpreadPercentange:P}"
 				} );
-			}
 
 			return formatter.FormatObjects ( objects );
 		}
@@ -151,7 +144,6 @@ namespace CryptoTickerBot.Exchanges
 			var objects = new List<object> ( );
 
 			foreach ( var coin in ExchangeData.Values.OrderBy ( x => x.Symbol ) )
-			{
 				objects.Add ( new
 				{
 					coin.Symbol,
@@ -159,7 +151,6 @@ namespace CryptoTickerBot.Exchanges
 					Ask = $"{FiatConverter.ToString ( coin.LowestAsk, FiatCurrency.USD, fiat )}",
 					Spread = $"{coin.SpreadPercentange:P}"
 				} );
-			}
 
 			return formatter.FormatObjects ( objects );
 		}

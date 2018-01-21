@@ -35,6 +35,7 @@ namespace CryptoTickerBot.Exchanges
 
 					LastUpdate = DateTime.Now;
 				}
+
 				await Task.Delay ( 1000, ct );
 			}
 		}

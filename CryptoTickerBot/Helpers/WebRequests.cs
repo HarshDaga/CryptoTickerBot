@@ -19,9 +19,7 @@ namespace CryptoTickerBot.Helpers
 			using ( var response = (HttpWebResponse) request.GetResponse ( ) )
 			using ( var stream = response.GetResponseStream ( ) )
 			using ( var reader = new StreamReader ( stream ) )
-			{
 				return reader.ReadToEnd ( );
-			}
 		}
 
 		public static string Get ( Uri uri ) => Get ( uri.ToString ( ) );
@@ -40,17 +38,12 @@ namespace CryptoTickerBot.Helpers
 			request.ContentType = contentType;
 			request.Method = method;
 
-			using ( var requestBody = request.GetRequestStream ( ) )
-			{
-				requestBody.Write ( dataBytes, 0, dataBytes.Length );
-			}
+			using ( var requestBody = request.GetRequestStream ( ) ) requestBody.Write ( dataBytes, 0, dataBytes.Length );
 
 			using ( var response = (HttpWebResponse) request.GetResponse ( ) )
 			using ( var stream = response.GetResponseStream ( ) )
 			using ( var reader = new StreamReader ( stream ) )
-			{
 				return reader.ReadToEnd ( );
-			}
 		}
 
 		public static async Task<string> PostAsync ( string uri, string data, string contentType, string method = "POST" )
@@ -64,16 +57,12 @@ namespace CryptoTickerBot.Helpers
 			request.Method = method;
 
 			using ( var requestBody = request.GetRequestStream ( ) )
-			{
 				await requestBody.WriteAsync ( dataBytes, 0, dataBytes.Length );
-			}
 
 			using ( var response = (HttpWebResponse) await request.GetResponseAsync ( ) )
 			using ( var stream = response.GetResponseStream ( ) )
 			using ( var reader = new StreamReader ( stream ) )
-			{
 				return await reader.ReadToEndAsync ( );
-			}
 		}
 	}
 }
