@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using CryptoTickerBot.Exchanges;
+using MoreLinq;
 
 namespace CryptoTickerBot.Helpers
 {
@@ -79,6 +80,46 @@ namespace CryptoTickerBot.Helpers
 
 			foreach ( var compareValue in compare.Values )
 				RemoveExchange ( compareValue, cryptoExchanges );
+		}
+
+		public static (string best, string leastWorst, decimal profit) GetBestPair (
+			Dictionary<CryptoExchange, Dictionary<CryptoExchange, Dictionary<string, decimal>>> compare,
+			CryptoExchange from,
+			CryptoExchange to
+		)
+		{
+			var best = compare[from][to].MaxBy ( x => x.Value ).Key;
+			var leastWorst = compare[to][from].MaxBy ( x => x.Value ).Key;
+			var profit =
+				( 1m + compare[from][to][best] )
+				* ( 1m + compare[to][from][leastWorst] )
+				- 1m;
+
+			return (best, leastWorst, profit);
+		}
+
+		public (CryptoExchange from, CryptoExchange to, string first, string second, decimal profit) GetBest ( )
+		{
+			var all = GetAll ( );
+			var exchanges = Exchanges.Keys.ToList ( );
+			var bestGain = decimal.MinValue;
+			(CryptoExchange from, CryptoExchange to, string first, string second, decimal profit) result = default;
+
+			foreach ( var from in exchanges )
+			foreach ( var to in exchanges )
+			{
+				if ( from == to || all[from][to].Count == 0 )
+					continue;
+
+				var pair = GetBestPair ( all, from, to );
+				if ( pair.profit > bestGain )
+				{
+					bestGain = pair.profit;
+					result = (from, to, pair.best, pair.leastWorst, pair.profit);
+				}
+			}
+
+			return result;
 		}
 	}
 }

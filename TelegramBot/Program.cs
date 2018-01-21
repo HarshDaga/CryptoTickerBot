@@ -123,7 +123,21 @@ namespace TelegramBot
 				case "/compare":
 					await HandleCompare ( message );
 					break;
+
+				case "/best":
+					await HandleBest ( message );
+					break;
 			}
+		}
+
+		private static async Task HandleFetch ( Message message )
+		{
+			var table = exchanges.Values.ToTable ( );
+			Logger.Info ( $"Sending ticker data to {message.From.Username}" );
+			await bot.ReplyTextMessageAsync (
+				message,
+				$"```\n{table}```",
+				ParseMode.Markdown );
 		}
 
 		private static async Task HandleCompare ( Message message )
@@ -162,6 +176,34 @@ namespace TelegramBot
 				ParseMode.Markdown );
 		}
 
+		private static async Task HandleBest ( Message message )
+		{
+			var best = CTB.CompareTable.GetBest ( );
+			var from = exchanges[best.from];
+			var to = exchanges[best.to];
+			var fees =
+				from.ExchangeData[best.first].Buy ( from.DepositFees[best.first] ) +
+				from.ExchangeData[best.first].Sell ( from.WithdrawalFees[best.first] ) +
+				to.ExchangeData[best.second].Buy ( to.DepositFees[best.first] ) +
+				to.ExchangeData[best.first].Sell ( to.WithdrawalFees[best.first] );
+			var minInvestment = fees / best.profit;
+
+			var reply =
+				$"Buy  {best.first} From: {from.Name,-12} @ {from[best.first].LowestAsk:C}\n" +
+				$"Sell {best.first} To:   {to.Name,-12} @ {to[best.first].HighestBid:C}\n" +
+				$"Buy  {best.second} From: {to.Name,-12} @ {to[best.second].LowestAsk:C}\n" +
+				$"Sell {best.second} To:   {from.Name,-12} @ {from[best.second].HighestBid:C}\n" +
+				$"Expected profit:    {best.profit:P}\n" +
+				$"Estimated fees:     {fees:C}\n" +
+				$"Minimum Investment: {minInvestment:C}";
+
+			Logger.Info ( $"Sending best pair data to {message.From.Username}" );
+			await bot.ReplyTextMessageAsync (
+				message,
+				$"```\n{reply}```",
+				ParseMode.Markdown );
+		}
+
 		private static IList<string> ExtractSymbols (
 			KeyValuePair<CryptoExchange, Dictionary<CryptoExchange, Dictionary<string, decimal>>> from
 		) =>
@@ -172,15 +214,5 @@ namespace TelegramBot
 						.OrderBy ( x => x )
 						.ToList ( )
 			);
-
-		private static async Task HandleFetch ( Message message )
-		{
-			var table = exchanges.Values.ToTable ( );
-			Logger.Info ( $"Sending ticker data to {message.From.Username}" );
-			await bot.ReplyTextMessageAsync (
-				message,
-				$"```\n{table}```",
-				ParseMode.Markdown );
-		}
 	}
 }
