@@ -29,10 +29,10 @@ namespace CryptoTickerBot
 		public decimal LowestAsk { get; set; }
 		public decimal SellPrice => HighestBid;
 		public decimal BuyPrice => LowestAsk;
-		public decimal Average => ( SellPrice + BuyPrice ) / 2;
+		public decimal Average => ( BuyPrice + SellPrice ) / 2;
 		public decimal Rate { get; set; }
-		public decimal Spread => SellPrice - BuyPrice;
-		public decimal SpreadPercentange => Spread / ( SellPrice + BuyPrice ) * 2;
+		public decimal Spread => BuyPrice - SellPrice;
+		public decimal SpreadPercentange => Spread / ( BuyPrice + SellPrice ) * 2;
 		public DateTime Time { get; }
 
 		public CryptoCoin (
