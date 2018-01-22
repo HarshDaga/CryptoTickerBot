@@ -98,6 +98,12 @@ namespace CryptoTickerBot.Helpers
 			return (best, leastWorst, profit);
 		}
 
+		public (string best, string leastWorst, decimal profit) GetBestPair ( CryptoExchange from, CryptoExchange to )
+		{
+			var compare = GetAll ( );
+			return GetBestPair ( compare, from, to );
+		}
+
 		public (CryptoExchange from, CryptoExchange to, string first, string second, decimal profit) GetBest ( )
 		{
 			var all = GetAll ( );

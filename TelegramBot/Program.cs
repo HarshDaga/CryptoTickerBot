@@ -125,7 +125,10 @@ namespace TelegramBot
 					break;
 
 				case "/best":
-					await HandleBest ( message );
+					if ( text.Count ( x => x == ' ' ) < 2 )
+						await HandleBest ( message );
+					else
+						await HandleBest ( message, text.Split ( ' ' ).Skip ( 1 ).ToList ( ) );
 					break;
 			}
 		}
@@ -176,6 +179,62 @@ namespace TelegramBot
 				ParseMode.Markdown );
 		}
 
+		private static async Task HandleBest ( Message message, IList<string> @params )
+		{
+			if ( @params.Count < 2 )
+				return;
+
+			var from =
+				exchanges.Values
+					.AsEnumerable ( )
+					.FirstOrDefault ( x => x.Name.Equals ( @params[0], StringComparison.CurrentCultureIgnoreCase ) );
+			var to =
+				exchanges.Values
+					.AsEnumerable ( )
+					.FirstOrDefault ( x => x.Name.Equals ( @params[1], StringComparison.CurrentCultureIgnoreCase ) );
+
+			if ( from == null )
+			{
+				await bot.ReplyTextMessageAsync (
+					message,
+					$"```\nERROR: {@params[0]} not found.```",
+					ParseMode.Markdown );
+				return;
+			}
+
+			if ( to == null )
+			{
+				await bot.ReplyTextMessageAsync (
+					message,
+					$"```\nERROR: {@params[1]} not found.```",
+					ParseMode.Markdown );
+				return;
+			}
+
+			var (best, leastWorst, profit) = CTB.CompareTable.GetBestPair ( from.Id, to.Id );
+			var fees =
+				from.ExchangeData[best].Buy ( from.DepositFees[best] ) +
+				from.ExchangeData[best].Sell ( from.WithdrawalFees[best] ) +
+				to.ExchangeData[leastWorst].Buy ( to.DepositFees[leastWorst] ) +
+				to.ExchangeData[leastWorst].Sell ( to.WithdrawalFees[leastWorst] );
+			var minInvestment = fees / profit;
+
+			var reply =
+				$"Buy  {best} From: {from.Name,-12} @ {from[best].BuyPrice:C}\n" +
+				$"Sell {best} To:   {to.Name,-12} @ {to[best].SellPrice:C}\n" +
+				$"Buy  {leastWorst} From: {to.Name,-12} @ {to[leastWorst].BuyPrice:C}\n" +
+				$"Sell {leastWorst} To:   {from.Name,-12} @ {from[leastWorst].SellPrice:C}\n" +
+				$"Expected profit:    {profit:P}\n" +
+				$"Estimated fees:     {fees:C}\n" +
+				$"Minimum Investment: {minInvestment:C}";
+
+			Logger.Info ( $"Sending best pair data to {message.From.Username}" );
+			await bot.ReplyTextMessageAsync (
+				message,
+				$"```\n{reply}```",
+				ParseMode.Markdown );
+		}
+
 		private static async Task HandleBest ( Message message )
 		{
 			var best = CTB.CompareTable.GetBest ( );
@@ -184,8 +243,8 @@ namespace TelegramBot
 			var fees =
 				from.ExchangeData[best.first].Buy ( from.DepositFees[best.first] ) +
 				from.ExchangeData[best.first].Sell ( from.WithdrawalFees[best.first] ) +
-				to.ExchangeData[best.second].Buy ( to.DepositFees[best.first] ) +
-				to.ExchangeData[best.first].Sell ( to.WithdrawalFees[best.first] );
+				to.ExchangeData[best.second].Buy ( to.DepositFees[best.second] ) +
+				to.ExchangeData[best.second].Sell ( to.WithdrawalFees[best.second] );
 			var minInvestment = fees / best.profit;
 
 			var reply =
