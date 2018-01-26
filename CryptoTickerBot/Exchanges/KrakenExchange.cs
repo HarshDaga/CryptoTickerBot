@@ -4,11 +4,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Newtonsoft.Json;
+using NLog;
 
 namespace CryptoTickerBot.Exchanges
 {
 	public class KrakenExchange : CryptoExchangeBase
 	{
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
+
 		public KrakenExchange ( )
 		{
 			Name = "Kraken";
@@ -41,7 +44,17 @@ namespace CryptoTickerBot.Exchanges
 
 			while ( !ct.IsCancellationRequested )
 			{
-				var data = await TickerUrl.GetJsonAsync<Root> ( ct );
+				Root data;
+				try
+				{
+					data = await TickerUrl.GetJsonAsync<Root> ( ct );
+				}
+				catch ( Exception e )
+				{
+					Logger.Error ( e );
+					await Task.Delay ( 10000, ct );
+					continue;
+				}
 
 				Update ( data.Result.Btc, "BTC" );
 				Update ( data.Result.Bch, "BCH" );

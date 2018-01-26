@@ -91,7 +91,6 @@ namespace CryptoTickerBot.Exchanges
 				old = ExchangeData[symbol].Clone ( );
 			ExchangeData[symbol] = new CryptoCoin ( symbol );
 
-
 			DeserializeData ( data, symbol );
 
 			ApplyFees ( symbol );

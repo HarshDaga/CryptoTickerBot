@@ -103,33 +103,40 @@ namespace TelegramBot
 
 		private static async void BotClientOnMessage ( object sender, MessageEventArgs messageEventArgs )
 		{
-			var message = messageEventArgs.Message;
-
-			if ( message == null || message.Type != MessageType.TextMessage )
-				return;
-
-			var text = message.Text;
-			var command = text.Split ( ' ' ).First ( );
-			if ( command.Contains ( $"@{me.Username}" ) )
-				command = command.Substring ( 0, command.IndexOf ( $"@{me.Username}", StringComparison.Ordinal ) );
-			Logger.Debug ( $"Message received from {messageEventArgs.Message.From.Username}: {message.Text}" );
-
-			switch ( command )
+			try
 			{
-				case "/fetch":
-					await HandleFetch ( message );
-					break;
+				var message = messageEventArgs.Message;
 
-				case "/compare":
-					await HandleCompare ( message );
-					break;
+				if ( message == null || message.Type != MessageType.TextMessage )
+					return;
 
-				case "/best":
-					if ( text.Count ( x => x == ' ' ) < 2 )
-						await HandleBest ( message );
-					else
-						await HandleBest ( message, text.Split ( ' ' ).Skip ( 1 ).ToList ( ) );
-					break;
+				var text = message.Text;
+				var command = text.Split ( ' ' ).First ( );
+				if ( command.Contains ( $"@{me.Username}" ) )
+					command = command.Substring ( 0, command.IndexOf ( $"@{me.Username}", StringComparison.Ordinal ) );
+				Logger.Debug ( $"Message received from {messageEventArgs.Message.From.Username}: {message.Text}" );
+
+				switch ( command )
+				{
+					case "/fetch":
+						await HandleFetch ( message );
+						break;
+
+					case "/compare":
+						await HandleCompare ( message );
+						break;
+
+					case "/best":
+						if ( text.Count ( x => x == ' ' ) < 2 )
+							await HandleBest ( message );
+						else
+							await HandleBest ( message, text.Split ( ' ' ).Skip ( 1 ).ToList ( ) );
+						break;
+				}
+			}
+			catch ( Exception e )
+			{
+				Logger.Error ( e );
 			}
 		}
 
