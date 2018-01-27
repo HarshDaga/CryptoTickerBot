@@ -219,6 +219,8 @@ namespace TelegramBot
 
 					await SendBlockText ( message, reply );
 				} );
+
+			await SendBlockText ( message, $"Subscribed to {chosen.Join ( ", " )} at a threshold of {threshold:P}." );
 		}
 
 		private async Task HandleFetch ( Message message )
