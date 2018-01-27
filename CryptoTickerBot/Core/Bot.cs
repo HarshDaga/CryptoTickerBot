@@ -46,6 +46,8 @@ namespace CryptoTickerBot.Core
 		public CryptoCompareTable CompareTable { get; } =
 			new CryptoCompareTable ( );
 
+		public bool IsInitialized { get; private set; } = false;
+
 		public Task Start ( )
 		{
 			return Task.Run ( async ( ) =>
@@ -53,6 +55,8 @@ namespace CryptoTickerBot.Core
 					FiatConverter.StartMonitor ( );
 
 					InitExchanges ( );
+
+					IsInitialized = true;
 
 					CreateSheetsService ( );
 

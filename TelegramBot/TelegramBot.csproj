@@ -84,7 +84,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CryptoTickerTeleBot.cs" />
+    <Compile Include="CryptoTickerTeleBot\CryptoTickerTeleBotCommands.cs" />
+    <Compile Include="CryptoTickerTeleBot\CryptoTickerTeleBotCore.cs" />
+    <Compile Include="CryptoTickerTeleBot\CryptoTickerTeleBotHelpers.cs" />
     <Compile Include="Extensions\DecimalExtensions.cs" />
     <Compile Include="Extensions\TelegramBotClientExtensions.cs" />
     <Compile Include="Program.cs" />

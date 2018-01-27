@@ -4,7 +4,7 @@
 	{
 		public static void Main ( )
 		{
-			var teleBot = new CryptoTickerTeleBot ( Settings.Instance.BotToken );
+			var teleBot = new CryptoTickerTeleBot.TeleBot ( Settings.Instance.BotToken );
 			teleBot.Start ( );
 		}
 	}
