@@ -123,7 +123,10 @@ namespace TelegramBot
 						break;
 
 					case "/compare":
-						await HandleCompare ( message );
+						if ( text.Count ( x => x == ' ' ) < 2 )
+							await HandleCompare ( message );
+						else
+							await HandleCompare ( message, text.Split ( ' ' ).Skip ( 1 ).ToList ( ) );
 						break;
 
 					case "/best":
@@ -150,12 +153,40 @@ namespace TelegramBot
 				ParseMode.Markdown );
 		}
 
+		private static async Task HandleCompare ( Message message, IEnumerable<string> @params )
+		{
+			var chosen = @params
+				.Select ( param => exchanges.Values.AsEnumerable ( )
+					.FirstOrDefault ( x => x.Name.Equals ( param, StringComparison.CurrentCultureIgnoreCase ) ) )
+				.ToList ( );
+
+			var compare = CTB.CompareTable.Get ( chosen.Select ( x => x.Id ).ToArray ( ) );
+
+			var table = BuildCompareTable ( compare );
+
+			Logger.Info ( $"Sending compare data to {message.From.Username}" );
+			await bot.ReplyTextMessageAsync (
+				message,
+				$"```\n{table}```",
+				ParseMode.Markdown );
+		}
+
 		private static async Task HandleCompare ( Message message )
 		{
 			var compare = CTB.CompareTable.GetAll ( );
 
-			CryptoCompareTable.RemoveExchange ( compare, CryptoExchange.Binance );
+			var table = BuildCompareTable ( compare );
 
+			Logger.Info ( $"Sending compare data to {message.From.Username}" );
+			await bot.ReplyTextMessageAsync (
+				message,
+				$"```\n{table}```",
+				ParseMode.Markdown );
+		}
+
+		private static StringBuilder BuildCompareTable (
+			Dictionary<CryptoExchange, Dictionary<CryptoExchange, Dictionary<string, decimal>>> compare )
+		{
 			var table = new StringBuilder ( );
 			foreach ( var from in compare )
 			{
@@ -179,11 +210,7 @@ namespace TelegramBot
 				table.AppendLine ( );
 			}
 
-			Logger.Info ( $"Sending compare data to {message.From.Username}" );
-			await bot.ReplyTextMessageAsync (
-				message,
-				$"```\n{table}```",
-				ParseMode.Markdown );
+			return table;
 		}
 
 		private static async Task HandleBest ( Message message, IList<string> @params )

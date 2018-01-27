@@ -61,6 +61,19 @@ namespace CryptoTickerBot.Helpers
 			return result;
 		}
 
+		public Dictionary<CryptoExchange, Dictionary<CryptoExchange, Dictionary<string, decimal>>> Get (
+			params CryptoExchange[] exchanges
+		)
+		{
+			var result = new Dictionary<CryptoExchange, Dictionary<CryptoExchange, Dictionary<string, decimal>>> ( );
+			foreach ( var exchange in exchanges.Intersect ( Exchanges.Keys ) )
+				result[exchange] = GetAll ( exchange )
+					.Where ( pair => exchanges.Contains ( pair.Key ) )
+					.ToDictionary ( );
+
+			return result;
+		}
+
 		public static void RemoveExchange (
 			Dictionary<CryptoExchange, Dictionary<string, decimal>> compare,
 			params CryptoExchange[] cryptoExchanges
