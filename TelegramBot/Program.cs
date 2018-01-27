@@ -135,12 +135,70 @@ namespace TelegramBot
 						else
 							await HandleBest ( message, text.Split ( ' ' ).Skip ( 1 ).ToList ( ) );
 						break;
+
+					case "/subscribe":
+						await HandleSubscribe ( message, text.Split ( ' ' ).Skip ( 1 ).ToList ( ) );
+						break;
+
+					case "/unsubscribe":
+						await HandleUnsubscribe ( message );
+						break;
 				}
 			}
 			catch ( Exception e )
 			{
 				Logger.Error ( e );
 			}
+		}
+
+		private static async Task HandleUnsubscribe ( Message message )
+		{
+			foreach ( var observer in CTB.Observers.Values )
+				observer.Unsubscribe ( message.Chat.Id );
+
+			await bot.ReplyTextMessageAsync (
+				message,
+				"```\nUnsubscribed from all exchanges.\n```",
+				ParseMode.Markdown );
+		}
+
+		private static async Task HandleSubscribe ( Message message, IList<string> @params )
+		{
+			var chosen = @params
+				.Where ( x => GetExchangeBase ( x ) != null )
+				.Select ( x => GetExchangeBase ( x ).Id )
+				.ToArray ( );
+
+			if ( chosen.Length == 0 )
+			{
+				chosen = exchanges.Keys.ToArray ( );
+				await bot.ReplyTextMessageAsync (
+					message,
+					"```\nNo exchanges provided, subscribing to all exchanges.\n```",
+					ParseMode.Markdown );
+			}
+
+			var threshold = 0.05m;
+			var thresholdString = @params.FirstOrDefault ( x => decimal.TryParse ( x.Trim ( '%' ), out var _ ) );
+			if ( !string.IsNullOrEmpty ( thresholdString ) )
+				threshold = decimal.Parse ( thresholdString ) / 100m;
+			else
+				await bot.ReplyTextMessageAsync (
+					message,
+					$"```\nNo threshold provided, setting to default {threshold:P}\n```",
+					ParseMode.Markdown );
+
+			foreach ( var exchange in chosen )
+				CTB.Observers[exchange].Subscribe ( message.Chat.Id, threshold, async ( ex, oldValue, newValue ) =>
+				{
+					var change = newValue - oldValue;
+					var reply =
+						$"{ex.Name,-10}: {newValue.Symbol} {change.Value.ToCurrency ( ),-6} {change.Percentage,6:P} in {change.TimeDiff:dd\\:hh\\:mm\\:ss}";
+					await bot.ReplyTextMessageAsync (
+						message,
+						$"```\n{reply}\n```",
+						ParseMode.Markdown );
+				} );
 		}
 
 		private static async Task HandleFetch ( Message message )
@@ -157,7 +215,8 @@ namespace TelegramBot
 		{
 			var compare = CTB.CompareTable.Get (
 				@params
-					.Select ( s => GetExchangeBase ( s ).Id )
+					.Where ( x => GetExchangeBase ( x ) != null )
+					.Select ( x => GetExchangeBase ( x ).Id )
 					.ToArray ( )
 			);
 

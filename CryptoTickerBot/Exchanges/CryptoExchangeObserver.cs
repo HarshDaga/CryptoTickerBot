@@ -9,16 +9,17 @@ namespace CryptoTickerBot.Exchanges
 	{
 		private readonly Dictionary<string, List<CryptoCoin>> history;
 		private readonly Dictionary<string, List<PriceChange>> priceChanges;
-		private readonly Dictionary<string, CryptoCoin> lastSignificantPrice;
+
+		private readonly Dictionary<long, List<SubscriptionInfo>> significantChangeSubscriptions;
+
 		public CryptoExchangeBase Exchange { get; }
-		public decimal ChangeThreshold { get; set; } = decimal.MaxValue;
 
 		public CryptoExchangeObserver ( CryptoExchangeBase exchange )
 		{
 			Exchange = exchange;
 			history = new Dictionary<string, List<CryptoCoin>> ( );
 			priceChanges = new Dictionary<string, List<PriceChange>> ( );
-			lastSignificantPrice = new Dictionary<string, CryptoCoin> ( );
+			significantChangeSubscriptions = new Dictionary<long, List<SubscriptionInfo>> ( );
 		}
 
 		public void OnNext ( CryptoCoin coin )
@@ -27,19 +28,14 @@ namespace CryptoTickerBot.Exchanges
 			{
 				history[coin.Symbol] = new List<CryptoCoin> ( );
 				priceChanges[coin.Symbol] = new List<PriceChange> ( );
-				lastSignificantPrice[coin.Symbol] = coin;
 			}
 
 			if ( history[coin.Symbol].Any ( ) )
-			{
 				priceChanges[coin.Symbol].Add ( coin - history[coin.Symbol].Last ( ) );
-				var change = coin - lastSignificantPrice[coin.Symbol];
-				if ( Math.Abs ( change.Percentage ) >= ChangeThreshold )
-				{
-					SignificantChange?.Invoke ( Exchange, lastSignificantPrice[coin.Symbol], coin );
-					lastSignificantPrice[coin.Symbol] = coin;
-				}
-			}
+
+			foreach ( var subscriptionInfos in significantChangeSubscriptions.Values )
+			foreach ( var subscriptionInfo in subscriptionInfos )
+				subscriptionInfo.Process ( coin );
 
 			history[coin.Symbol].Add ( coin );
 
@@ -54,8 +50,25 @@ namespace CryptoTickerBot.Exchanges
 		{
 		}
 
+		public void Subscribe ( long id, decimal threshold,
+			Action<CryptoExchangeBase, CryptoCoin, CryptoCoin> action )
+		{
+			if ( !significantChangeSubscriptions.ContainsKey ( id ) )
+				significantChangeSubscriptions[id] = new List<SubscriptionInfo> ( );
+
+			var info = new SubscriptionInfo ( Exchange, threshold );
+			info.Init ( );
+			info.Changed += action;
+			significantChangeSubscriptions[id].Add ( info );
+		}
+
+		public void Unsubscribe ( long id )
+		{
+			if ( significantChangeSubscriptions.ContainsKey ( id ) )
+				significantChangeSubscriptions[id].Clear ( );
+		}
+
 		public event Action<CryptoExchangeBase, CryptoCoin> Next;
-		public event Action<CryptoExchangeBase, CryptoCoin, CryptoCoin> SignificantChange;
 
 		public IList<CryptoCoin> History ( string symbol, TimeSpan timeSpan )
 		{
@@ -65,5 +78,41 @@ namespace CryptoTickerBot.Exchanges
 
 		public IList<CryptoCoin> History ( string symbol, int count ) =>
 			history[symbol].TakeLast ( count );
+
+		private class SubscriptionInfo
+		{
+			private readonly CryptoExchangeBase exchange;
+			private readonly Dictionary<string, CryptoCoin> lastSignificantPrice;
+			private readonly decimal threshold;
+
+			public SubscriptionInfo ( CryptoExchangeBase exchange, decimal threshold )
+			{
+				this.exchange = exchange;
+				this.threshold = threshold;
+				lastSignificantPrice = new Dictionary<string, CryptoCoin> ( );
+			}
+
+			public event Action<CryptoExchangeBase, CryptoCoin, CryptoCoin> Changed;
+
+			public void Init ( )
+			{
+				foreach ( var coin in exchange.ExchangeData )
+					lastSignificantPrice[coin.Key] = coin.Value;
+			}
+
+			public void Process ( CryptoCoin coin )
+			{
+				if ( !lastSignificantPrice.ContainsKey ( coin.Symbol ) )
+					lastSignificantPrice[coin.Symbol] = coin.Clone ( );
+
+				var change = coin - lastSignificantPrice[coin.Symbol];
+				var percentage = Math.Abs ( change.Percentage );
+				if ( percentage >= threshold )
+				{
+					Changed?.Invoke ( exchange, lastSignificantPrice[coin.Symbol], coin );
+					lastSignificantPrice[coin.Symbol] = coin.Clone ( );
+				}
+			}
+		}
 	}
 }

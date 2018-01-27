@@ -130,11 +130,11 @@ namespace CryptoTickerBot.Helpers
 				if ( from == to || all[from][to].Count == 0 )
 					continue;
 
-				var pair = GetBestPair ( all, from, to );
-				if ( pair.profit > bestGain )
+				var (best, leastWorst, profit) = GetBestPair ( all, from, to );
+				if ( profit > bestGain )
 				{
-					bestGain = pair.profit;
-					result = (from, to, pair.best, pair.leastWorst, pair.profit);
+					bestGain = profit;
+					result = (from, to, best, leastWorst, profit);
 				}
 			}
 

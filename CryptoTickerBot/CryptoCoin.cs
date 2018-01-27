@@ -15,8 +15,8 @@ namespace CryptoTickerBot
 			{
 				Value = coin1.Average - coin2.Average,
 				Percentage = ( coin1.Average - coin2.Average ) / ( coin1.Average + coin2.Average ) * 2m,
-				TimeDiff = coin2.Time - coin1.Time,
-				AbsoluteTime = coin2.Time
+				TimeDiff = coin1.Time - coin2.Time,
+				AbsoluteTime = coin1.Time
 			};
 
 		public override string ToString ( ) => $"{Value:N} {Percentage:P}";
