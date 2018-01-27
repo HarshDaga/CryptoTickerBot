@@ -19,16 +19,12 @@ using Timer = System.Timers.Timer;
 
 namespace CryptoTickerBot.Core
 {
-	public static class Bot
+	public class Bot
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 		private static readonly string[] Scopes = {SheetsService.Scope.Spreadsheets};
-		private static SheetsService service;
 
-		private static readonly ConcurrentQueue<CryptoExchange> PendingUpdates =
-			new ConcurrentQueue<CryptoExchange> ( );
-
-		public static Dictionary<CryptoExchange, CryptoExchangeBase> Exchanges =
+		public readonly Dictionary<CryptoExchange, CryptoExchangeBase> Exchanges =
 			new Dictionary<CryptoExchange, CryptoExchangeBase>
 			{
 				[CryptoExchange.Koinex] = new KoinexExchange ( ),
@@ -39,13 +35,18 @@ namespace CryptoTickerBot.Core
 				[CryptoExchange.Kraken] = new KrakenExchange ( )
 			};
 
-		public static Dictionary<CryptoExchange, CryptoExchangeObserver> Observers =
+		public readonly Dictionary<CryptoExchange, CryptoExchangeObserver> Observers =
 			new Dictionary<CryptoExchange, CryptoExchangeObserver> ( );
 
-		public static CryptoCompareTable CompareTable { get; set; } =
+		private readonly ConcurrentQueue<CryptoExchange> pendingUpdates =
+			new ConcurrentQueue<CryptoExchange> ( );
+
+		private SheetsService service;
+
+		public CryptoCompareTable CompareTable { get; } =
 			new CryptoCompareTable ( );
 
-		public static Task Start ( string[] args = null )
+		public Task Start ( )
 		{
 			return Task.Run ( async ( ) =>
 				{
@@ -62,15 +63,15 @@ namespace CryptoTickerBot.Core
 			);
 		}
 
-		private static void InitExchanges ( )
+		private void InitExchanges ( )
 		{
 			foreach ( var exchange in Exchanges.Values )
 			{
 				Observers[exchange.Id] = new CryptoExchangeObserver ( exchange );
 				exchange.Changed += ( e, coin ) =>
 				{
-					if ( !PendingUpdates.Contains ( e.Id ) )
-						PendingUpdates.Enqueue ( e.Id );
+					if ( !pendingUpdates.Contains ( e.Id ) )
+						pendingUpdates.Enqueue ( e.Id );
 				};
 				var observer = Observers[exchange.Id];
 				observer.Next += ( e, coin ) => Logger.Debug ( $"{e.Name,-10} {e[coin.Symbol]}" );
@@ -88,7 +89,7 @@ namespace CryptoTickerBot.Core
 			}
 		}
 
-		private static void StartAutoSheetsUpdater ( )
+		private void StartAutoSheetsUpdater ( )
 		{
 			Task.Run ( ( ) =>
 			{
@@ -103,7 +104,7 @@ namespace CryptoTickerBot.Core
 					try
 					{
 						var valueRanges = new List<ValueRange> ( );
-						while ( PendingUpdates.TryDequeue ( out var id ) )
+						while ( pendingUpdates.TryDequeue ( out var id ) )
 						{
 							var exchange = Exchanges[id];
 							if ( !exchange.IsComplete )
@@ -138,7 +139,7 @@ namespace CryptoTickerBot.Core
 			} );
 		}
 
-		private static void CreateSheetsService ( )
+		private void CreateSheetsService ( )
 		{
 			var credential = GetCredentials ( );
 
@@ -149,7 +150,7 @@ namespace CryptoTickerBot.Core
 			} );
 		}
 
-		private static async Task UpdateSheet ( IList<ValueRange> valueRanges )
+		private async Task UpdateSheet ( IList<ValueRange> valueRanges )
 		{
 			try
 			{
@@ -177,7 +178,7 @@ namespace CryptoTickerBot.Core
 			}
 		}
 
-		private static UserCredential GetCredentials ( )
+		private UserCredential GetCredentials ( )
 		{
 			UserCredential credential;
 

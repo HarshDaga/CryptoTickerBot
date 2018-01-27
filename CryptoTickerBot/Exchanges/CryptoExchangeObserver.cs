@@ -109,7 +109,7 @@ namespace CryptoTickerBot.Exchanges
 				var percentage = Math.Abs ( change.Percentage );
 				if ( percentage >= threshold )
 				{
-					Changed?.Invoke ( exchange, lastSignificantPrice[coin.Symbol], coin );
+					Changed?.BeginInvoke ( exchange, lastSignificantPrice[coin.Symbol], coin, null, null );
 					lastSignificantPrice[coin.Symbol] = coin.Clone ( );
 				}
 			}

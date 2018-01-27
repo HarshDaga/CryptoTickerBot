@@ -9,11 +9,12 @@ namespace CryptoTickerBot
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
-		public static void Main ( string[] args )
+		public static void Main ( )
 		{
 			Console.Title = Settings.Instance.ApplicationName;
 			Logger.Info ( $"Started {Settings.Instance.ApplicationName}" );
-			Bot.Start ( args );
+			var ctb = new Bot ( );
+			ctb.Start ( );
 			Thread.Sleep ( int.MaxValue );
 		}
 	}
