@@ -48,6 +48,7 @@ namespace CryptoTickerBot.Exchanges
 		public decimal SellFees { get; protected set; }
 		public bool IsComplete => ExchangeData.Count == KnownSymbols.Count;
 		public DateTime LastUpdate { get; protected set; }
+		public int Count => ExchangeData.Count;
 
 		public CryptoCoin this [ string symbol ]
 		{

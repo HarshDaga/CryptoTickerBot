@@ -155,12 +155,11 @@ namespace TelegramBot
 
 		private static async Task HandleCompare ( Message message, IEnumerable<string> @params )
 		{
-			var chosen = @params
-				.Select ( param => exchanges.Values.AsEnumerable ( )
-					.FirstOrDefault ( x => x.Name.Equals ( param, StringComparison.CurrentCultureIgnoreCase ) ) )
-				.ToList ( );
-
-			var compare = CTB.CompareTable.Get ( chosen.Select ( x => x.Id ).ToArray ( ) );
+			var compare = CTB.CompareTable.Get (
+				@params
+					.Select ( s => GetExchangeBase ( s ).Id )
+					.ToArray ( )
+			);
 
 			var table = BuildCompareTable ( compare );
 
@@ -218,14 +217,8 @@ namespace TelegramBot
 			if ( @params.Count < 2 )
 				return;
 
-			var from =
-				exchanges.Values
-					.AsEnumerable ( )
-					.FirstOrDefault ( x => x.Name.Equals ( @params[0], StringComparison.CurrentCultureIgnoreCase ) );
-			var to =
-				exchanges.Values
-					.AsEnumerable ( )
-					.FirstOrDefault ( x => x.Name.Equals ( @params[1], StringComparison.CurrentCultureIgnoreCase ) );
+			var from = GetExchangeBase ( @params[0] );
+			var to = GetExchangeBase ( @params[1] );
 
 			if ( from == null )
 			{
@@ -241,6 +234,15 @@ namespace TelegramBot
 				await bot.ReplyTextMessageAsync (
 					message,
 					$"```\nERROR: {@params[1]} not found.```",
+					ParseMode.Markdown );
+				return;
+			}
+
+			if ( from.Count == 0 || to.Count == 0 )
+			{
+				await bot.ReplyTextMessageAsync (
+					message,
+					$"```\nERROR: Not enough data received.```",
 					ParseMode.Markdown );
 				return;
 			}
@@ -269,9 +271,24 @@ namespace TelegramBot
 				ParseMode.Markdown );
 		}
 
+		private static CryptoExchangeBase GetExchangeBase ( string name ) =>
+			exchanges.Values
+				.AsEnumerable ( )
+				.FirstOrDefault ( x => x.Name.Equals ( name, StringComparison.CurrentCultureIgnoreCase ) );
+
 		private static async Task HandleBest ( Message message )
 		{
 			var best = CTB.CompareTable.GetBest ( );
+
+			if ( best.first == null || best.second == null )
+			{
+				await bot.ReplyTextMessageAsync (
+					message,
+					$"```\nERROR: Not enough data received.```",
+					ParseMode.Markdown );
+				return;
+			}
+
 			var from = exchanges[best.from];
 			var to = exchanges[best.to];
 			var fees =
