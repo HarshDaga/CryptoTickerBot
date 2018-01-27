@@ -61,8 +61,6 @@ namespace CryptoTickerBot.Exchanges
 				Update ( data.Result.Eth, "ETH" );
 				Update ( data.Result.Ltc, "LTC" );
 
-				LastUpdate = DateTime.Now;
-
 				await Task.Delay ( 2000, ct );
 			}
 		}

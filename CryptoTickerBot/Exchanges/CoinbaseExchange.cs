@@ -61,8 +61,6 @@ namespace CryptoTickerBot.Exchanges
 			var symbol = ( (string) data.product_id ).Substring ( 0, 3 );
 
 			Update ( data, symbol );
-
-			LastUpdate = DateTime.Now;
 		}
 
 		protected override void DeserializeData ( dynamic data, string symbol )

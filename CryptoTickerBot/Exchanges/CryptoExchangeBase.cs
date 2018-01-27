@@ -47,7 +47,10 @@ namespace CryptoTickerBot.Exchanges
 		public decimal BuyFees { get; protected set; }
 		public decimal SellFees { get; protected set; }
 		public bool IsComplete => ExchangeData.Count == KnownSymbols.Count;
+		public DateTime StartTime { get; } = DateTime.Now;
+		public TimeSpan UpTime => DateTime.Now - StartTime;
 		public DateTime LastUpdate { get; protected set; }
+		public TimeSpan Age => DateTime.Now - LastUpdate;
 		public int Count => ExchangeData.Count;
 
 		public CryptoCoin this [ string symbol ]
@@ -95,6 +98,8 @@ namespace CryptoTickerBot.Exchanges
 			DeserializeData ( data, symbol );
 
 			ApplyFees ( symbol );
+
+			LastUpdate = DateTime.Now;
 
 			if ( ExchangeData[symbol] != old ) OnChanged ( this, ExchangeData[symbol] );
 		}

@@ -32,8 +32,6 @@ namespace CryptoTickerBot.Exchanges
 					var marketname = ( (string) datum.MarketName ).Split ( '-' );
 					if ( marketname[1] == "inr" )
 						Update ( datum, marketname[0].ToUpper ( ) );
-
-					LastUpdate = DateTime.Now;
 				}
 
 				await Task.Delay ( 1000, ct );

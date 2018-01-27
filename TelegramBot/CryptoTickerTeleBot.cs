@@ -25,7 +25,10 @@ namespace TelegramBot
 		private TelegramBotClient bot;
 		private Dictionary<CryptoExchange, CryptoExchangeBase> exchanges;
 		private User me;
+
 		public string BotToken { get; }
+		public DateTime StartTime { get; } = DateTime.Now;
+		public TimeSpan UpTime => DateTime.Now - StartTime;
 
 		public CryptoTickerTeleBot ( string botToken )
 		{
@@ -57,7 +60,7 @@ namespace TelegramBot
 			}
 		}
 
-		private void BotClientOnReceiveError ( object sender, ReceiveErrorEventArgs receiveErrorEventArgs )
+		private static void BotClientOnReceiveError ( object sender, ReceiveErrorEventArgs receiveErrorEventArgs )
 		{
 			Logger.Error (
 				receiveErrorEventArgs.ApiRequestException,
@@ -149,6 +152,10 @@ namespace TelegramBot
 					case "/unsubscribe":
 						await HandleUnsubscribe ( message );
 						break;
+
+					case "/status":
+						await HandleStatus ( message );
+						break;
 				}
 			}
 			catch ( Exception e )
@@ -157,15 +164,30 @@ namespace TelegramBot
 			}
 		}
 
+		private async Task HandleStatus ( Message message )
+		{
+			var builder = new StringBuilder ( );
+			builder
+				.AppendLine ( $"Running since {UpTime:dd\\:hh\\:mm\\:ss}" )
+				.AppendLine ( "Exchanges:" );
+			foreach ( var exchange in exchanges.Values )
+				builder.AppendLine (
+					$"{exchange.Name,-10} Since {exchange.UpTime:dd\\:hh\\:mm\\:ss} Last Update {exchange.Age:dd\\:hh\\:mm\\:ss}" );
+
+			await SendBlockText ( message, builder.ToString ( ) );
+		}
+
+		private async Task SendBlockText ( Message message, string str )
+		{
+			await bot.SendTextMessageAsync ( message.Chat.Id, $"```\n{str}\n```", ParseMode.Markdown );
+		}
+
 		private async Task HandleUnsubscribe ( Message message )
 		{
 			foreach ( var observer in ctb.Observers.Values )
 				observer.Unsubscribe ( message.Chat.Id );
 
-			await bot.ReplyTextMessageAsync (
-				message,
-				"```\nUnsubscribed from all exchanges.\n```",
-				ParseMode.Markdown );
+			await SendBlockText ( message, "Unsubscribed from all exchanges." );
 		}
 
 		private async Task HandleSubscribe ( Message message, IList<string> @params )
@@ -178,10 +200,7 @@ namespace TelegramBot
 			if ( chosen.Length == 0 )
 			{
 				chosen = exchanges.Keys.ToArray ( );
-				await bot.ReplyTextMessageAsync (
-					message,
-					"```\nNo exchanges provided, subscribing to all exchanges.\n```",
-					ParseMode.Markdown );
+				await SendBlockText ( message, "No exchanges provided, subscribing to all exchanges." );
 			}
 
 			var threshold = 0.05m;
@@ -189,10 +208,7 @@ namespace TelegramBot
 			if ( !string.IsNullOrEmpty ( thresholdString ) )
 				threshold = decimal.Parse ( thresholdString ) / 100m;
 			else
-				await bot.ReplyTextMessageAsync (
-					message,
-					$"```\nNo threshold provided, setting to default {threshold:P}\n```",
-					ParseMode.Markdown );
+				await SendBlockText ( message, $"No threshold provided, setting to default {threshold:P}" );
 
 			foreach ( var exchange in chosen )
 				ctb.Observers[exchange].Subscribe ( message.Chat.Id, threshold, async ( ex, oldValue, newValue ) =>
@@ -200,10 +216,8 @@ namespace TelegramBot
 					var change = newValue - oldValue;
 					var reply =
 						$"{ex.Name,-10}: {newValue.Symbol} {change.Value.ToCurrency ( ),-6} {change.Percentage,6:P} in {change.TimeDiff:dd\\:hh\\:mm\\:ss}";
-					await bot.ReplyTextMessageAsync (
-						message,
-						$"```\n{reply}\n```",
-						ParseMode.Markdown );
+
+					await SendBlockText ( message, reply );
 				} );
 		}
 
@@ -211,10 +225,8 @@ namespace TelegramBot
 		{
 			var table = exchanges.Values.ToTable ( );
 			Logger.Info ( $"Sending ticker data to {message.From.Username}" );
-			await bot.ReplyTextMessageAsync (
-				message,
-				$"```\n{table}```",
-				ParseMode.Markdown );
+
+			await SendBlockText ( message, table );
 		}
 
 		private async Task HandleCompare ( Message message, IEnumerable<string> @params )
@@ -229,10 +241,8 @@ namespace TelegramBot
 			var table = BuildCompareTable ( compare );
 
 			Logger.Info ( $"Sending compare data to {message.From.Username}" );
-			await bot.ReplyTextMessageAsync (
-				message,
-				$"```\n{table}```",
-				ParseMode.Markdown );
+
+			await SendBlockText ( message, table.ToString ( ) );
 		}
 
 		private async Task HandleCompare ( Message message )
@@ -242,13 +252,11 @@ namespace TelegramBot
 			var table = BuildCompareTable ( compare );
 
 			Logger.Info ( $"Sending compare data to {message.From.Username}" );
-			await bot.ReplyTextMessageAsync (
-				message,
-				$"```\n{table}```",
-				ParseMode.Markdown );
+
+			await SendBlockText ( message, table.ToString ( ) );
 		}
 
-		private StringBuilder BuildCompareTable (
+		private static StringBuilder BuildCompareTable (
 			Dictionary<CryptoExchange, Dictionary<CryptoExchange, Dictionary<string, decimal>>> compare )
 		{
 			var table = new StringBuilder ( );
@@ -287,28 +295,19 @@ namespace TelegramBot
 
 			if ( from == null )
 			{
-				await bot.ReplyTextMessageAsync (
-					message,
-					$"```\nERROR: {@params[0]} not found.```",
-					ParseMode.Markdown );
+				await SendBlockText ( message, $"ERROR: {@params[0]} not found." );
 				return;
 			}
 
 			if ( to == null )
 			{
-				await bot.ReplyTextMessageAsync (
-					message,
-					$"```\nERROR: {@params[1]} not found.```",
-					ParseMode.Markdown );
+				await SendBlockText ( message, $"ERROR: {@params[1]} not found." );
 				return;
 			}
 
 			if ( from.Count == 0 || to.Count == 0 )
 			{
-				await bot.ReplyTextMessageAsync (
-					message,
-					"```\nERROR: Not enough data received.```",
-					ParseMode.Markdown );
+				await SendBlockText ( message, "ERROR: Not enough data received." );
 				return;
 			}
 
@@ -330,10 +329,7 @@ namespace TelegramBot
 				$"Minimum Investment: {minInvestment:C}";
 
 			Logger.Info ( $"Sending best pair data to {message.From.Username}" );
-			await bot.ReplyTextMessageAsync (
-				message,
-				$"```\n{reply}```",
-				ParseMode.Markdown );
+			await SendBlockText ( message, reply );
 		}
 
 		private CryptoExchangeBase GetExchangeBase ( string name ) =>
@@ -347,10 +343,7 @@ namespace TelegramBot
 
 			if ( best.first == null || best.second == null )
 			{
-				await bot.ReplyTextMessageAsync (
-					message,
-					"```\nERROR: Not enough data received.```",
-					ParseMode.Markdown );
+				await SendBlockText ( message, "ERROR: Not enough data received." );
 				return;
 			}
 
@@ -373,10 +366,7 @@ namespace TelegramBot
 				$"Minimum Investment: {minInvestment:C}";
 
 			Logger.Info ( $"Sending best pair data to {message.From.Username}" );
-			await bot.ReplyTextMessageAsync (
-				message,
-				$"```\n{reply}```",
-				ParseMode.Markdown );
+			await SendBlockText ( message, reply );
 		}
 
 		private static IList<string> ExtractSymbols (

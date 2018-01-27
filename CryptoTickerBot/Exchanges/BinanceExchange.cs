@@ -49,35 +49,32 @@ namespace CryptoTickerBot.Exchanges
 			{
 				await Task.Run ( ( ) => ws.Connect ( ), ct );
 
-				ws.OnMessage += ( sender, args ) =>
-				{
-					try
-					{
-						var json = args.Data;
-						var data = JsonConvert.DeserializeObject<dynamic> ( json );
-
-						foreach ( var datum in data )
-						{
-							var s = (string) datum.s;
-							var symbol = s.Substring ( 0, 3 );
-							if ( !s.EndsWith ( "USDT" ) )
-								continue;
-							if ( symbol == "BCC" )
-								symbol = "BCH";
-							if ( !KnownSymbols.Contains ( symbol ) )
-								continue;
-							Update ( datum, symbol );
-
-							LastUpdate = DateTime.Now;
-						}
-					}
-					catch ( Exception e )
-					{
-						Logger.Error ( e );
-					}
-				};
+				ws.OnMessage += WsOnMessage;
 
 				await Task.Delay ( int.MaxValue, ct );
+			}
+		}
+
+		private void WsOnMessage ( object sender, MessageEventArgs args )
+		{
+			try
+			{
+				var json = args.Data;
+				var data = JsonConvert.DeserializeObject<dynamic> ( json );
+
+				foreach ( var datum in data )
+				{
+					var s = (string) datum.s;
+					var symbol = s.Substring ( 0, 3 );
+					if ( !s.EndsWith ( "USDT" ) ) continue;
+					if ( symbol == "BCC" ) symbol = "BCH";
+					if ( !KnownSymbols.Contains ( symbol ) ) continue;
+					Update ( datum, symbol );
+				}
+			}
+			catch ( Exception e )
+			{
+				Logger.Error ( e );
 			}
 		}
 
