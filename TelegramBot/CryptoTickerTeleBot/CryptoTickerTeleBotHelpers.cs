@@ -37,7 +37,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 								var change = newValue - oldValue;
 								var builder = new StringBuilder ( );
 								builder
-									.AppendLine ( $"{ex.Name,-10}" )
+									.AppendLine ( $"{ex.Name,-10} {newValue.Symbol}" )
 									.AppendLine ( $"Current Price: {ex[newValue.Symbol].Average:C}" )
 									.AppendLine ( $"Change: {change.Value.ToCurrency ( ),-8} {change.Percentage,6:P}" )
 									.AppendLine ( $"in {change.TimeDiff:dd\\:hh\\:mm\\:ss}" );
@@ -96,7 +96,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 							var change = newValue - oldValue;
 							var builder = new StringBuilder ( );
 							builder
-								.AppendLine ( $"{ex.Name,-10}" )
+								.AppendLine ( $"{ex.Name,-10} {newValue.Symbol}" )
 								.AppendLine ( $"Current Price: {ex[newValue.Symbol].Average:C}" )
 								.AppendLine ( $"Change: {change.Value.ToCurrency ( ),-8} {change.Percentage,6:P}" )
 								.AppendLine ( $"in {change.TimeDiff:dd\\:hh\\:mm\\:ss}" );
