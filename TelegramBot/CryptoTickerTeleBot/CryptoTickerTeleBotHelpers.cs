@@ -35,10 +35,14 @@ namespace TelegramBot.CryptoTickerTeleBot
 							async ( ex, oldValue, newValue ) =>
 							{
 								var change = newValue - oldValue;
-								var info =
-									$"{ex.Name,-10}: {newValue.Symbol} {change.Value.ToCurrency ( ),-8} {change.Percentage,6:P} in {change.TimeDiff:dd\\:hh\\:mm\\:ss}";
+								var builder = new StringBuilder ( );
+								builder
+									.AppendLine ( $"{ex.Name,-10}" )
+									.AppendLine ( $"Current Price: {ex[newValue.Symbol].Average:C}" )
+									.AppendLine ( $"Change: {change.Value.ToCurrency ( ),-8} {change.Percentage,6:P}" )
+									.AppendLine ( $"in {change.TimeDiff:dd\\:hh\\:mm\\:ss}" );
 
-								await SendBlockText ( message, info );
+								await SendBlockText ( message, builder.ToString ( ) );
 							} )
 					);
 				}
