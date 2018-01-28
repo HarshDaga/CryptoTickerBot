@@ -94,10 +94,14 @@ namespace TelegramBot.CryptoTickerTeleBot
 						async ( ex, oldValue, newValue ) =>
 						{
 							var change = newValue - oldValue;
-							var reply =
-								$"{ex.Name,-10}: {newValue.Symbol} {change.Value.ToCurrency ( ),-6} {change.Percentage,6:P} in {change.TimeDiff:dd\\:hh\\:mm\\:ss}";
+							var builder = new StringBuilder ( );
+							builder
+								.AppendLine ( $"{ex.Name,-10}" )
+								.AppendLine ( $"Current Price: {ex[newValue.Symbol].Average:C}" )
+								.AppendLine ( $"Change: {change.Value.ToCurrency ( ),-8} {change.Percentage,6:P}" )
+								.AppendLine ( $"in {change.TimeDiff:dd\\:hh\\:mm\\:ss}" );
 
-							await bot.SendTextMessageAsync ( subscription.Id, $"```\n{reply}\n```", ParseMode.Markdown );
+							await bot.SendTextMessageAsync ( subscription.Id, $"```\n{builder}\n```", ParseMode.Markdown );
 						} );
 			}
 
