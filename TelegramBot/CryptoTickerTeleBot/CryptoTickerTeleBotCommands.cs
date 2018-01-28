@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CryptoTickerBot.Extensions;
+using Tababular;
 using Telegram.Bot.Types;
 
 namespace TelegramBot.CryptoTickerTeleBot
@@ -166,13 +167,22 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 		private async Task HandleStatus ( Message message )
 		{
+			var formatter = new TableFormatter ( );
+			var objects = new List<object> ( );
+			foreach ( var exchange in exchanges.Values )
+				objects.Add ( new
+				{
+					Exchange = exchange.Name,
+					UpTime = $"{exchange.UpTime:hh\\:mm\\:ss}",
+					LastUpdate = $"{exchange.Age:hh\\:mm\\:ss}",
+					LastChange = $"{exchange.LastChangeDuration:hh\\:mm\\:ss}"
+				} );
+
 			var builder = new StringBuilder ( );
 			builder
 				.AppendLine ( $"Running since {UpTime:dd\\:hh\\:mm\\:ss}" )
-				.AppendLine ( "Exchanges:" );
-			foreach ( var exchange in exchanges.Values )
-				builder.AppendLine (
-					$"{exchange.Name,-10} Since {exchange.UpTime:dd\\:hh\\:mm\\:ss} Last Update {exchange.Age:dd\\:hh\\:mm\\:ss}" );
+				.AppendLine ( "" )
+				.AppendLine ( formatter.FormatObjects ( objects ) );
 
 			await SendBlockText ( message, builder.ToString ( ) );
 		}

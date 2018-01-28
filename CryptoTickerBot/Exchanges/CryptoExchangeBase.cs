@@ -51,6 +51,8 @@ namespace CryptoTickerBot.Exchanges
 		public TimeSpan UpTime => DateTime.Now - StartTime;
 		public DateTime LastUpdate { get; protected set; }
 		public TimeSpan Age => DateTime.Now - LastUpdate;
+		public DateTime LastChange { get; protected set; }
+		public TimeSpan LastChangeDuration => DateTime.Now - LastChange;
 		public int Count => ExchangeData.Count;
 
 		public CryptoCoin this [ string symbol ]
@@ -122,28 +124,15 @@ namespace CryptoTickerBot.Exchanges
 		public void OnChanged ( CryptoExchangeBase exchange, CryptoCoin coin )
 		{
 			Changed?.Invoke ( exchange, coin );
+			LastChange = DateTime.Now;
 			foreach ( var observer in Observers )
 				observer.OnNext ( ExchangeData[coin.Symbol].Clone ( ) );
 		}
 
-		public override string ToString ( )
-		{
-			var formatter = new TableFormatter ( );
-			var objects = new List<object> ( );
+		public override string ToString ( ) =>
+			$"{Name,-12} {UpTime:hh\\:mm\\:ss} {Age:hh\\:mm\\:ss} {LastChangeDuration:hh\\:mm\\:ss}";
 
-			foreach ( var coin in ExchangeData.Values.OrderBy ( x => x.Symbol ) )
-				objects.Add ( new
-				{
-					coin.Symbol,
-					Bid = $"{coin.HighestBid:C}",
-					Ask = $"{coin.LowestAsk:C}",
-					Spread = $"{coin.SpreadPercentange:P}"
-				} );
-
-			return formatter.FormatObjects ( objects );
-		}
-
-		public string ToString ( FiatCurrency fiat )
+		public string ToTable ( FiatCurrency fiat )
 		{
 			var formatter = new TableFormatter ( );
 			var objects = new List<object> ( );

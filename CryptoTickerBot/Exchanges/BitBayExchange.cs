@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
@@ -54,7 +53,7 @@ namespace CryptoTickerBot.Exchanges
 
 					Update ( data, symbol );
 
-					await Task.Delay ( 1000, ct );
+					await Task.Delay ( 2000, ct );
 				}
 		}
 

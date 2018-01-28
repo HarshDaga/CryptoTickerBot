@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
 using CryptoTickerBot.Exchanges;
+using CryptoTickerBot.Helpers;
 
 namespace CryptoTickerBot.Extensions
 {
@@ -27,7 +28,7 @@ namespace CryptoTickerBot.Extensions
 			foreach ( var exchange in exchanges )
 			{
 				tables.Add ( exchange.Name );
-				tables.Add ( exchange.ToString ( ) );
+				tables.Add ( exchange.ToTable ( FiatCurrency.USD ) );
 			}
 
 			return tables.Join ( "\n" );

@@ -13,7 +13,7 @@ namespace CryptoTickerBot.Exchanges
 		private readonly Dictionary<string, List<CryptoCoin>> history;
 		private readonly Dictionary<string, List<PriceChange>> priceChanges;
 
-		private Dictionary<long, List<SubscriptionInfo>> significantChangeSubscriptions;
+		private readonly Dictionary<long, List<SubscriptionInfo>> significantChangeSubscriptions;
 
 		public CryptoExchangeBase Exchange { get; }
 
@@ -65,6 +65,8 @@ namespace CryptoTickerBot.Exchanges
 			info.Init ( );
 			info.Changed += action;
 			significantChangeSubscriptions[id].Add ( info );
+
+			Logger.Debug ( $"Created subscription for {id:X8} {info}" );
 
 			return new ResumableSubscription
 			{
@@ -155,6 +157,8 @@ namespace CryptoTickerBot.Exchanges
 					LastSignificantPrice[coin.Symbol] = coin.Clone ( );
 				}
 			}
+
+			public override string ToString ( ) => $"Exchange: {Exchange}, Threshold: {Threshold}";
 		}
 	}
 }

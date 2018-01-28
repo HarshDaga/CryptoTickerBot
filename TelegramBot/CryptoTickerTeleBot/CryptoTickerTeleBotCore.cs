@@ -101,7 +101,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 				Url = exchange.Url,
 				InputMessageContent = new InputTextMessageContent
 				{
-					MessageText = $"```\n{name}\n{exchange.ToString ( fiat )}\n```",
+					MessageText = $"```\n{name}\n{exchange.ToTable ( fiat )}\n```",
 					ParseMode = ParseMode.Markdown
 				}
 			};
