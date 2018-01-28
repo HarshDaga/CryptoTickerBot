@@ -4,12 +4,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle ( "CryptoTickerBot" )]
-[assembly: AssemblyDescription ( "" )]
+[assembly: AssemblyTitle ( "Crypto Ticker Bot" )]
+[assembly: AssemblyDescription ( "Fetch and store crypto prices from various exchange sites." )]
 [assembly: AssemblyConfiguration ( "" )]
 [assembly: AssemblyCompany ( "" )]
 [assembly: AssemblyProduct ( "CryptoTickerBot" )]
-[assembly: AssemblyCopyright ( "Copyright ©  2018" )]
+[assembly: AssemblyCopyright ( "Harsh Daga ©  2018" )]
 [assembly: AssemblyTrademark ( "" )]
 [assembly: AssemblyCulture ( "" )]
 
@@ -31,5 +31,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion ( "1.0.0.0" )]
-[assembly: AssemblyFileVersion ( "1.0.0.0" )]
+[assembly: AssemblyVersion ( "1.0.0.42" )]
+[assembly: AssemblyFileVersion ( "1.0.0.42" )]
