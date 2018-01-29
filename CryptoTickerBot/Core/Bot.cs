@@ -21,7 +21,7 @@ namespace CryptoTickerBot.Core
 				[CryptoExchange.Koinex] = new KoinexExchange ( ),
 				[CryptoExchange.BitBay] = new BitBayExchange ( ),
 				[CryptoExchange.Binance] = new BinanceExchange ( ),
-				//[CryptoExchange.CoinDelta] = new CoinDeltaExchange ( ),
+				[CryptoExchange.CoinDelta] = new CoinDeltaExchange ( ),
 				[CryptoExchange.Coinbase] = new CoinbaseExchange ( ),
 				[CryptoExchange.Kraken] = new KrakenExchange ( )
 			};

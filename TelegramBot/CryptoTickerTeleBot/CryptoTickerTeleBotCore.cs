@@ -94,6 +94,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 				.ToList<InlineQueryResult> ( );
 
 			inlineQueryResults.Add ( ToInlineQueryResult ( exchanges[CryptoExchange.Koinex], "Koinex INR", FiatCurrency.INR ) );
+			inlineQueryResults.Add ( ToInlineQueryResult ( exchanges[CryptoExchange.CoinDelta], "CoinDelta INR", FiatCurrency.INR ) );
 			inlineQueryResults.Add ( ToInlineQueryResult ( exchanges[CryptoExchange.BitBay], "BitBay PLN", FiatCurrency.PLN ) );
 
 			await bot.AnswerInlineQueryAsync (

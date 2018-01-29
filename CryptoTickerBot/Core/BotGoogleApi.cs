@@ -48,6 +48,9 @@ namespace CryptoTickerBot.Core
 								continue;
 							}
 
+							if ( !Settings.Instance.SheetsRanges.ContainsKey ( id ) )
+								continue;
+
 							var range = Settings.Instance.SheetsRanges[id];
 							valueRanges.Add ( new ValueRange
 							{
