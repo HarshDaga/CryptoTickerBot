@@ -81,7 +81,9 @@ namespace CryptoTickerBot.Exchanges
 			while ( !ct.IsCancellationRequested )
 				try
 				{
+					Logger.Debug ( $"Starting {Name} receiver." );
 					await GetExchangeData ( ct );
+					Logger.Debug ( $"{Name} receiver terminated." );
 				}
 				catch ( Exception e )
 				{
