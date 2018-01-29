@@ -41,30 +41,43 @@ namespace CryptoTickerBot.Core
 		private readonly ConcurrentQueue<CryptoExchange> pendingUpdates =
 			new ConcurrentQueue<CryptoExchange> ( );
 
+		private CancellationTokenSource cts;
+		private Timer fiatMonitor;
+
 		private SheetsService service;
 
 		public CryptoCompareTable CompareTable { get; } =
 			new CryptoCompareTable ( );
 
+		public bool IsRunning { get; private set; }
 		public bool IsInitialized { get; private set; }
 
-		public Task Start ( )
+		public void Start ( )
 		{
-			return Task.Run ( async ( ) =>
-				{
-					FiatConverter.StartMonitor ( );
+			IsRunning = true;
+			cts = new CancellationTokenSource ( );
+			Task.Run ( async ( ) =>
+			{
+				fiatMonitor = FiatConverter.StartMonitor ( );
 
-					InitExchanges ( );
+				InitExchanges ( );
 
-					IsInitialized = true;
+				IsInitialized = true;
 
-					CreateSheetsService ( );
+				CreateSheetsService ( );
 
-					StartAutoSheetsUpdater ( );
+				StartAutoSheetsUpdater ( );
 
-					await Task.Delay ( int.MaxValue );
-				}
-			);
+				await Task.Delay ( int.MaxValue, cts.Token );
+
+				IsRunning = false;
+			}, cts.Token );
+		}
+
+		public void Stop ( )
+		{
+			fiatMonitor.Stop ( );
+			cts.Cancel ( );
 		}
 
 		private void InitExchanges ( )
@@ -83,7 +96,7 @@ namespace CryptoTickerBot.Core
 				CompareTable.AddExchange ( exchange );
 				try
 				{
-					Task.Run ( ( ) => exchange.StartMonitor ( ) );
+					Task.Run ( ( ) => exchange.StartMonitor ( cts.Token ), cts.Token );
 				}
 				catch ( Exception e )
 				{
@@ -105,6 +118,9 @@ namespace CryptoTickerBot.Core
 				};
 				updateTimer.Elapsed += async ( sender, eventArgs ) =>
 				{
+					if ( cts.IsCancellationRequested )
+						return;
+
 					try
 					{
 						var valueRanges = new List<ValueRange> ( );
@@ -136,11 +152,12 @@ namespace CryptoTickerBot.Core
 					}
 					finally
 					{
-						( sender as Timer )?.Start ( );
+						if ( !cts.IsCancellationRequested )
+							( sender as Timer )?.Start ( );
 					}
 				};
 				updateTimer.Start ( );
-			} );
+			}, cts.Token );
 		}
 
 		private void CreateSheetsService ( )
@@ -166,16 +183,16 @@ namespace CryptoTickerBot.Core
 
 				var request = service.Spreadsheets.Values.BatchUpdate ( requestBody, Settings.Instance.SheetId );
 
-				await request.ExecuteAsync ( );
+				await request.ExecuteAsync ( cts.Token );
 			}
 			catch ( Exception e )
 			{
 				if ( e is GoogleApiException gae && gae.Error.Code == 429 )
 				{
 					Logger.Error ( gae, "Too many Google Api requests. Cooling down." );
-					await Task.Delay ( 5000 );
+					await Task.Delay ( 5000, cts.Token );
 				}
-				else
+				else if ( !( e is TaskCanceledException ) )
 				{
 					Logger.Error ( e );
 				}

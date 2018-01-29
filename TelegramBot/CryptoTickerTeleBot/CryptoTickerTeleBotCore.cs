@@ -12,12 +12,27 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InlineQueryResults;
 using Telegram.Bot.Types.InputMessageContents;
+using File = System.IO.File;
 
 namespace TelegramBot.CryptoTickerTeleBot
 {
 	public partial class TeleBot
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
+		private static readonly object WhitelistLock = new object ( );
+
+		private static readonly string[] Commands =
+		{
+			"/fetch",
+			"/compare",
+			"/best",
+			"/status",
+			"/subscribe",
+			"/unsubscribe",
+			"/whitelist",
+			"/restart"
+		};
+
 		private readonly Bot ctb = new Bot ( );
 		private TelegramBotClient bot;
 		private Dictionary<CryptoExchange, CryptoExchangeBase> exchanges;
@@ -125,7 +140,14 @@ namespace TelegramBot.CryptoTickerTeleBot
 				var command = text.Split ( ' ' ).First ( );
 				if ( command.Contains ( $"@{me.Username}" ) )
 					command = command.Substring ( 0, command.IndexOf ( $"@{me.Username}", StringComparison.Ordinal ) );
-				Logger.Debug ( $"Message received from {messageEventArgs.Message.From.Username}: {message.Text}" );
+				var userName = messageEventArgs.Message.From.Username;
+				Logger.Debug ( $"Message received from {userName}: {message.Text}" );
+
+				if ( Commands.Contains ( command ) && !IsWhitelisted ( userName ) )
+				{
+					await RequestPurchase ( message, userName );
+					return;
+				}
 
 				switch ( command )
 				{
@@ -158,11 +180,35 @@ namespace TelegramBot.CryptoTickerTeleBot
 					case "/status":
 						await HandleStatus ( message );
 						break;
+
+					case "/whitelist":
+						if ( Settings.Instance.Admins?.Contains ( userName ) == true )
+							await HandleWhitelist ( message, text.Split ( ' ' ).Skip ( 1 ).FirstOrDefault ( ) );
+						break;
+
+					case "/restart":
+						await HandleRestart ( message );
+						break;
 				}
 			}
 			catch ( Exception e )
 			{
 				Logger.Error ( e );
+			}
+		}
+
+		private static bool IsWhitelisted ( string userName )
+		{
+			if ( !Settings.Instance.WhitelistMode || Settings.Instance.Admins.Contains ( userName ) )
+				return true;
+
+			lock ( WhitelistLock )
+			{
+				if ( !File.Exists ( Settings.Instance.WhiteListFileName ) )
+					File.Create ( Settings.Instance.WhiteListFileName );
+
+				var whitelist = File.ReadAllLines ( Settings.Instance.WhiteListFileName );
+				return whitelist.Contains ( userName );
 			}
 		}
 	}

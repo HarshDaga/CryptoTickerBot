@@ -49,9 +49,17 @@ namespace CryptoTickerBot.Exchanges
 				foreach ( var ticker in tickers )
 				{
 					var symbol = ticker.symbol;
-					var data = await ticker.url.GetJsonAsync ( ct );
+					try
+					{
+						var data = await ticker.url.GetJsonAsync ( ct );
 
-					Update ( data, symbol );
+						Update ( data, symbol );
+					}
+					catch ( FlurlHttpException e )
+					{
+						if ( e.InnerException is TaskCanceledException )
+							throw e.InnerException;
+					}
 
 					await Task.Delay ( 2000, ct );
 				}

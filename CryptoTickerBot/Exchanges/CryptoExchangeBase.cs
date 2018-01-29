@@ -46,8 +46,8 @@ namespace CryptoTickerBot.Exchanges
 		public Dictionary<string, decimal> WithdrawalFees { get; protected set; }
 		public decimal BuyFees { get; protected set; }
 		public decimal SellFees { get; protected set; }
-		public bool IsComplete => ExchangeData.Count == KnownSymbols.Count;
-		public DateTime StartTime { get; } = DateTime.Now;
+		public virtual bool IsComplete => ExchangeData.Count == KnownSymbols.Count;
+		public DateTime StartTime { get; private set; }
 		public TimeSpan UpTime => DateTime.Now - StartTime;
 		public DateTime LastUpdate { get; protected set; }
 		public TimeSpan Age => DateTime.Now - LastUpdate;
@@ -81,9 +81,14 @@ namespace CryptoTickerBot.Exchanges
 			while ( !ct.IsCancellationRequested )
 				try
 				{
-					Logger.Debug ( $"Starting {Name} receiver." );
+					StartTime = DateTime.Now;
+					Logger.Debug ( $"Starting {Name,-12} receiver." );
 					await GetExchangeData ( ct );
-					Logger.Debug ( $"{Name} receiver terminated." );
+					Logger.Debug ( $"{Name,-12} receiver terminated." );
+				}
+				catch ( TaskCanceledException )
+				{
+					Logger.Info ( $"{Name,-12} task cancelled." );
 				}
 				catch ( Exception e )
 				{

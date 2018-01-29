@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CryptoTickerBot.Extensions;
 using Tababular;
 using Telegram.Bot.Types;
+using File = System.IO.File;
 
 namespace TelegramBot.CryptoTickerTeleBot
 {
@@ -185,6 +186,35 @@ namespace TelegramBot.CryptoTickerTeleBot
 				.AppendLine ( formatter.FormatObjects ( objects ) );
 
 			await SendBlockText ( message, builder.ToString ( ) );
+		}
+
+		private async Task HandleWhitelist ( Message message, string userName )
+		{
+			if ( string.IsNullOrWhiteSpace ( userName ) )
+			{
+				await SendBlockText ( message, "Malformed UserName." );
+				return;
+			}
+
+			Logger.Info ( $"Adding {userName} to Whitelist." );
+			lock ( WhitelistLock )
+			{
+				var whitelist = new HashSet<string> ( File.ReadAllLines ( Settings.Instance.WhiteListFileName ) )
+				{
+					userName
+				};
+				File.WriteAllLines ( Settings.Instance.WhiteListFileName, whitelist );
+			}
+
+			await SendBlockText ( message, $"Added {userName} to Whitelist." );
+		}
+
+		private async Task HandleRestart ( Message message )
+		{
+			ctb.Stop ( );
+			ctb.Start ( );
+
+			await SendBlockText ( message, "Restarted all exchange monitors." );
 		}
 	}
 }

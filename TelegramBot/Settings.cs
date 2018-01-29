@@ -10,12 +10,6 @@ namespace TelegramBot
 
 		public static Settings Instance { get; private set; }
 
-		#region Properties
-
-		public string BotToken { get; set; }
-
-		#endregion Properties
-
 		static Settings ( )
 		{
 			LoadLock = new object ( );
@@ -38,5 +32,15 @@ namespace TelegramBot
 					Instance = JsonConvert.DeserializeObject<Settings> ( File.ReadAllText ( SETTINGSFILE ) );
 			}
 		}
+
+		#region Properties
+
+		public string BotToken { get; set; }
+		public bool WhitelistMode { get; set; }
+		public string WhiteListFileName { get; set; }
+		public string PurchaseMessageText { get; set; }
+		public string[] Admins { get; set; }
+
+		#endregion Properties
 	}
 }

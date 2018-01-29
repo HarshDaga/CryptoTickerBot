@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
@@ -44,22 +43,20 @@ namespace CryptoTickerBot.Exchanges
 
 			while ( !ct.IsCancellationRequested )
 			{
-				Root data;
 				try
 				{
-					data = await TickerUrl.GetJsonAsync<Root> ( ct );
-				}
-				catch ( Exception e )
-				{
-					Logger.Error ( e );
-					await Task.Delay ( 10000, ct );
-					continue;
-				}
+					var data = await TickerUrl.GetJsonAsync<Root> ( ct );
 
-				Update ( data.Result.Btc, "BTC" );
-				Update ( data.Result.Bch, "BCH" );
-				Update ( data.Result.Eth, "ETH" );
-				Update ( data.Result.Ltc, "LTC" );
+					Update ( data.Result.Btc, "BTC" );
+					Update ( data.Result.Bch, "BCH" );
+					Update ( data.Result.Eth, "ETH" );
+					Update ( data.Result.Ltc, "LTC" );
+				}
+				catch ( FlurlHttpException e )
+				{
+					if ( e.InnerException is TaskCanceledException )
+						throw e.InnerException;
+				}
 
 				await Task.Delay ( 2000, ct );
 			}

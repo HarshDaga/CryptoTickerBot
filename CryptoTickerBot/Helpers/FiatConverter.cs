@@ -80,7 +80,7 @@ namespace CryptoTickerBot.Helpers
 				);
 		}
 
-		public static void StartMonitor ( )
+		public static Timer StartMonitor ( )
 		{
 			var timer = new Timer ( 60 * 60 * 100 );
 			FetchRates ( );
@@ -96,6 +96,8 @@ namespace CryptoTickerBot.Helpers
 				}
 			} );
 			timer.Start ( );
+
+			return timer;
 		}
 
 		public static void FetchRates ( )

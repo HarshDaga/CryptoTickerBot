@@ -25,6 +25,15 @@ namespace TelegramBot.CryptoTickerTeleBot
 			await bot.SendTextMessageAsync ( message.Chat.Id, $"```\n{str}\n```", ParseMode.Markdown );
 		}
 
+		private async Task RequestPurchase ( Message message, string userName )
+		{
+			await SendBlockText ( message, $"You need to purchase before you can use this command, {userName}." );
+			await bot.SendTextMessageAsync (
+				message.Chat.Id,
+				$"{Settings.Instance.PurchaseMessageText}"
+			);
+		}
+
 		private async Task AddSubscription ( Message message, CryptoExchange[] chosen, decimal threshold )
 		{
 			foreach ( var exchange in chosen )
