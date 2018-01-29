@@ -74,6 +74,9 @@ namespace CryptoTickerBot.Exchanges
 			return Disposable.Create ( ( ) => Observers = Observers.Remove ( observer ) );
 		}
 
+		public void ClearObservers ( ) =>
+			Observers = ImmutableHashSet<IObserver<CryptoCoin>>.Empty;
+
 		public abstract Task GetExchangeData ( CancellationToken ct );
 
 		public async Task StartMonitor ( CancellationToken ct = default )
