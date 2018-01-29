@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Extensions;
 using Tababular;
@@ -215,6 +216,12 @@ namespace TelegramBot.CryptoTickerTeleBot
 			ctb.Start ( );
 
 			await SendBlockText ( message, "Restarted all exchange monitors." );
+
+			while ( !ctb.IsInitialized )
+				await Task.Delay ( 10 );
+
+			LoadSubscriptions ( );
+			ResumeSubscriptions ( );
 		}
 	}
 }
