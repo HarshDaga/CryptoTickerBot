@@ -35,7 +35,16 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 		public void MakeAdmin ( ) => Role = UserRole.Guest | UserRole.Registered | UserRole.Admin;
 
-		public override string ToString ( ) => $"{Role,-12} Username: {UserName}";
+		public static UserRole GetHighestRole ( UserRole role )
+		{
+			if ( role.HasFlag ( UserRole.Admin ) )
+				return UserRole.Admin;
+			if ( role.HasFlag ( UserRole.Registered ) )
+				return UserRole.Registered;
+			return UserRole.Guest;
+		}
+
+		public override string ToString ( ) => $"{GetHighestRole ( Role ),-12} Username: {UserName}";
 
 		public override bool Equals ( object obj )
 		{

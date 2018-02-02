@@ -30,7 +30,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 		public IEnumerator<TeleBotUser> GetEnumerator ( ) => listImplementation.GetEnumerator ( );
 
-		IEnumerator IEnumerable.GetEnumerator ( ) => ( (IEnumerable) listImplementation ).GetEnumerator ( );
+		IEnumerator IEnumerable.GetEnumerator ( ) => ( listImplementation as IEnumerable ).GetEnumerator ( );
 
 		public void Add ( TeleBotUser user )
 		{

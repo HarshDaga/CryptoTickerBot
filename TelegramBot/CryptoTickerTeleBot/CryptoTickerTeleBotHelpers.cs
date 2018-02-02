@@ -45,7 +45,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 			SaveSubscriptions ( );
 
-			await bot.SendTextMessageAsync ( id, builder.ToString ( ) );
+			await bot.SendTextMessageAsync ( id, $"```\n{builder}\n```", ParseMode.Markdown );
 		}
 
 		private async Task AddSubscription ( Message message, CryptoExchange[] chosen, decimal threshold )
