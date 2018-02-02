@@ -12,12 +12,9 @@ namespace CryptoTickerBot.Exchanges
 
 		private readonly Dictionary<string, List<CryptoCoin>> history;
 		private readonly Dictionary<string, List<PriceChange>> priceChanges;
-
 		private readonly Dictionary<long, List<SubscriptionInfo>> significantChangeSubscriptions;
 
 		public CryptoExchangeBase Exchange { get; }
-
-		public string SubscriptionsFileName { get; } = "Subscriptions.json";
 
 		public CryptoExchangeObserver ( CryptoExchangeBase exchange )
 		{
