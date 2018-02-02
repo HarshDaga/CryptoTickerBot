@@ -185,7 +185,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 			await SendBlockText ( message, builder.ToString ( ) );
 		}
 
-		private async Task HandleWhitelist ( Message message, IList<string> userNames )
+		private async Task HandleRegister ( Message message, IList<string> userNames )
 		{
 			foreach ( var userName in userNames )
 			{
@@ -204,6 +204,10 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 		private async Task HandleRestart ( Message message, IList<string> _ )
 		{
+			CryptoTickerBot.Core.Settings.Load ( );
+			Settings.Load ( );
+			users.Load ( );
+
 			ctb.Stop ( );
 			ctb.Start ( );
 
@@ -214,6 +218,27 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 			LoadSubscriptions ( );
 			ResumeSubscriptions ( );
+		}
+
+		private async Task HandleUsers ( Message message, IList<string> @params )
+		{
+			if ( @params.Count == 0 )
+			{
+				foreach ( UserRole value in Enum.GetValues ( typeof ( UserRole ) ) )
+					await SendBlockText ( message, $"{value} List:\n{users[value].Select ( x => x.UserName ).Join ( "\n" )}" );
+
+				return;
+			}
+
+			if ( !Enum.TryParse ( @params[0], true, out UserRole role ) )
+			{
+				await SendBlockText ( message,
+					$"{@params[0]} is not a known role.\nRoles: {Enum.GetNames ( typeof ( UserRole ) )}" );
+				return;
+			}
+
+			var list = users[role];
+			await SendBlockText ( message, $"{role} List:\n{list.Select ( x => x.UserName ).Join ( "\n" )}" );
 		}
 	}
 }

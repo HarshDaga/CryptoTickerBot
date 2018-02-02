@@ -45,8 +45,9 @@ namespace TelegramBot.CryptoTickerTeleBot
 					["/status"]      = (UserRole.Registered, HandleStatus),
 					["/subscribe"]   = (UserRole.Registered, HandleSubscribe),
 					["/unsubscribe"] = (UserRole.Registered, HandleUnsubscribe),
-					["/whitelist"]   = (UserRole.Admin, HandleWhitelist),
-					["/restart"]     = (UserRole.Admin, HandleRestart)
+					["/register"]    = (UserRole.Admin, HandleRegister),
+					["/restart"]     = (UserRole.Admin, HandleRestart),
+					["/users"]       = (UserRole.Admin, HandleUsers)
 				};
 		}
 
