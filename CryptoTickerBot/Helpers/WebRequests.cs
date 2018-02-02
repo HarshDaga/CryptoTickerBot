@@ -34,9 +34,9 @@ namespace CryptoTickerBot.Helpers
 
 			var request = (HttpWebRequest) WebRequest.Create ( uri );
 			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-			request.ContentLength = dataBytes.Length;
-			request.ContentType = contentType;
-			request.Method = method;
+			request.ContentLength          = dataBytes.Length;
+			request.ContentType            = contentType;
+			request.Method                 = method;
 
 			using ( var requestBody = request.GetRequestStream ( ) ) requestBody.Write ( dataBytes, 0, dataBytes.Length );
 
@@ -52,9 +52,9 @@ namespace CryptoTickerBot.Helpers
 
 			var request = (HttpWebRequest) WebRequest.Create ( uri );
 			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-			request.ContentLength = dataBytes.Length;
-			request.ContentType = contentType;
-			request.Method = method;
+			request.ContentLength          = dataBytes.Length;
+			request.ContentType            = contentType;
+			request.Method                 = method;
 
 			using ( var requestBody = request.GetRequestStream ( ) )
 				await requestBody.WriteAsync ( dataBytes, 0, dataBytes.Length );

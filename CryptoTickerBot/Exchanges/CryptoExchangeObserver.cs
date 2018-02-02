@@ -21,9 +21,9 @@ namespace CryptoTickerBot.Exchanges
 
 		public CryptoExchangeObserver ( CryptoExchangeBase exchange )
 		{
-			Exchange = exchange;
-			history = new Dictionary<string, List<CryptoCoin>> ( );
-			priceChanges = new Dictionary<string, List<PriceChange>> ( );
+			Exchange                       = exchange;
+			history                        = new Dictionary<string, List<CryptoCoin>> ( );
+			priceChanges                   = new Dictionary<string, List<PriceChange>> ( );
 			significantChangeSubscriptions = new Dictionary<long, List<SubscriptionInfo>> ( );
 		}
 
@@ -31,7 +31,7 @@ namespace CryptoTickerBot.Exchanges
 		{
 			if ( !history.ContainsKey ( coin.Symbol ) )
 			{
-				history[coin.Symbol] = new List<CryptoCoin> ( );
+				history[coin.Symbol]      = new List<CryptoCoin> ( );
 				priceChanges[coin.Symbol] = new List<PriceChange> ( );
 			}
 
@@ -70,10 +70,10 @@ namespace CryptoTickerBot.Exchanges
 
 			return new ResumableSubscription
 			{
-				Exchange = Exchange.Id,
-				Id = id,
+				Exchange             = Exchange.Id,
+				Id                   = id,
 				LastSignificantPrice = Exchange.ExchangeData,
-				Threshhold = threshold
+				Threshhold           = threshold
 			};
 		}
 
@@ -124,15 +124,15 @@ namespace CryptoTickerBot.Exchanges
 
 			public SubscriptionInfo ( CryptoExchangeBase exchange, decimal threshold )
 			{
-				Exchange = exchange;
-				Threshold = threshold;
+				Exchange             = exchange;
+				Threshold            = threshold;
 				LastSignificantPrice = new Dictionary<string, CryptoCoin> ( );
 			}
 
 			public SubscriptionInfo ( CryptoExchangeBase exchange, ResumableSubscription subscription )
 			{
-				Exchange = exchange;
-				Threshold = subscription.Threshhold;
+				Exchange             = exchange;
+				Threshold            = subscription.Threshhold;
 				LastSignificantPrice = subscription.LastSignificantPrice;
 			}
 

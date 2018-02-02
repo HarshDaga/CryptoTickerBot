@@ -14,18 +14,18 @@ namespace CryptoTickerBot.Exchanges
 	{
 		private static readonly Dictionary<string, string> ToSymBol = new Dictionary<string, string>
 		{
-			["bitcoin"] = "BTC",
+			["bitcoin"]      = "BTC",
 			["bitcoin_cash"] = "BCH",
-			["ether"] = "ETH",
-			["litecoin"] = "LTC"
+			["ether"]        = "ETH",
+			["litecoin"]     = "LTC"
 		};
 
 		public KoinexExchange ( )
 		{
-			Name = "Koinex";
-			Url = "https://koinex.in/";
+			Name      = "Koinex";
+			Url       = "https://koinex.in/";
 			TickerUrl = "wss://ws-ap2.pusher.com/app/9197b0bfdf3f71a4064e?protocol=7&client=js&version=4.1.0&flash=false";
-			Id = CryptoExchange.Koinex;
+			Id        = CryptoExchange.Koinex;
 
 			WithdrawalFees = new Dictionary<string, decimal>
 			{
@@ -42,7 +42,7 @@ namespace CryptoTickerBot.Exchanges
 				["BCH"] = 0m
 			};
 
-			BuyFees = 0.25m;
+			BuyFees  = 0.25m;
 			SellFees = 0m;
 		}
 
@@ -81,9 +81,9 @@ namespace CryptoTickerBot.Exchanges
 		{
 			decimal InrToUsd ( decimal amount ) => FiatConverter.Convert ( amount, FiatCurrency.INR, FiatCurrency.USD );
 
-			ExchangeData[symbol].LowestAsk = InrToUsd ( data.lowest_ask );
+			ExchangeData[symbol].LowestAsk  = InrToUsd ( data.lowest_ask );
 			ExchangeData[symbol].HighestBid = InrToUsd ( data.highest_bid );
-			ExchangeData[symbol].Rate = InrToUsd ( data.last_traded_price );
+			ExchangeData[symbol].Rate       = InrToUsd ( data.last_traded_price );
 		}
 
 		public static async Task ConnectAndSubscribe ( WebSocket ws, CancellationToken ct )

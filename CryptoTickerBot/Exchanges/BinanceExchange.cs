@@ -17,10 +17,10 @@ namespace CryptoTickerBot.Exchanges
 
 		public BinanceExchange ( )
 		{
-			Name = "Binance";
-			Url = "https://www.binance.com/";
+			Name      = "Binance";
+			Url       = "https://www.binance.com/";
 			TickerUrl = "wss://stream2.binance.com:9443/ws/!ticker@arr@3000ms";
-			Id = CryptoExchange.Binance;
+			Id        = CryptoExchange.Binance;
 
 			WithdrawalFees = new Dictionary<string, decimal>
 			{
@@ -37,7 +37,7 @@ namespace CryptoTickerBot.Exchanges
 				["BCH"] = 0m
 			};
 
-			BuyFees = 0.1m;
+			BuyFees  = 0.1m;
 			SellFees = 0.1m;
 		}
 
@@ -81,9 +81,9 @@ namespace CryptoTickerBot.Exchanges
 
 		protected override void DeserializeData ( dynamic datum, string symbol )
 		{
-			ExchangeData[symbol].LowestAsk = datum.a;
+			ExchangeData[symbol].LowestAsk  = datum.a;
 			ExchangeData[symbol].HighestBid = datum.b;
-			ExchangeData[symbol].Rate = datum.w;
+			ExchangeData[symbol].Rate       = datum.w;
 		}
 	}
 }

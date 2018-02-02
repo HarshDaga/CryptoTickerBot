@@ -29,6 +29,7 @@ namespace CryptoTickerBot.Helpers
 		IDR,
 		ILS,
 		INR,
+		ISK,
 		JPY,
 		KRW,
 		MXN,
@@ -102,12 +103,21 @@ namespace CryptoTickerBot.Helpers
 
 		public static void FetchRates ( )
 		{
-			var json = TickerUrl.GetStringAsync ( ).Result;
-			var data = JsonConvert.DeserializeObject<dynamic> ( json );
-			UsdTo = JsonConvert.DeserializeObject<Dictionary<FiatCurrency, decimal>> ( data.rates.ToString ( ) );
-			UsdTo[FiatCurrency.USD] = 1m;
-			Console.WriteLine ( data.rates );
-			Logger.Info ( "Fetched Fiat currency rates." );
+			try
+			{
+				var json = TickerUrl.GetStringAsync ( ).Result;
+				var data = JsonConvert.DeserializeObject<dynamic> ( json );
+				UsdTo =
+					JsonConvert.DeserializeObject<Dictionary<FiatCurrency, decimal>> ( data.rates.ToString ( ) );
+				UsdTo[FiatCurrency.USD] = 1m;
+				Console.WriteLine ( data.rates );
+				Logger.Info ( "Fetched Fiat currency rates." );
+			}
+			catch ( Exception e )
+			{
+				Logger.Error ( e );
+				throw;
+			}
 		}
 
 		public static decimal Convert ( decimal amount, FiatCurrency from, FiatCurrency to ) =>

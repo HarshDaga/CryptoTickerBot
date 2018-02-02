@@ -18,12 +18,12 @@ namespace CryptoTickerBot.Core
 		public readonly Dictionary<CryptoExchange, CryptoExchangeBase> Exchanges =
 			new Dictionary<CryptoExchange, CryptoExchangeBase>
 			{
-				[CryptoExchange.Koinex] = new KoinexExchange ( ),
-				[CryptoExchange.BitBay] = new BitBayExchange ( ),
-				[CryptoExchange.Binance] = new BinanceExchange ( ),
+				[CryptoExchange.Koinex]    = new KoinexExchange ( ),
+				[CryptoExchange.BitBay]    = new BitBayExchange ( ),
+				[CryptoExchange.Binance]   = new BinanceExchange ( ),
 				[CryptoExchange.CoinDelta] = new CoinDeltaExchange ( ),
-				[CryptoExchange.Coinbase] = new CoinbaseExchange ( ),
-				[CryptoExchange.Kraken] = new KrakenExchange ( )
+				[CryptoExchange.Coinbase]  = new CoinbaseExchange ( ),
+				[CryptoExchange.Kraken]    = new KrakenExchange ( )
 			};
 
 		public readonly Dictionary<CryptoExchange, CryptoExchangeObserver> Observers =
@@ -44,7 +44,7 @@ namespace CryptoTickerBot.Core
 		public void Start ( )
 		{
 			IsRunning = true;
-			cts = new CancellationTokenSource ( );
+			cts       = new CancellationTokenSource ( );
 			Task.Run ( async ( ) =>
 			{
 				fiatMonitor = FiatConverter.StartMonitor ( );
@@ -74,8 +74,8 @@ namespace CryptoTickerBot.Core
 			foreach ( var exchange in Exchanges.Values )
 			{
 				exchange.ClearObservers ( );
-				Observers[exchange.Id] = new CryptoExchangeObserver ( exchange );
-				exchange.Changed += ( e, coin ) =>
+				Observers[exchange.Id] =  new CryptoExchangeObserver ( exchange );
+				exchange.Changed       += ( e, coin ) =>
 				{
 					if ( !pendingUpdates.Contains ( e.Id ) )
 						pendingUpdates.Enqueue ( e.Id );

@@ -24,9 +24,9 @@ namespace CryptoTickerBot.Core
 			Task.Run ( ( ) =>
 			{
 				Thread.Sleep ( 10000 );
-				var updateTimer = new Timer ( 1000 )
+				var updateTimer = new Timer ( 1500 )
 				{
-					Enabled = true,
+					Enabled   = true,
 					AutoReset = false
 				};
 				updateTimer.Elapsed += async ( sender, eventArgs ) =>
@@ -55,7 +55,7 @@ namespace CryptoTickerBot.Core
 							valueRanges.Add ( new ValueRange
 							{
 								Values = exchange.ToSheetRows ( ),
-								Range = $"{Settings.Instance.SheetName}!{range}"
+								Range  = $"{Settings.Instance.SheetName}!{range}"
 							} );
 							Logger.Info ( $"Updated Sheets for {id}" );
 						}
@@ -83,7 +83,7 @@ namespace CryptoTickerBot.Core
 			service = new SheetsService ( new BaseClientService.Initializer
 			{
 				HttpClientInitializer = credential,
-				ApplicationName = Settings.Instance.ApplicationName
+				ApplicationName       = Settings.Instance.ApplicationName
 			} );
 		}
 
@@ -94,7 +94,7 @@ namespace CryptoTickerBot.Core
 				var requestBody = new BatchUpdateValuesRequest
 				{
 					ValueInputOption = "USER_ENTERED",
-					Data = valueRanges
+					Data             = valueRanges
 				};
 
 				var request = service.Spreadsheets.Values.BatchUpdate ( requestBody, Settings.Instance.SheetId );

@@ -37,9 +37,8 @@ namespace TelegramBot
 
 		public string BotToken { get; set; }
 		public bool WhitelistMode { get; set; }
-		public string WhiteListFileName { get; set; }
+		public string UsersFileName { get; set; }
 		public string PurchaseMessageText { get; set; }
-		public string[] Admins { get; set; }
 
 		#endregion Properties
 	}

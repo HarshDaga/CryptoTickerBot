@@ -13,9 +13,9 @@ namespace CryptoTickerBot
 		public static PriceChange From ( CryptoCoin coin1, CryptoCoin coin2 )
 			=> new PriceChange
 			{
-				Value = coin1.Average - coin2.Average,
-				Percentage = ( coin1.Average - coin2.Average ) / ( coin1.Average + coin2.Average ) * 2m,
-				TimeDiff = coin1.Time - coin2.Time,
+				Value        = coin1.Average - coin2.Average,
+				Percentage   = ( coin1.Average - coin2.Average ) / ( coin1.Average + coin2.Average ) * 2m,
+				TimeDiff     = coin1.Time - coin2.Time,
 				AbsoluteTime = coin1.Time
 			};
 
@@ -41,11 +41,11 @@ namespace CryptoTickerBot
 			decimal rate = 0m
 		)
 		{
-			Symbol = symbol;
+			Symbol     = symbol;
 			HighestBid = highestBid;
-			LowestAsk = lowestAsk;
-			Rate = rate;
-			Time = DateTime.Now;
+			LowestAsk  = lowestAsk;
+			Rate       = rate;
+			Time       = DateTime.Now;
 		}
 
 		public bool Equals ( CryptoCoin other ) =>

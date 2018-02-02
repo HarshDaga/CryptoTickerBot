@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using CryptoTickerBot.Core;
 using CryptoTickerBot.Exchanges;
 using CryptoTickerBot.Helpers;
@@ -12,28 +13,17 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InlineQueryResults;
 using Telegram.Bot.Types.InputMessageContents;
-using File = System.IO.File;
 
 namespace TelegramBot.CryptoTickerTeleBot
 {
 	public partial class TeleBot
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
-		private static readonly object WhitelistLock = new object ( );
 
-		private static readonly string[] Commands =
-		{
-			"/fetch",
-			"/compare",
-			"/best",
-			"/status",
-			"/subscribe",
-			"/unsubscribe",
-			"/whitelist",
-			"/restart"
-		};
+		private readonly Dictionary<string, (UserRole role, MessageHandlerDelegate func)> commands;
 
 		private readonly Bot ctb = new Bot ( );
+		private readonly TeleBotUserList users;
 		private TelegramBotClient bot;
 		private Dictionary<CryptoExchange, CryptoExchangeBase> exchanges;
 		private User me;
@@ -42,8 +32,22 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 		public TeleBot ( string botToken )
 		{
-			BotToken = botToken;
+			BotToken      = botToken;
 			subscriptions = new List<CryptoExchangeObserver.ResumableSubscription> ( );
+			users         = new TeleBotUserList ( Settings.Instance.UsersFileName );
+
+			commands = new
+				Dictionary<string, (UserRole role, MessageHandlerDelegate func)>
+				{
+					["/fetch"]       = (UserRole.Registered, HandleFetch),
+					["/compare"]     = (UserRole.Registered, HandleCompare),
+					["/best"]        = (UserRole.Registered, HandleBest),
+					["/status"]      = (UserRole.Registered, HandleStatus),
+					["/subscribe"]   = (UserRole.Registered, HandleSubscribe),
+					["/unsubscribe"] = (UserRole.Registered, HandleUnsubscribe),
+					["/whitelist"]   = (UserRole.Admin, HandleWhitelist),
+					["/restart"]     = (UserRole.Admin, HandleRestart)
+				};
 		}
 
 		public void Start ( )
@@ -52,9 +56,9 @@ namespace TelegramBot.CryptoTickerTeleBot
 			{
 				StartCryptoTickerBot ( );
 
-				bot = new TelegramBotClient ( BotToken );
-				bot.OnMessage += BotClientOnMessage;
-				bot.OnInlineQuery += BotClientOnInlineQuery;
+				bot                =  new TelegramBotClient ( BotToken );
+				bot.OnMessage      += BotClientOnMessage;
+				bot.OnInlineQuery  += BotClientOnInlineQuery;
 				bot.OnReceiveError += BotClientOnReceiveError;
 
 				me = bot.GetMeAsync ( ).Result;
@@ -94,7 +98,8 @@ namespace TelegramBot.CryptoTickerTeleBot
 				.ToList<InlineQueryResult> ( );
 
 			inlineQueryResults.Add ( ToInlineQueryResult ( exchanges[CryptoExchange.Koinex], "Koinex INR", FiatCurrency.INR ) );
-			inlineQueryResults.Add ( ToInlineQueryResult ( exchanges[CryptoExchange.CoinDelta], "CoinDelta INR", FiatCurrency.INR ) );
+			inlineQueryResults.Add ( ToInlineQueryResult ( exchanges[CryptoExchange.CoinDelta], "CoinDelta INR",
+				FiatCurrency.INR ) );
 			inlineQueryResults.Add ( ToInlineQueryResult ( exchanges[CryptoExchange.BitBay], "BitBay PLN", FiatCurrency.PLN ) );
 
 			await bot.AnswerInlineQueryAsync (
@@ -111,14 +116,14 @@ namespace TelegramBot.CryptoTickerTeleBot
 		) =>
 			new InlineQueryResultArticle
 			{
-				Id = name,
-				HideUrl = true,
-				Title = name,
-				Url = exchange.Url,
+				Id                  = name,
+				HideUrl             = true,
+				Title               = name,
+				Url                 = exchange.Url,
 				InputMessageContent = new InputTextMessageContent
 				{
 					MessageText = $"```\n{name}\n{exchange.ToTable ( fiat )}\n```",
-					ParseMode = ParseMode.Markdown
+					ParseMode   = ParseMode.Markdown
 				}
 			};
 
@@ -144,53 +149,29 @@ namespace TelegramBot.CryptoTickerTeleBot
 				var userName = messageEventArgs.Message.From.Username;
 				Logger.Debug ( $"Message received from {userName}: {message.Text}" );
 
-				if ( Commands.Contains ( command ) && !IsWhitelisted ( userName ) )
+				if ( !users.Contains ( userName ) )
+				{
+					Logger.Info ( $"First message received from {userName}" );
+					users.Add ( new TeleBotUser ( userName ) );
+				}
+
+				if ( !commands.Keys.Contains ( command ) ) return;
+
+				if ( Settings.Instance.WhitelistMode && !users.HasFlag ( userName, UserRole.Registered ) )
 				{
 					await RequestPurchase ( message, userName );
 					return;
 				}
 
-				switch ( command )
+				if ( !users.HasFlag ( userName, commands[command].role ) )
 				{
-					case "/fetch":
-						await HandleFetch ( message );
-						break;
-
-					case "/compare":
-						if ( text.Count ( x => x == ' ' ) < 2 )
-							await HandleCompare ( message );
-						else
-							await HandleCompare ( message, text.Split ( ' ' ).Skip ( 1 ).ToList ( ) );
-						break;
-
-					case "/best":
-						if ( text.Count ( x => x == ' ' ) < 2 )
-							await HandleBest ( message );
-						else
-							await HandleBest ( message, text.Split ( ' ' ).Skip ( 1 ).ToList ( ) );
-						break;
-
-					case "/subscribe":
-						await HandleSubscribe ( message, text.Split ( ' ' ).Skip ( 1 ).ToList ( ) );
-						break;
-
-					case "/unsubscribe":
-						await HandleUnsubscribe ( message );
-						break;
-
-					case "/status":
-						await HandleStatus ( message );
-						break;
-
-					case "/whitelist":
-						if ( Settings.Instance.Admins?.Contains ( userName ) == true )
-							await HandleWhitelist ( message, text.Split ( ' ' ).Skip ( 1 ).FirstOrDefault ( ) );
-						break;
-
-					case "/restart":
-						await HandleRestart ( message );
-						break;
+					await SendBlockText ( message, $"You do not have access to {command}" );
+					return;
 				}
+
+				var parameters = text.Split ( ' ' ).Skip ( 1 ).ToList ( );
+
+				await commands[command].func ( message, parameters );
 			}
 			catch ( Exception e )
 			{
@@ -198,19 +179,9 @@ namespace TelegramBot.CryptoTickerTeleBot
 			}
 		}
 
-		private static bool IsWhitelisted ( string userName )
-		{
-			if ( !Settings.Instance.WhitelistMode || Settings.Instance.Admins.Contains ( userName ) )
-				return true;
+		private bool IsWhitelisted ( string userName ) =>
+			!Settings.Instance.WhitelistMode || users.HasFlag ( userName, UserRole.Registered );
 
-			lock ( WhitelistLock )
-			{
-				if ( !File.Exists ( Settings.Instance.WhiteListFileName ) )
-					File.Create ( Settings.Instance.WhiteListFileName );
-
-				var whitelist = File.ReadAllLines ( Settings.Instance.WhiteListFileName );
-				return whitelist.Contains ( userName );
-			}
-		}
+		private delegate Task MessageHandlerDelegate ( Message message, IList<string> @params );
 	}
 }

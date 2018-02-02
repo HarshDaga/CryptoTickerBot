@@ -11,10 +11,10 @@ namespace CryptoTickerBot.Exchanges
 	{
 		public CoinDeltaExchange ( )
 		{
-			Name = "CoinDelta";
-			Url = "https://coindelta.com/";
+			Name      = "CoinDelta";
+			Url       = "https://coindelta.com/";
 			TickerUrl = "https://coindelta.com/api/v1/public/getticker/";
-			Id = CryptoExchange.CoinDelta;
+			Id        = CryptoExchange.CoinDelta;
 
 			WithdrawalFees = new Dictionary<string, decimal>
 			{
@@ -31,23 +31,8 @@ namespace CryptoTickerBot.Exchanges
 				["BCH"] = 0m
 			};
 
-			BuyFees = 0.3m;
+			BuyFees  = 0.3m;
 			SellFees = 0.3m;
-		}
-
-		private class CoinDeltaCoin
-		{
-			[JsonProperty ( "Ask" )]
-			public decimal Ask { get; set; }
-
-			[JsonProperty ( "Bid" )]
-			public decimal Bid { get; set; }
-
-			[JsonProperty ( "MarketName" )]
-			public string MarketName { get; set; }
-
-			[JsonProperty ( "Last" )]
-			public decimal Last { get; set; }
 		}
 
 		public override async Task GetExchangeData ( CancellationToken ct )
@@ -74,9 +59,24 @@ namespace CryptoTickerBot.Exchanges
 			var cdc = (CoinDeltaCoin) data;
 			decimal InrToUsd ( decimal amount ) => FiatConverter.Convert ( amount, FiatCurrency.INR, FiatCurrency.USD );
 
-			ExchangeData[symbol].LowestAsk = InrToUsd ( cdc.Ask );
+			ExchangeData[symbol].LowestAsk  = InrToUsd ( cdc.Ask );
 			ExchangeData[symbol].HighestBid = InrToUsd ( cdc.Bid );
-			ExchangeData[symbol].Rate = InrToUsd ( cdc.Last );
+			ExchangeData[symbol].Rate       = InrToUsd ( cdc.Last );
+		}
+
+		private class CoinDeltaCoin
+		{
+			[JsonProperty ( "Ask" )]
+			public decimal Ask { get; set; }
+
+			[JsonProperty ( "Bid" )]
+			public decimal Bid { get; set; }
+
+			[JsonProperty ( "MarketName" )]
+			public string MarketName { get; set; }
+
+			[JsonProperty ( "Last" )]
+			public decimal Last { get; set; }
 		}
 	}
 }

@@ -64,7 +64,7 @@ namespace CryptoTickerBot.Exchanges
 		protected CryptoExchangeBase ( )
 		{
 			ExchangeData = new Dictionary<string, CryptoCoin> ( );
-			Observers = ImmutableHashSet<IObserver<CryptoCoin>>.Empty;
+			Observers    = ImmutableHashSet<IObserver<CryptoCoin>>.Empty;
 		}
 
 		public IDisposable Subscribe ( IObserver<CryptoCoin> observer )
@@ -104,7 +104,7 @@ namespace CryptoTickerBot.Exchanges
 		{
 			CryptoCoin old = null;
 			if ( ExchangeData.ContainsKey ( symbol ) )
-				old = ExchangeData[symbol].Clone ( );
+				old                 = ExchangeData[symbol].Clone ( );
 			ExchangeData[symbol] = new CryptoCoin ( symbol );
 
 			DeserializeData ( data, symbol );
@@ -121,9 +121,9 @@ namespace CryptoTickerBot.Exchanges
 		protected void ApplyFees ( string symbol )
 		{
 			var coin = ExchangeData[symbol];
-			coin.LowestAsk += coin.LowestAsk * BuyFees / 100m;
-			coin.HighestBid += coin.HighestBid * SellFees / 100m;
-			ExchangeData[symbol] = coin;
+			coin.LowestAsk       += coin.LowestAsk * BuyFees / 100m;
+			coin.HighestBid      += coin.HighestBid * SellFees / 100m;
+			ExchangeData[symbol] =  coin;
 		}
 
 		public List<IList<object>> ToSheetRows ( ) =>
@@ -151,8 +151,8 @@ namespace CryptoTickerBot.Exchanges
 				objects.Add ( new
 				{
 					coin.Symbol,
-					Bid = $"{FiatConverter.ToString ( coin.HighestBid, FiatCurrency.USD, fiat )}",
-					Ask = $"{FiatConverter.ToString ( coin.LowestAsk, FiatCurrency.USD, fiat )}",
+					Bid    = $"{FiatConverter.ToString ( coin.HighestBid, FiatCurrency.USD, fiat )}",
+					Ask    = $"{FiatConverter.ToString ( coin.LowestAsk, FiatCurrency.USD, fiat )}",
 					Spread = $"{coin.SpreadPercentange:P}"
 				} );
 

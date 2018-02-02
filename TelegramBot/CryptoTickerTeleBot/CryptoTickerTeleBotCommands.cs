@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
+using CryptoTickerBot.Exchanges;
 using CryptoTickerBot.Extensions;
 using Tababular;
 using Telegram.Bot.Types;
-using File = System.IO.File;
+
+// ReSharper disable UnusedParameter.Local
 
 namespace TelegramBot.CryptoTickerTeleBot
 {
@@ -15,7 +16,6 @@ namespace TelegramBot.CryptoTickerTeleBot
 	{
 		public DateTime StartTime { get; } = DateTime.Now;
 		public TimeSpan UpTime => DateTime.Now - StartTime;
-
 
 		private async Task HandleSubscribe ( Message message, IList<string> @params )
 		{
@@ -40,7 +40,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 			await AddSubscription ( message, chosen, threshold );
 		}
 
-		private async Task HandleUnsubscribe ( Message message )
+		private async Task HandleUnsubscribe ( Message message, IList<string> _ )
 		{
 			foreach ( var observer in ctb.Observers.Values )
 				observer.Unsubscribe ( message.Chat.Id );
@@ -53,7 +53,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 			await SendBlockText ( message, "Unsubscribed from all exchanges." );
 		}
 
-		private async Task HandleFetch ( Message message )
+		private async Task HandleFetch ( Message message, IList<string> _ )
 		{
 			var table = exchanges.Values.ToTable ( );
 			Logger.Info ( $"Sending ticker data to {message.From.Username}" );
@@ -61,14 +61,18 @@ namespace TelegramBot.CryptoTickerTeleBot
 			await SendBlockText ( message, table );
 		}
 
-		private async Task HandleCompare ( Message message, IEnumerable<string> @params )
+		private async Task HandleCompare ( Message message, IList<string> @params )
 		{
-			var compare = ctb.CompareTable.Get (
-				@params
-					.Where ( x => GetExchangeBase ( x ) != null )
-					.Select ( x => GetExchangeBase ( x ).Id )
-					.ToArray ( )
-			);
+			Dictionary<CryptoExchange, Dictionary<CryptoExchange, Dictionary<string, decimal>>> compare;
+			if ( @params?.Count >= 2 )
+				compare = ctb.CompareTable.Get (
+					@params
+						.Where ( x => GetExchangeBase ( x ) != null )
+						.Select ( x => GetExchangeBase ( x ).Id )
+						.ToArray ( )
+				);
+			else
+				compare = ctb.CompareTable.GetAll ( );
 
 			var table = BuildCompareTable ( compare );
 
@@ -77,18 +81,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 			await SendBlockText ( message, table.ToString ( ) );
 		}
 
-		private async Task HandleCompare ( Message message )
-		{
-			var compare = ctb.CompareTable.GetAll ( );
-
-			var table = BuildCompareTable ( compare );
-
-			Logger.Info ( $"Sending compare data to {message.From.Username}" );
-
-			await SendBlockText ( message, table.ToString ( ) );
-		}
-
-		private async Task HandleBest ( Message message )
+		private async Task HandleBestAll ( Message message )
 		{
 			var best = ctb.CompareTable.GetBest ( );
 
@@ -122,8 +115,11 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 		private async Task HandleBest ( Message message, IList<string> @params )
 		{
-			if ( @params.Count < 2 )
+			if ( @params == null || @params.Count < 2 )
+			{
+				await HandleBestAll ( message );
 				return;
+			}
 
 			var from = GetExchangeBase ( @params[0] );
 			var to = GetExchangeBase ( @params[1] );
@@ -167,15 +163,15 @@ namespace TelegramBot.CryptoTickerTeleBot
 			await SendBlockText ( message, reply );
 		}
 
-		private async Task HandleStatus ( Message message )
+		private async Task HandleStatus ( Message message, IList<string> _ )
 		{
 			var formatter = new TableFormatter ( );
 			var objects = new List<object> ( );
 			foreach ( var exchange in exchanges.Values )
 				objects.Add ( new
 				{
-					Exchange = exchange.Name,
-					UpTime = $"{exchange.UpTime:hh\\:mm\\:ss}",
+					Exchange   = exchange.Name,
+					UpTime     = $"{exchange.UpTime:hh\\:mm\\:ss}",
 					LastUpdate = $"{exchange.Age:hh\\:mm\\:ss}",
 					LastChange = $"{exchange.LastChangeDuration:hh\\:mm\\:ss}"
 				} );
@@ -189,28 +185,24 @@ namespace TelegramBot.CryptoTickerTeleBot
 			await SendBlockText ( message, builder.ToString ( ) );
 		}
 
-		private async Task HandleWhitelist ( Message message, string userName )
+		private async Task HandleWhitelist ( Message message, IList<string> userNames )
 		{
-			if ( string.IsNullOrWhiteSpace ( userName ) )
+			foreach ( var userName in userNames )
 			{
-				await SendBlockText ( message, "Malformed UserName." );
-				return;
-			}
-
-			Logger.Info ( $"Adding {userName} to Whitelist." );
-			lock ( WhitelistLock )
-			{
-				var whitelist = new HashSet<string> ( File.ReadAllLines ( Settings.Instance.WhiteListFileName ) )
+				if ( string.IsNullOrWhiteSpace ( userName ) )
 				{
-					userName
-				};
-				File.WriteAllLines ( Settings.Instance.WhiteListFileName, whitelist );
+					await SendBlockText ( message, "Malformed UserName." );
+					return;
+				}
+
+				Logger.Info ( $"Registered {userName}." );
+				users.Add ( new TeleBotUser ( userName, UserRole.Registered | UserRole.Guest ) );
 			}
 
-			await SendBlockText ( message, $"Added {userName} to Whitelist." );
+			await SendBlockText ( message, $"Registered {userNames.Join ( ", " )}." );
 		}
 
-		private async Task HandleRestart ( Message message )
+		private async Task HandleRestart ( Message message, IList<string> _ )
 		{
 			ctb.Stop ( );
 			ctb.Start ( );

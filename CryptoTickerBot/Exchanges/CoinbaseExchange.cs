@@ -12,10 +12,10 @@ namespace CryptoTickerBot.Exchanges
 	{
 		public CoinbaseExchange ( )
 		{
-			Name = "Coinbase";
-			Url = "https://www.coinbase.com/";
+			Name      = "Coinbase";
+			Url       = "https://www.coinbase.com/";
 			TickerUrl = "wss://ws-feed.gdax.com/";
-			Id = CryptoExchange.Coinbase;
+			Id        = CryptoExchange.Coinbase;
 
 			WithdrawalFees = new Dictionary<string, decimal>
 			{
@@ -32,7 +32,7 @@ namespace CryptoTickerBot.Exchanges
 				["BCH"] = 0m
 			};
 
-			BuyFees = 0.3m;
+			BuyFees  = 0.3m;
 			SellFees = 0.3m;
 		}
 
@@ -64,9 +64,9 @@ namespace CryptoTickerBot.Exchanges
 
 		protected override void DeserializeData ( dynamic data, string symbol )
 		{
-			ExchangeData[symbol].LowestAsk = data.best_ask;
+			ExchangeData[symbol].LowestAsk  = data.best_ask;
 			ExchangeData[symbol].HighestBid = data.best_bid;
-			ExchangeData[symbol].Rate = data.price;
+			ExchangeData[symbol].Rate       = data.price;
 		}
 
 		private static async Task ConnectAndSubscribe ( WebSocket ws, CancellationToken ct )

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Timers;
+using CryptoTickerBot;
 using CryptoTickerBot.Exchanges;
 using CryptoTickerBot.Extensions;
 using Newtonsoft.Json;
@@ -34,25 +34,31 @@ namespace TelegramBot.CryptoTickerTeleBot
 			);
 		}
 
+		private async Task SendSubscriptionReply ( long id, CryptoExchangeBase ex, CryptoCoin oldValue, CryptoCoin newValue )
+		{
+			var change = newValue - oldValue;
+			var builder = new StringBuilder ( );
+			builder.AppendLine ( $"{ex.Name,-10} {newValue.Symbol}" )
+				.AppendLine ( $"Current Price: {ex[newValue.Symbol].Average:C}" )
+				.AppendLine ( $"Change: {change.Value.ToCurrency ( ),-8} {change.Percentage,6:P}" )
+				.AppendLine ( $"in {change.TimeDiff:dd\\:hh\\:mm\\:ss}" );
+
+			SaveSubscriptions ( );
+
+			await bot.SendTextMessageAsync ( id, builder.ToString ( ) );
+		}
+
 		private async Task AddSubscription ( Message message, CryptoExchange[] chosen, decimal threshold )
 		{
 			foreach ( var exchange in chosen )
 				lock ( subscriptionLock )
 				{
 					subscriptions.Add (
-						ctb.Observers[exchange].Subscribe ( message.Chat.Id, threshold,
+						ctb.Observers[exchange].Subscribe (
+							message.Chat.Id,
+							threshold,
 							async ( ex, oldValue, newValue ) =>
-							{
-								var change = newValue - oldValue;
-								var builder = new StringBuilder ( );
-								builder
-									.AppendLine ( $"{ex.Name,-10} {newValue.Symbol}" )
-									.AppendLine ( $"Current Price: {ex[newValue.Symbol].Average:C}" )
-									.AppendLine ( $"Change: {change.Value.ToCurrency ( ),-8} {change.Percentage,6:P}" )
-									.AppendLine ( $"in {change.TimeDiff:dd\\:hh\\:mm\\:ss}" );
-
-								await SendBlockText ( message, builder.ToString ( ) );
-							} )
+								await SendSubscriptionReply ( message.Chat.Id, ex, oldValue, newValue ) )
 					);
 				}
 
@@ -85,13 +91,6 @@ namespace TelegramBot.CryptoTickerTeleBot
 			var json = File.ReadAllText ( SubscriptionFileName );
 			lock ( subscriptionLock )
 				subscriptions = JsonConvert.DeserializeObject<List<CryptoExchangeObserver.ResumableSubscription>> ( json );
-
-			Task.Run ( ( ) =>
-			{
-				var timer = new Timer ( 1000 * 60 * 10 );
-				timer.Elapsed += ( sender, args ) => SaveSubscriptions ( );
-				timer.Start ( );
-			} );
 		}
 
 		private void ResumeSubscriptions ( )
@@ -99,19 +98,10 @@ namespace TelegramBot.CryptoTickerTeleBot
 			lock ( subscriptionLock )
 			{
 				foreach ( var subscription in subscriptions )
-					ctb.Observers[subscription.Exchange].Subscribe ( subscription,
+					ctb.Observers[subscription.Exchange].Subscribe (
+						subscription,
 						async ( ex, oldValue, newValue ) =>
-						{
-							var change = newValue - oldValue;
-							var builder = new StringBuilder ( );
-							builder
-								.AppendLine ( $"{ex.Name,-10} {newValue.Symbol}" )
-								.AppendLine ( $"Current Price: {ex[newValue.Symbol].Average:C}" )
-								.AppendLine ( $"Change: {change.Value.ToCurrency ( ),-8} {change.Percentage,6:P}" )
-								.AppendLine ( $"in {change.TimeDiff:dd\\:hh\\:mm\\:ss}" );
-
-							await bot.SendTextMessageAsync ( subscription.Id, $"```\n{builder}\n```", ParseMode.Markdown );
-						} );
+							await SendSubscriptionReply ( subscription.Id, ex, oldValue, newValue ) );
 			}
 
 			List<IGrouping<long, CryptoExchange>> groups;

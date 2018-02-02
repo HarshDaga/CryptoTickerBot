@@ -13,10 +13,10 @@ namespace CryptoTickerBot.Exchanges
 
 		public KrakenExchange ( )
 		{
-			Name = "Kraken";
-			Url = "https://www.kraken.com/";
+			Name      = "Kraken";
+			Url       = "https://www.kraken.com/";
 			TickerUrl = "https://api.kraken.com/0/public/Ticker?pair=XBTUSD,BCHUSD,ETHUSD,LTCUSD";
-			Id = CryptoExchange.Kraken;
+			Id        = CryptoExchange.Kraken;
 
 			WithdrawalFees = new Dictionary<string, decimal>
 			{
@@ -33,7 +33,7 @@ namespace CryptoTickerBot.Exchanges
 				["BCH"] = 0m
 			};
 
-			BuyFees = 0.26m;
+			BuyFees  = 0.26m;
 			SellFees = 0.26m;
 		}
 
@@ -66,9 +66,9 @@ namespace CryptoTickerBot.Exchanges
 		{
 			KrakenCoinInfo coinInfo = data;
 
-			ExchangeData[symbol].LowestAsk = coinInfo.Ask[0];
+			ExchangeData[symbol].LowestAsk  = coinInfo.Ask[0];
 			ExchangeData[symbol].HighestBid = coinInfo.Bid[0];
-			ExchangeData[symbol].Rate = coinInfo.LastTrade[0];
+			ExchangeData[symbol].Rate       = coinInfo.LastTrade[0];
 		}
 
 		#region JSON Structure

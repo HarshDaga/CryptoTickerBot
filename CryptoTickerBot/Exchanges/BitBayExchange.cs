@@ -9,10 +9,10 @@ namespace CryptoTickerBot.Exchanges
 	{
 		public BitBayExchange ( )
 		{
-			Name = "BitBay";
-			Url = "https://bitbay.net/en";
+			Name      = "BitBay";
+			Url       = "https://bitbay.net/en";
 			TickerUrl = "https://api.bitbay.net/rest/trading/ticker";
-			Id = CryptoExchange.BitBay;
+			Id        = CryptoExchange.BitBay;
 
 			WithdrawalFees = new Dictionary<string, decimal>
 			{
@@ -29,7 +29,7 @@ namespace CryptoTickerBot.Exchanges
 				["BCH"] = 0m
 			};
 
-			BuyFees = 0.3m;
+			BuyFees  = 0.3m;
 			SellFees = 0.3m;
 		}
 
@@ -67,9 +67,9 @@ namespace CryptoTickerBot.Exchanges
 
 		protected override void DeserializeData ( dynamic data, string symbol )
 		{
-			ExchangeData[symbol].LowestAsk = (decimal) data.ask;
+			ExchangeData[symbol].LowestAsk  = (decimal) data.ask;
 			ExchangeData[symbol].HighestBid = (decimal) data.bid;
-			ExchangeData[symbol].Rate = (decimal) data.last;
+			ExchangeData[symbol].Rate       = (decimal) data.last;
 		}
 	}
 }

@@ -134,7 +134,7 @@ namespace CryptoTickerBot.Helpers
 				if ( profit > bestGain )
 				{
 					bestGain = profit;
-					result = (from, to, best, leastWorst, profit);
+					result   = (from, to, best, leastWorst, profit);
 				}
 			}
 

@@ -4,6 +4,8 @@ using System.IO;
 using CryptoTickerBot.Exchanges;
 using Newtonsoft.Json;
 
+// ReSharper disable CollectionNeverUpdated.Global
+
 namespace CryptoTickerBot.Core
 {
 	public class Settings
@@ -38,20 +40,9 @@ namespace CryptoTickerBot.Core
 
 		#region Properties
 
-		public Dictionary<CryptoExchange, string> SheetsRanges { get; set; } = new Dictionary<CryptoExchange, string>
-		{
-			[CryptoExchange.BitBay] = "A3:D6",
-			[CryptoExchange.Koinex] = "A12:D15",
-			[CryptoExchange.Binance] = "A20:D23",
-			//[CryptoExchange.CoinDelta] = "A29:D32",
-			[CryptoExchange.Coinbase] = "A37:D40",
-			[CryptoExchange.Kraken] = "A29:D32"
-		};
-
-		public string ApplicationName { get; set; } = "Crypto Ticker Bot";
-
-		public string SheetName { get; set; } = "Tickers";
-
+		public Dictionary<CryptoExchange, string> SheetsRanges { get; set; }
+		public string ApplicationName { get; set; }
+		public string SheetName { get; set; }
 		public string SheetId { get; set; }
 		public TimeSpan HistorySpan { get; set; } = TimeSpan.FromMinutes ( 60 );
 
