@@ -5,20 +5,26 @@
 namespace TelegramBot.CryptoTickerTeleBot
 {
 	[Flags]
-	public enum UserRole
+	public enum UserRole : uint
 	{
 		Admin = 1 << 0,
 		Registered = 1 << 1,
-		Guest = 1 << 2
+		Guest = 1 << 2,
+		None = 1 << 20
 	}
 
 	public class TeleBotUser : IEquatable<TeleBotUser>
 	{
+		private const UserRole Guest = UserRole.Guest;
+		private const UserRole Registered = Guest | UserRole.Registered;
+		private const UserRole Admin = Registered | UserRole.Admin;
+		private static readonly UserRole[] RolePriority = {UserRole.Admin, UserRole.Registered, UserRole.Guest};
+
 		public UserRole Role { get; set; }
-		public string UserName { get; set; }
+		public string UserName { get; }
 		public DateTime Created { get; set; } = DateTime.Now;
 
-		public TeleBotUser ( string userName, UserRole role = UserRole.Guest )
+		public TeleBotUser ( string userName, UserRole role = Guest )
 		{
 			UserName = userName;
 			Role     = role;
@@ -31,17 +37,16 @@ namespace TelegramBot.CryptoTickerTeleBot
 			return Equals ( UserName, other.UserName );
 		}
 
-		public void Register ( ) => Role = UserRole.Guest | UserRole.Registered;
+		public void Register ( ) => Role = Registered;
 
-		public void MakeAdmin ( ) => Role = UserRole.Guest | UserRole.Registered | UserRole.Admin;
+		public void MakeAdmin ( ) => Role = Admin;
 
 		public static UserRole GetHighestRole ( UserRole role )
 		{
-			if ( role.HasFlag ( UserRole.Admin ) )
-				return UserRole.Admin;
-			if ( role.HasFlag ( UserRole.Registered ) )
-				return UserRole.Registered;
-			return UserRole.Guest;
+			foreach ( var r in RolePriority )
+				if ( role.HasFlag ( r ) )
+					return r;
+			return UserRole.None;
 		}
 
 		public override string ToString ( ) => $"{GetHighestRole ( Role ),-12} Username: {UserName}";
@@ -54,7 +59,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 			return Equals ( (TeleBotUser) obj );
 		}
 
-		public override int GetHashCode ( ) => UserName != null ? UserName.GetHashCode ( ) : 0;
+		public override int GetHashCode ( ) => UserName?.GetHashCode ( ) ?? 0;
 
 		public static bool operator == ( TeleBotUser left, TeleBotUser right ) => Equals ( left, right );
 

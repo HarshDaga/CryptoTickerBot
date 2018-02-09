@@ -158,13 +158,13 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 				if ( !commands.Keys.Contains ( command ) ) return;
 
-				if ( Settings.Instance.WhitelistMode && !users.HasFlag ( userName, UserRole.Registered ) )
+				if ( Settings.Instance.WhitelistMode && !users.HasUserWithFlag ( userName, UserRole.Registered ) )
 				{
 					await RequestPurchase ( message, userName );
 					return;
 				}
 
-				if ( !users.HasFlag ( userName, commands[command].role ) )
+				if ( !users.HasUserWithFlag ( userName, commands[command].role ) )
 				{
 					await SendBlockText ( message, $"You do not have access to {command}" );
 					return;
@@ -179,9 +179,6 @@ namespace TelegramBot.CryptoTickerTeleBot
 				Logger.Error ( e );
 			}
 		}
-
-		private bool IsWhitelisted ( string userName ) =>
-			!Settings.Instance.WhitelistMode || users.HasFlag ( userName, UserRole.Registered );
 
 		private delegate Task MessageHandlerDelegate ( Message message, IList<string> @params );
 	}

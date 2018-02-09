@@ -13,13 +13,13 @@ namespace TelegramBot.CryptoTickerTeleBot
 		private readonly object fileLock = new object ( );
 		private readonly string fileName;
 		private readonly object listLock = new object ( );
-		private IList<TeleBotUser> listImplementation;
+		private List<TeleBotUser> listImplementation;
 
 		public TeleBotUser this [ string userName ] =>
-			listImplementation.FirstOrDefault ( x => x.UserName == userName );
+			listImplementation.Find ( x => x.UserName == userName );
 
-		public IList<TeleBotUser> this [ UserRole role ] =>
-			listImplementation.Where ( x => x.Role.HasFlag ( role ) ).ToList ( );
+		public IEnumerable<TeleBotUser> this [ UserRole role ] =>
+			listImplementation.Where ( x => x.Role.HasFlag ( role ) );
 
 		public TeleBotUserList ( string fileName )
 		{
@@ -58,7 +58,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 		public int Count => listImplementation.Count;
 
-		public bool IsReadOnly => listImplementation.IsReadOnly;
+		public bool IsReadOnly => ( listImplementation as IList<TeleBotUser> ).IsReadOnly;
 
 		public int IndexOf ( TeleBotUser user ) => listImplementation.IndexOf ( user );
 
@@ -92,7 +92,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 			return true;
 		}
 
-		public bool HasFlag ( string userName, UserRole role ) =>
+		public bool HasUserWithFlag ( string userName, UserRole role ) =>
 			this[userName]?.Role.HasFlag ( role ) == true;
 
 		public void Load ( )
