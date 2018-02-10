@@ -92,9 +92,12 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 		private async void BotClientOnInlineQuery ( object sender, InlineQueryEventArgs eventArgs )
 		{
-			Logger.Debug ( $"Received inline query from: {eventArgs.InlineQuery.From.Username}" );
-			var fiat = eventArgs.InlineQuery.Query.ToFiatCurrency ( );
+			var userName = eventArgs.InlineQuery.From.Username;
+			Logger.Debug ( $"Received inline query from: {userName}" );
+			if ( !users.Contains ( userName ) )
+				users.Add ( new TeleBotUser ( userName ) );
 
+			var fiat = eventArgs.InlineQuery.Query.ToFiatCurrency ( );
 			var inlineQueryResults = exchanges.Values
 				.Select ( x => ToInlineQueryResult ( x, x.Name, fiat ) )
 				.ToList<InlineQueryResult> ( );
