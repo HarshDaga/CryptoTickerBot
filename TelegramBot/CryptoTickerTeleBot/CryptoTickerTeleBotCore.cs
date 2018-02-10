@@ -93,15 +93,11 @@ namespace TelegramBot.CryptoTickerTeleBot
 		private async void BotClientOnInlineQuery ( object sender, InlineQueryEventArgs eventArgs )
 		{
 			Logger.Debug ( $"Received inline query from: {eventArgs.InlineQuery.From.Username}" );
+			var fiat = eventArgs.InlineQuery.Query.ToFiatCurrency ( );
 
 			var inlineQueryResults = exchanges.Values
-				.Select ( x => ToInlineQueryResult ( x, x.Name ) )
+				.Select ( x => ToInlineQueryResult ( x, x.Name, fiat ) )
 				.ToList<InlineQueryResult> ( );
-
-			inlineQueryResults.Add ( ToInlineQueryResult ( exchanges[CryptoExchange.Koinex], "Koinex INR", FiatCurrency.INR ) );
-			inlineQueryResults.Add ( ToInlineQueryResult ( exchanges[CryptoExchange.CoinDelta], "CoinDelta INR",
-				FiatCurrency.INR ) );
-			inlineQueryResults.Add ( ToInlineQueryResult ( exchanges[CryptoExchange.BitBay], "BitBay PLN", FiatCurrency.PLN ) );
 
 			await bot.AnswerInlineQueryAsync (
 				eventArgs.InlineQuery.Id,

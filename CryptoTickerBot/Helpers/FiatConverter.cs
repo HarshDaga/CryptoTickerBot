@@ -53,6 +53,7 @@ namespace CryptoTickerBot.Helpers
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
 		private static readonly IDictionary<FiatCurrency, string> Map;
+		private static readonly IDictionary<string, FiatCurrency> StringMap;
 
 		public static Dictionary<FiatCurrency, decimal> UsdTo { get; private set; } =
 			new Dictionary<FiatCurrency, decimal> ( );
@@ -79,6 +80,16 @@ namespace CryptoTickerBot.Helpers
 					x => (FiatCurrency) Enum.Parse ( typeof ( FiatCurrency ), x.Key ),
 					x => x.First ( ).CurrencySymbol
 				);
+
+			StringMap = new Dictionary<string, FiatCurrency> ( );
+			foreach ( FiatCurrency fiat in Enum.GetValues ( typeof ( FiatCurrency ) ) )
+				StringMap[fiat.ToString ( )] = fiat;
+		}
+
+		public static FiatCurrency ToFiatCurrency ( this string symbol )
+		{
+			var upper = symbol.ToUpper ( );
+			return StringMap.ContainsKey ( upper ) ? StringMap[upper] : FiatCurrency.USD;
 		}
 
 		public static Timer StartMonitor ( )
