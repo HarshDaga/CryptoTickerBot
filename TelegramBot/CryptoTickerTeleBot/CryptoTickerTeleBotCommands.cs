@@ -240,5 +240,13 @@ namespace TelegramBot.CryptoTickerTeleBot
 			var list = users[role];
 			await SendBlockText ( message, $"{role} List:\n{list.Select ( x => x.UserName ).Join ( "\n" )}" );
 		}
+
+		private async Task HandleKill ( Message message, IList<string> @params )
+		{
+			Logger.Info ( $"Shutting down per {message.From.Username}'s request." );
+			await SendBlockText ( message, "Bye Bye 👋🏻👋🏻" );
+			await Task.Delay ( 100 );
+			Environment.Exit ( 0 );
+		}
 	}
 }
