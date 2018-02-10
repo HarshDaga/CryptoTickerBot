@@ -142,34 +142,11 @@ namespace TelegramBot.CryptoTickerTeleBot
 				if ( message == null || message.Type != MessageType.TextMessage )
 					return;
 
-				var text = message.Text;
-				var command = text.Split ( ' ' ).First ( );
-				if ( command.Contains ( $"@{me.Username}" ) )
-					command = command.Substring ( 0, command.IndexOf ( $"@{me.Username}", StringComparison.Ordinal ) );
-				var userName = messageEventArgs.Message.From.Username;
+				ParseMessage ( message, out var command, out var parameters, out var userName );
 				Logger.Debug ( $"Message received from {userName}: {message.Text}" );
 
-				if ( !users.Contains ( userName ) )
-				{
-					Logger.Info ( $"First message received from {userName}" );
-					users.Add ( new TeleBotUser ( userName ) );
-				}
-
-				if ( !commands.Keys.Contains ( command ) ) return;
-
-				if ( Settings.Instance.WhitelistMode && !users.HasUserWithFlag ( userName, UserRole.Registered ) )
-				{
-					await RequestPurchase ( message, userName );
+				if ( await ValidateUserCommand ( userName, command, message ) )
 					return;
-				}
-
-				if ( !users.HasUserWithFlag ( userName, commands[command].role ) )
-				{
-					await SendBlockText ( message, $"You do not have access to {command}" );
-					return;
-				}
-
-				var parameters = text.Split ( ' ' ).Skip ( 1 ).ToList ( );
 
 				await commands[command].func ( message, parameters );
 			}

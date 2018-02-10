@@ -7,6 +7,7 @@ using CryptoTickerBot;
 using CryptoTickerBot.Exchanges;
 using CryptoTickerBot.Extensions;
 using Newtonsoft.Json;
+using Tababular;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using TelegramBot.Extensions;
@@ -19,6 +20,41 @@ namespace TelegramBot.CryptoTickerTeleBot
 		private const string SubscriptionFileName = "Subscriptions.json";
 		private readonly object subscriptionLock = new object ( );
 		private List<CryptoExchangeObserver.ResumableSubscription> subscriptions;
+
+		private void ParseMessage ( Message message, out string command, out List<string> parameters, out string userName )
+		{
+			var text = message.Text;
+			command = text.Split ( ' ' ).First ( );
+			if ( command.Contains ( $"@{me.Username}" ) )
+				command   = command.Substring ( 0, command.IndexOf ( $"@{me.Username}", StringComparison.Ordinal ) );
+			parameters = text.Split ( ' ' ).Skip ( 1 ).ToList ( );
+			userName   = message.From.Username;
+		}
+
+		private async Task<bool> ValidateUserCommand ( string userName, string command, Message message )
+		{
+			if ( !users.Contains ( userName ) )
+			{
+				Logger.Info ( $"First message received from {userName}" );
+				users.Add ( new TeleBotUser ( userName ) );
+			}
+
+			if ( !commands.Keys.Contains ( command ) ) return true;
+
+			if ( Settings.Instance.WhitelistMode && !users.HasUserWithFlag ( userName, UserRole.Registered ) )
+			{
+				await RequestPurchase ( message, userName );
+				return true;
+			}
+
+			if ( !users.HasUserWithFlag ( userName, commands[command].role ) )
+			{
+				await SendBlockText ( message, $"You do not have access to {command}" );
+				return true;
+			}
+
+			return false;
+		}
 
 		private async Task SendBlockText ( Message message, string str )
 		{
@@ -121,25 +157,27 @@ namespace TelegramBot.CryptoTickerTeleBot
 			Dictionary<CryptoExchange, Dictionary<CryptoExchange, Dictionary<string, decimal>>> compare )
 		{
 			var table = new StringBuilder ( );
+
 			foreach ( var from in compare )
 			{
+				var formatter = new TableFormatter ( );
+				var objects = new List<IDictionary<string, object>> ( );
 				table.AppendLine ( $"{from.Key}" );
-				table.AppendLine ( $"{"Symbol",-8}{from.Value.Keys.Select ( x => $"{x,-10}" ).Join ( "" )}" );
 
 				var symbols = ExtractSymbols ( from );
 
 				foreach ( var symbol in symbols )
 				{
-					table.Append ( $"{symbol,-8}" );
+					var dict = new Dictionary<string, object> {["Symbol"] = $"{symbol,-8}"};
 					foreach ( var value in from.Value )
-						table.Append (
+						dict[value.Key.ToString ( )] =
 							value.Value.ContainsKey ( symbol )
 								? $"{value.Value[symbol],-10:P}"
-								: $"{"",-10}"
-						);
-					table.AppendLine ( );
+								: $"{"",-10}";
+					objects.Add ( dict );
 				}
 
+				table.AppendLine ( formatter.FormatDictionaries ( objects ) );
 				table.AppendLine ( );
 			}
 

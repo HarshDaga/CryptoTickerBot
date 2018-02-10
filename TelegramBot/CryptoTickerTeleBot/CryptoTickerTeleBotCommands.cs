@@ -83,29 +83,29 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 		private async Task HandleBestAll ( Message message )
 		{
-			var best = ctb.CompareTable.GetBest ( );
+			var (from, to, first, second, profit) = ctb.CompareTable.GetBest ( );
 
-			if ( best.first == null || best.second == null )
+			if ( first == null || second == null )
 			{
 				await SendBlockText ( message, "ERROR: Not enough data received." );
 				return;
 			}
 
-			var from = exchanges[best.from];
-			var to = exchanges[best.to];
+			var fromExchange = exchanges[from];
+			var toExchange = exchanges[to];
 			var fees =
-				from.ExchangeData[best.first].Buy ( from.DepositFees[best.first] ) +
-				from.ExchangeData[best.first].Sell ( from.WithdrawalFees[best.first] ) +
-				to.ExchangeData[best.second].Buy ( to.DepositFees[best.second] ) +
-				to.ExchangeData[best.second].Sell ( to.WithdrawalFees[best.second] );
-			var minInvestment = fees / best.profit;
+				fromExchange.ExchangeData[first].Buy ( fromExchange.DepositFees[first] ) +
+				fromExchange.ExchangeData[first].Sell ( fromExchange.WithdrawalFees[first] ) +
+				toExchange.ExchangeData[second].Buy ( toExchange.DepositFees[second] ) +
+				toExchange.ExchangeData[second].Sell ( toExchange.WithdrawalFees[second] );
+			var minInvestment = fees / profit;
 
 			var reply =
-				$"Buy  {best.first} From: {from.Name,-12} @ {from[best.first].BuyPrice:C}\n" +
-				$"Sell {best.first} To:   {to.Name,-12} @ {to[best.first].SellPrice:C}\n" +
-				$"Buy  {best.second} From: {to.Name,-12} @ {to[best.second].BuyPrice:C}\n" +
-				$"Sell {best.second} To:   {from.Name,-12} @ {from[best.second].SellPrice:C}\n" +
-				$"Expected profit:    {best.profit:P}\n" +
+				$"Buy  {first} From: {fromExchange.Name,-12} @ {fromExchange[first].BuyPrice:C}\n" +
+				$"Sell {first} To:   {toExchange.Name,-12} @ {toExchange[first].SellPrice:C}\n" +
+				$"Buy  {second} From: {toExchange.Name,-12} @ {toExchange[second].BuyPrice:C}\n" +
+				$"Sell {second} To:   {fromExchange.Name,-12} @ {fromExchange[second].SellPrice:C}\n" +
+				$"Expected profit:    {profit:P}\n" +
 				$"Estimated fees:     {fees:C}\n" +
 				$"Minimum Investment: {minInvestment:C}";
 
@@ -166,21 +166,21 @@ namespace TelegramBot.CryptoTickerTeleBot
 		private async Task HandleStatus ( Message message, IList<string> _ )
 		{
 			var formatter = new TableFormatter ( );
-			var objects = new List<object> ( );
+			var objects = new List<IDictionary<string, string>> ( );
 			foreach ( var exchange in exchanges.Values )
-				objects.Add ( new
+				objects.Add ( new Dictionary<string, string>
 				{
-					Exchange   = exchange.Name,
-					UpTime     = $"{exchange.UpTime:hh\\:mm\\:ss}",
-					LastUpdate = $"{exchange.Age:hh\\:mm\\:ss}",
-					LastChange = $"{exchange.LastChangeDuration:hh\\:mm\\:ss}"
+					["Exchange"]    = exchange.Name,
+					["Up Time"]     = $"{exchange.UpTime:hh\\:mm\\:ss}",
+					["Last Update"] = $"{exchange.Age:hh\\:mm\\:ss}",
+					["Last Change"] = $"{exchange.LastChangeDuration:hh\\:mm\\:ss}"
 				} );
 
 			var builder = new StringBuilder ( );
 			builder
 				.AppendLine ( $"Running since {UpTime:dd\\:hh\\:mm\\:ss}" )
 				.AppendLine ( "" )
-				.AppendLine ( formatter.FormatObjects ( objects ) );
+				.AppendLine ( formatter.FormatDictionaries ( objects ) );
 
 			await SendBlockText ( message, builder.ToString ( ) );
 		}
@@ -196,7 +196,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 				}
 
 				Logger.Info ( $"Registered {userName}." );
-				users.Add ( new TeleBotUser ( userName, UserRole.Registered | UserRole.Guest ) );
+				users.Add ( new TeleBotUser ( userName, TeleBotUser.Registered ) );
 			}
 
 			await SendBlockText ( message, $"Registered {userNames.Join ( ", " )}." );

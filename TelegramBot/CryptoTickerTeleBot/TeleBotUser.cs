@@ -15,9 +15,9 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 	public class TeleBotUser : IEquatable<TeleBotUser>
 	{
-		private const UserRole Guest = UserRole.Guest;
-		private const UserRole Registered = Guest | UserRole.Registered;
-		private const UserRole Admin = Registered | UserRole.Admin;
+		public const UserRole Guest = UserRole.Guest;
+		public const UserRole Registered = Guest | UserRole.Registered;
+		public const UserRole Admin = Registered | UserRole.Admin;
 		private static readonly UserRole[] RolePriority = {UserRole.Admin, UserRole.Registered, UserRole.Guest};
 
 		public UserRole Role { get; set; }
