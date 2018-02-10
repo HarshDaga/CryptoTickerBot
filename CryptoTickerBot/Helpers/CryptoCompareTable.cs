@@ -7,7 +7,7 @@ namespace CryptoTickerBot.Helpers
 {
 	public class CryptoCompareTable
 	{
-		public Dictionary<CryptoExchange, CryptoExchangeBase> Exchanges { get; set; } =
+		public Dictionary<CryptoExchange, CryptoExchangeBase> Exchanges { get; } =
 			new Dictionary<CryptoExchange, CryptoExchangeBase> ( );
 
 		public CryptoCompareTable ( params CryptoExchangeBase[] exchanges )

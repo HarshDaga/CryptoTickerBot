@@ -22,19 +22,21 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 		private readonly Dictionary<string, (UserRole role, MessageHandlerDelegate func)> commands;
 
-		private readonly Bot ctb = new Bot ( );
+		private readonly Bot ctb;
 		private readonly TeleBotUserList users;
 		private TelegramBotClient bot;
-		private Dictionary<CryptoExchange, CryptoExchangeBase> exchanges;
+		private readonly Dictionary<CryptoExchange, CryptoExchangeBase> exchanges;
 		private User me;
 
 		public string BotToken { get; }
 
-		public TeleBot ( string botToken )
+		public TeleBot ( string botToken, Bot ctb )
 		{
 			BotToken      = botToken;
 			subscriptions = new List<CryptoExchangeObserver.ResumableSubscription> ( );
 			users         = new TeleBotUserList ( Settings.Instance.UsersFileName );
+			this.ctb      = ctb;
+			exchanges     = ctb.Exchanges;
 
 			commands = new
 				Dictionary<string, (UserRole role, MessageHandlerDelegate func)>
@@ -56,8 +58,6 @@ namespace TelegramBot.CryptoTickerTeleBot
 		{
 			try
 			{
-				StartCryptoTickerBot ( );
-
 				bot                =  new TelegramBotClient ( BotToken );
 				bot.OnMessage      += BotClientOnMessage;
 				bot.OnInlineQuery  += BotClientOnInlineQuery;
@@ -127,12 +127,6 @@ namespace TelegramBot.CryptoTickerTeleBot
 					ParseMode   = ParseMode.Markdown
 				}
 			};
-
-		private void StartCryptoTickerBot ( )
-		{
-			exchanges = ctb.Exchanges;
-			ctb.Start ( );
-		}
 
 		private async void BotClientOnMessage ( object sender, MessageEventArgs messageEventArgs )
 		{

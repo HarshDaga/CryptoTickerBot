@@ -1,4 +1,6 @@
-﻿using TelegramBot.CryptoTickerTeleBot;
+﻿using System;
+using CryptoTickerBot.Core;
+using TelegramBot.CryptoTickerTeleBot;
 
 namespace TelegramBot
 {
@@ -6,7 +8,10 @@ namespace TelegramBot
 	{
 		public static void Main ( )
 		{
-			var teleBot = new TeleBot ( Settings.Instance.BotToken );
+			Console.Title = "Crypto Ticker Telegram Bot";
+			var ctb = new Bot ( );
+			ctb.Start ( );
+			var teleBot = new TeleBot ( Settings.Instance.BotToken, ctb );
 			teleBot.Start ( );
 		}
 	}

@@ -11,7 +11,7 @@ using Timer = System.Timers.Timer;
 
 namespace CryptoTickerBot.Core
 {
-	public partial class Bot
+	public partial class Bot : IDisposable
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
@@ -94,6 +94,26 @@ namespace CryptoTickerBot.Core
 					throw;
 				}
 			}
+		}
+
+		private void Dispose ( bool disposing )
+		{
+			if ( !disposing ) return;
+
+			cts?.Dispose ( );
+			fiatMonitor?.Dispose ( );
+			service?.Dispose ( );
+		}
+
+		public void Dispose ( )
+		{
+			Dispose ( true );
+			GC.SuppressFinalize ( this );
+		}
+
+		~Bot ( )
+		{
+			Dispose ( false );
 		}
 	}
 }
