@@ -39,10 +39,10 @@ namespace TelegramBot.CryptoTickerTeleBot
 			commands = new
 				Dictionary<string, (UserRole role, MessageHandlerDelegate func)>
 				{
-					["/fetch"]       = (UserRole.Registered, HandleFetch),
+					["/fetch"]       = (UserRole.Guest, HandleFetch),
 					["/compare"]     = (UserRole.Registered, HandleCompare),
 					["/best"]        = (UserRole.Registered, HandleBest),
-					["/status"]      = (UserRole.Registered, HandleStatus),
+					["/status"]      = (UserRole.Guest, HandleStatus),
 					["/subscribe"]   = (UserRole.Registered, HandleSubscribe),
 					["/unsubscribe"] = (UserRole.Registered, HandleUnsubscribe),
 					["/register"]    = (UserRole.Admin, HandleRegister),
