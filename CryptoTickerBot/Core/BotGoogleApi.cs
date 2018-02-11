@@ -36,30 +36,7 @@ namespace CryptoTickerBot.Core
 
 					try
 					{
-						var valueRanges = new List<ValueRange> ( );
-						while ( pendingUpdates.TryDequeue ( out var id ) )
-						{
-							var exchange = Exchanges[id];
-							if ( !exchange.IsComplete )
-							{
-								Logger.Warn (
-									$"Sheets not updated for {id}. Only {exchange.ExchangeData.Count} coins updated." +
-									$" {exchange.ExchangeData.Keys.Join ( ", " )}." );
-								continue;
-							}
-
-							if ( !Settings.Instance.SheetsRanges.ContainsKey ( id ) )
-								continue;
-
-							var range = Settings.Instance.SheetsRanges[id];
-							valueRanges.Add ( new ValueRange
-							{
-								Values = exchange.ToSheetRows ( ),
-								Range  = $"{Settings.Instance.SheetName}!{range}"
-							} );
-							Logger.Info ( $"Updated Sheets for {id}" );
-						}
-
+						var valueRanges = GetValueRangesToUpdate ( );
 						await UpdateSheet ( valueRanges );
 					}
 					catch ( Exception e )
@@ -74,6 +51,35 @@ namespace CryptoTickerBot.Core
 				};
 				updateTimer.Start ( );
 			}, cts.Token );
+		}
+
+		private List<ValueRange> GetValueRangesToUpdate ( )
+		{
+			var valueRanges = new List<ValueRange> ( );
+			while ( pendingUpdates.TryDequeue ( out var id ) )
+			{
+				var exchange = Exchanges[id];
+				if ( !exchange.IsComplete )
+				{
+					Logger.Warn (
+						$"Sheets not updated for {id}. Only {exchange.ExchangeData.Count} coins updated." +
+						$" {exchange.ExchangeData.Keys.Join ( ", " )}." );
+					continue;
+				}
+
+				if ( !Settings.Instance.SheetsRanges.ContainsKey ( id ) )
+					continue;
+
+				var range = Settings.Instance.SheetsRanges[id];
+				valueRanges.Add ( new ValueRange
+				{
+					Values = exchange.ToSheetRows ( ),
+					Range  = $"{Settings.Instance.SheetName}!{range}"
+				} );
+				Logger.Info ( $"Updated Sheets for {id}" );
+			}
+
+			return valueRanges;
 		}
 
 		private void CreateSheetsService ( )
