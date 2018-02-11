@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CryptoTickerBot.Exchanges;
 using CryptoTickerBot.Extensions;
+using CryptoTickerBot.Helpers;
 using Tababular;
 using Telegram.Bot.Types;
 
@@ -53,12 +54,17 @@ namespace TelegramBot.CryptoTickerTeleBot
 			await SendBlockText ( message, "Unsubscribed from all exchanges." );
 		}
 
-		private async Task HandleFetch ( Message message, IList<string> _ )
+		private async Task HandleFetch ( Message message, IList<string> @params )
 		{
-			var table = exchanges.Values.ToTable ( );
+			var fiat = FiatCurrency.USD;
+			if ( @params.Count >= 1 )
+				fiat = @params[0].ToFiatCurrency ( );
+
+			var tables = exchanges.Values.ToTables ( fiat );
 			Logger.Info ( $"Sending ticker data to {message.From.Username}" );
 
-			await SendBlockText ( message, table );
+			foreach ( var table in tables )
+				await SendBlockText ( message, table );
 		}
 
 		private async Task HandleCompare ( Message message, IList<string> @params )
@@ -74,11 +80,12 @@ namespace TelegramBot.CryptoTickerTeleBot
 			else
 				compare = ctb.CompareTable.GetAll ( );
 
-			var table = BuildCompareTable ( compare );
+			var tables = BuildCompareTables ( compare );
 
 			Logger.Info ( $"Sending compare data to {message.From.Username}" );
 
-			await SendBlockText ( message, table.ToString ( ) );
+			foreach ( var table in tables )
+				await SendBlockText ( message, table );
 		}
 
 		private async Task HandleBestAll ( Message message )

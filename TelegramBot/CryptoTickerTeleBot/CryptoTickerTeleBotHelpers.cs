@@ -26,7 +26,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 			var text = message.Text;
 			command = text.Split ( ' ' ).First ( );
 			if ( command.Contains ( $"@{me.Username}" ) )
-				command   = command.Substring ( 0, command.IndexOf ( $"@{me.Username}", StringComparison.Ordinal ) );
+				command = command.Substring ( 0, command.IndexOf ( $"@{me.Username}", StringComparison.Ordinal ) );
 			parameters = text.Split ( ' ' ).Skip ( 1 ).ToList ( );
 			userName   = message.From.Username;
 		}
@@ -153,35 +153,37 @@ namespace TelegramBot.CryptoTickerTeleBot
 			}
 		}
 
-		private static StringBuilder BuildCompareTable (
+		private static IList<string> BuildCompareTables (
 			Dictionary<CryptoExchange, Dictionary<CryptoExchange, Dictionary<string, decimal>>> compare )
 		{
-			var table = new StringBuilder ( );
+			var tables = new List<string> ( );
 
 			foreach ( var from in compare )
 			{
+				var table = new StringBuilder ( );
 				var formatter = new TableFormatter ( );
 				var objects = new List<IDictionary<string, object>> ( );
 				table.AppendLine ( $"{from.Key}" );
 
 				var symbols = ExtractSymbols ( from );
 
-				foreach ( var symbol in symbols )
+				foreach ( var value in from.Value )
 				{
-					var dict = new Dictionary<string, object> {["Symbol"] = $"{symbol,-8}"};
-					foreach ( var value in from.Value )
-						dict[value.Key.ToString ( )] =
+					var dict = new Dictionary<string, object> {["Exchange"] = $"{value.Key}"};
+					foreach ( var symbol in symbols )
+						dict[symbol] =
 							value.Value.ContainsKey ( symbol )
-								? $"{value.Value[symbol],-10:P}"
-								: $"{"",-10}";
+								? $"{value.Value[symbol]:P}"
+								: "";
 					objects.Add ( dict );
 				}
 
 				table.AppendLine ( formatter.FormatDictionaries ( objects ) );
 				table.AppendLine ( );
+				tables.Add ( table.ToString ( ) );
 			}
 
-			return table;
+			return tables;
 		}
 
 		private CryptoExchangeBase GetExchangeBase ( string name ) =>

@@ -23,9 +23,9 @@ namespace TelegramBot.CryptoTickerTeleBot
 		private readonly Dictionary<string, (UserRole role, MessageHandlerDelegate func)> commands;
 
 		private readonly Bot ctb;
+		private readonly Dictionary<CryptoExchange, CryptoExchangeBase> exchanges;
 		private readonly TeleBotUserList users;
 		private TelegramBotClient bot;
-		private readonly Dictionary<CryptoExchange, CryptoExchangeBase> exchanges;
 		private User me;
 
 		public string BotToken { get; }
@@ -41,16 +41,16 @@ namespace TelegramBot.CryptoTickerTeleBot
 			commands = new
 				Dictionary<string, (UserRole role, MessageHandlerDelegate func)>
 				{
-					["/fetch"]       = (UserRole.Guest, HandleFetch),
-					["/compare"]     = (UserRole.Registered, HandleCompare),
-					["/best"]        = (UserRole.Registered, HandleBest),
-					["/status"]      = (UserRole.Guest, HandleStatus),
-					["/subscribe"]   = (UserRole.Registered, HandleSubscribe),
-					["/unsubscribe"] = (UserRole.Registered, HandleUnsubscribe),
-					["/register"]    = (UserRole.Admin, HandleRegister),
-					["/restart"]     = (UserRole.Admin, HandleRestart),
-					["/users"]       = (UserRole.Admin, HandleUsers),
-					["/kill"]        = (UserRole.Admin, HandleKill)
+					["/status"]      = ( UserRole.Guest, HandleStatus ),
+					["/fetch"]       = ( UserRole.Guest, HandleFetch ),
+					["/compare"]     = ( UserRole.Registered, HandleCompare ),
+					["/best"]        = ( UserRole.Registered, HandleBest ),
+					["/subscribe"]   = ( UserRole.Registered, HandleSubscribe ),
+					["/unsubscribe"] = ( UserRole.Registered, HandleUnsubscribe ),
+					["/register"]    = ( UserRole.Admin, HandleRegister ),
+					["/restart"]     = ( UserRole.Admin, HandleRestart ),
+					["/users"]       = ( UserRole.Admin, HandleUsers ),
+					["/kill"]        = ( UserRole.Admin, HandleKill )
 				};
 		}
 
@@ -103,11 +103,18 @@ namespace TelegramBot.CryptoTickerTeleBot
 				.Select ( x => ToInlineQueryResult ( x, x.Name, fiat ) )
 				.ToList<InlineQueryResult> ( );
 
-			await bot.AnswerInlineQueryAsync (
-				eventArgs.InlineQuery.Id,
-				inlineQueryResults.ToArray ( ),
-				0
-			);
+			try
+			{
+				await bot.AnswerInlineQueryAsync (
+					eventArgs.InlineQuery.Id,
+					inlineQueryResults.ToArray ( ),
+					0
+				);
+			}
+			catch ( Exception e )
+			{
+				Logger.Error ( e );
+			}
 		}
 
 		private static InlineQueryResultArticle ToInlineQueryResult (
@@ -117,10 +124,10 @@ namespace TelegramBot.CryptoTickerTeleBot
 		) =>
 			new InlineQueryResultArticle
 			{
-				Id                  = name,
-				HideUrl             = true,
-				Title               = name,
-				Url                 = exchange.Url,
+				Id      = name,
+				HideUrl = true,
+				Title   = name,
+				Url     = exchange.Url,
 				InputMessageContent = new InputTextMessageContent
 				{
 					MessageText = $"```\n{name}\n{exchange.ToTable ( fiat )}\n```",

@@ -21,18 +21,11 @@ namespace CryptoTickerBot.Extensions
 		public static T[] TakeLast<T> ( this T[] source, int count ) =>
 			source.Skip ( Math.Max ( 0, source.Length - count ) ).ToArray ( );
 
-		public static string ToTable ( this IEnumerable<CryptoExchangeBase> exchanges )
-		{
-			var tables = new List<string> ( );
-
-			foreach ( var exchange in exchanges )
-			{
-				tables.Add ( exchange.Name );
-				tables.Add ( exchange.ToTable ( FiatCurrency.USD ) );
-			}
-
-			return tables.Join ( "\n" );
-		}
+		public static IEnumerable<string> ToTables (
+			this IEnumerable<CryptoExchangeBase> exchanges,
+			FiatCurrency fiat = FiatCurrency.USD
+		) =>
+			exchanges.Select ( exchange => $"{exchange.Name}\n{exchange.ToTable ( fiat )}" );
 
 		public static T GetFieldValue<T> ( this object obj, string name )
 		{

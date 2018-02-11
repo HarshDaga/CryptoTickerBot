@@ -41,6 +41,12 @@ namespace CryptoTickerBot.Core
 		public bool IsRunning { get; private set; }
 		public bool IsInitialized { get; private set; }
 
+		public void Dispose ( )
+		{
+			Dispose ( true );
+			GC.SuppressFinalize ( this );
+		}
+
 		public void Start ( )
 		{
 			IsRunning = true;
@@ -74,8 +80,8 @@ namespace CryptoTickerBot.Core
 			foreach ( var exchange in Exchanges.Values )
 			{
 				exchange.ClearObservers ( );
-				Observers[exchange.Id] =  new CryptoExchangeObserver ( exchange );
-				exchange.Changed       += ( e, coin ) =>
+				Observers[exchange.Id] = new CryptoExchangeObserver ( exchange );
+				exchange.Changed += ( e, coin ) =>
 				{
 					if ( !pendingUpdates.Contains ( e.Id ) )
 						pendingUpdates.Enqueue ( e.Id );
@@ -103,12 +109,6 @@ namespace CryptoTickerBot.Core
 			cts?.Dispose ( );
 			fiatMonitor?.Dispose ( );
 			service?.Dispose ( );
-		}
-
-		public void Dispose ( )
-		{
-			Dispose ( true );
-			GC.SuppressFinalize ( this );
 		}
 
 		~Bot ( )
