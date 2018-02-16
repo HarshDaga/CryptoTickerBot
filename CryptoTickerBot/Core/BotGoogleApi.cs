@@ -114,7 +114,7 @@ namespace CryptoTickerBot.Core
 					Logger.Error ( gae, "Too many Google Api requests. Cooling down." );
 					await Task.Delay ( 5000, cts.Token );
 				}
-				else if ( !( e is TaskCanceledException ) )
+				else
 				{
 					Logger.Error ( e );
 				}
