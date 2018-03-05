@@ -263,6 +263,8 @@ namespace TelegramBot.CryptoTickerTeleBot
 				Logger.Info ( $"Registered {userName}." );
 
 				var user = new TeleBotUser ( userName, role );
+				if ( Users.Contains ( user ) )
+					Users.Remove ( user );
 				Users.Add ( user );
 				using ( var unit = new UnitOfWork ( ) )
 				{
