@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using CryptoTickerBot.Data.Enums;
+using CryptoTickerBot.Exchanges.Core;
 using Newtonsoft.Json;
 using NLog;
 using WebSocketSharp;
@@ -15,35 +17,13 @@ namespace CryptoTickerBot.Exchanges
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
-		public BinanceExchange ( )
+		public BinanceExchange ( ) : base ( CryptoExchangeId.Binance )
 		{
-			Name      = "Binance";
-			Url       = "https://www.binance.com/";
-			TickerUrl = "wss://stream2.binance.com:9443/ws/!ticker@arr@3000ms";
-			Id        = CryptoExchange.Binance;
-
-			WithdrawalFees = new Dictionary<string, decimal>
-			{
-				["BTC"] = 0.001m,
-				["ETH"] = 0.01m,
-				["LTC"] = 0.01m,
-				["BCH"] = 0.001m
-			};
-			DepositFees = new Dictionary<string, decimal>
-			{
-				["BTC"] = 0m,
-				["ETH"] = 0m,
-				["LTC"] = 0m,
-				["BCH"] = 0m
-			};
-
-			BuyFees  = 0.1m;
-			SellFees = 0.1m;
 		}
 
 		public override async Task GetExchangeData ( CancellationToken ct )
 		{
-			ExchangeData = new Dictionary<string, CryptoCoin> ( );
+			ExchangeData = new Dictionary<CryptoCoinId, CryptoCoin> ( );
 
 			using ( var ws = new WebSocket ( TickerUrl ) )
 			{
@@ -79,11 +59,11 @@ namespace CryptoTickerBot.Exchanges
 			}
 		}
 
-		protected override void DeserializeData ( dynamic datum, string symbol )
+		protected override void DeserializeData ( dynamic datum, CryptoCoinId id )
 		{
-			ExchangeData[symbol].LowestAsk  = datum.a;
-			ExchangeData[symbol].HighestBid = datum.b;
-			ExchangeData[symbol].Rate       = datum.w;
+			ExchangeData[id].LowestAsk  = datum.a;
+			ExchangeData[id].HighestBid = datum.b;
+			ExchangeData[id].Rate       = datum.w;
 		}
 	}
 }

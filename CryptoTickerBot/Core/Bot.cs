@@ -1,10 +1,13 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CryptoTickerBot.Data.Enums;
+using CryptoTickerBot.Data.Persistence;
 using CryptoTickerBot.Exchanges;
+using CryptoTickerBot.Exchanges.Core;
 using CryptoTickerBot.Helpers;
 using NLog;
 using Timer = System.Timers.Timer;
@@ -15,31 +18,43 @@ namespace CryptoTickerBot.Core
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
-		public readonly Dictionary<CryptoExchange, CryptoExchangeBase> Exchanges =
-			new Dictionary<CryptoExchange, CryptoExchangeBase>
+		public readonly Dictionary<CryptoExchangeId, CryptoExchangeBase> Exchanges =
+			new Dictionary<CryptoExchangeId, CryptoExchangeBase>
 			{
-				[CryptoExchange.Koinex]    = new KoinexExchange ( ),
-				[CryptoExchange.BitBay]    = new BitBayExchange ( ),
-				[CryptoExchange.Binance]   = new BinanceExchange ( ),
-				[CryptoExchange.CoinDelta] = new CoinDeltaExchange ( ),
-				[CryptoExchange.Coinbase]  = new CoinbaseExchange ( ),
-				[CryptoExchange.Kraken]    = new KrakenExchange ( )
+				[CryptoExchangeId.Koinex]    = new KoinexExchange ( ),
+				[CryptoExchangeId.BitBay]    = new BitBayExchange ( ),
+				[CryptoExchangeId.Binance]   = new BinanceExchange ( ),
+				[CryptoExchangeId.CoinDelta] = new CoinDeltaExchange ( ),
+				[CryptoExchangeId.Coinbase]  = new CoinbaseExchange ( ),
+				[CryptoExchangeId.Kraken]    = new KrakenExchange ( )
 			};
-
-		public readonly Dictionary<CryptoExchange, CryptoExchangeObserver> Observers =
-			new Dictionary<CryptoExchange, CryptoExchangeObserver> ( );
-
-		private readonly ConcurrentQueue<CryptoExchange> pendingUpdates =
-			new ConcurrentQueue<CryptoExchange> ( );
 
 		private CancellationTokenSource cts;
 		private Timer fiatMonitor;
+
+		private ImmutableHashSet<CryptoExchangeId> pendingUpdates =
+			ImmutableHashSet<CryptoExchangeId>.Empty;
 
 		public CryptoCompareTable CompareTable { get; } =
 			new CryptoCompareTable ( );
 
 		public bool IsRunning { get; private set; }
 		public bool IsInitialized { get; private set; }
+
+		public static List<Data.Domain.CryptoCoin> SupportedCoins
+		{
+			get
+			{
+				List<Data.Domain.CryptoCoin> result;
+				using ( var unit = new UnitOfWork ( ) )
+				{
+					result = unit.Coins.GetAll ( ).ToList ( );
+					unit.Complete ( );
+				}
+
+				return result;
+			}
+		}
 
 		public void Dispose ( )
 		{
@@ -79,17 +94,14 @@ namespace CryptoTickerBot.Core
 		{
 			foreach ( var exchange in Exchanges.Values )
 			{
-				exchange.ClearObservers ( );
-				Observers[exchange.Id] = new CryptoExchangeObserver ( exchange );
-				exchange.Changed += ( e, coin ) =>
-				{
-					if ( !pendingUpdates.Contains ( e.Id ) )
-						pendingUpdates.Enqueue ( e.Id );
-				};
-				var observer = Observers[exchange.Id];
-				observer.Next += ( e, coin ) => Logger.Debug ( $"{e.Name,-10} {e[coin.Symbol]}" );
-				exchange.Subscribe ( observer );
+				exchange.Next    += UpdateExchangeLastUpdateInDb;
+				exchange.Changed += ( e, coin ) => Logger.Debug ( $"{e.Name,-10} {e[coin.Id]}" );
+				exchange.Changed += StoreCoinValueInDb;
+				exchange.Changed += UpdateExchangeLastChangeInDb;
+				exchange.Changed += ( ex, coin ) => pendingUpdates = pendingUpdates.Add ( ex.Id );
+
 				CompareTable.AddExchange ( exchange );
+
 				try
 				{
 					Task.Run ( ( ) => exchange.StartMonitor ( cts.Token ), cts.Token );
@@ -99,6 +111,33 @@ namespace CryptoTickerBot.Core
 					Logger.Error ( e );
 					throw;
 				}
+			}
+		}
+
+		private static void StoreCoinValueInDb ( CryptoExchangeBase exchange, CryptoCoin coin )
+		{
+			using ( var unit = new UnitOfWork ( ) )
+			{
+				unit.CoinValues.AddCoinValue ( coin.Id, exchange.Id, coin.LowestAsk, coin.HighestBid, coin.Time );
+				unit.Complete ( );
+			}
+		}
+
+		private static void UpdateExchangeLastChangeInDb ( CryptoExchangeBase exchange, CryptoCoin coin )
+		{
+			using ( var unit = new UnitOfWork ( ) )
+			{
+				unit.Exchanges.UpdateExchange ( exchange.Id, lastChange: DateTime.UtcNow );
+				unit.Complete ( );
+			}
+		}
+
+		private static void UpdateExchangeLastUpdateInDb ( CryptoExchangeBase exchange, CryptoCoin coin )
+		{
+			using ( var unit = new UnitOfWork ( ) )
+			{
+				unit.Exchanges.UpdateExchange ( exchange.Id, lastUpdate: DateTime.UtcNow );
+				unit.Complete ( );
 			}
 		}
 

@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using CryptoTickerBot.Exchanges;
+using CryptoTickerBot.Data.Enums;
+using CryptoTickerBot.Exchanges.Core;
 using MoreLinq;
 
 namespace CryptoTickerBot.Helpers
 {
 	public class CryptoCompareTable
 	{
-		public Dictionary<CryptoExchange, CryptoExchangeBase> Exchanges { get; } =
-			new Dictionary<CryptoExchange, CryptoExchangeBase> ( );
+		public Dictionary<CryptoExchangeId, CryptoExchangeBase> Exchanges { get; } =
+			new Dictionary<CryptoExchangeId, CryptoExchangeBase> ( );
 
 		public CryptoCompareTable ( params CryptoExchangeBase[] exchanges )
 		{
@@ -19,12 +20,12 @@ namespace CryptoTickerBot.Helpers
 		public void AddExchange ( CryptoExchangeBase exchange ) =>
 			Exchanges[exchange.Id] = exchange;
 
-		public Dictionary<string, decimal> GetPair ( CryptoExchange from, CryptoExchange to )
+		public Dictionary<CryptoCoinId, decimal> GetPair ( CryptoExchangeId from, CryptoExchangeId to )
 		{
 			if ( !Exchanges.ContainsKey ( from ) || !Exchanges.ContainsKey ( to ) )
 				return null;
 
-			var result = new Dictionary<string, decimal> ( );
+			var result = new Dictionary<CryptoCoinId, decimal> ( );
 			var symbols =
 				Exchanges[from].ExchangeData.Keys
 					.Intersect ( Exchanges[to].ExchangeData.Keys )
@@ -40,32 +41,32 @@ namespace CryptoTickerBot.Helpers
 			return result;
 		}
 
-		public Dictionary<CryptoExchange, Dictionary<string, decimal>> GetAll ( CryptoExchange from )
+		public Dictionary<CryptoExchangeId, Dictionary<CryptoCoinId, decimal>> GetAll ( CryptoExchangeId from )
 		{
 			if ( !Exchanges.ContainsKey ( from ) )
 				return null;
 
-			var result = new Dictionary<CryptoExchange, Dictionary<string, decimal>> ( );
+			var result = new Dictionary<CryptoExchangeId, Dictionary<CryptoCoinId, decimal>> ( );
 			foreach ( var to in Exchanges.Keys )
 				result[to] = GetPair ( from, to );
 
 			return result;
 		}
 
-		public Dictionary<CryptoExchange, Dictionary<CryptoExchange, Dictionary<string, decimal>>> GetAll ( )
+		public Dictionary<CryptoExchangeId, Dictionary<CryptoExchangeId, Dictionary<CryptoCoinId, decimal>>> GetAll ( )
 		{
-			var result = new Dictionary<CryptoExchange, Dictionary<CryptoExchange, Dictionary<string, decimal>>> ( );
+			var result = new Dictionary<CryptoExchangeId, Dictionary<CryptoExchangeId, Dictionary<CryptoCoinId, decimal>>> ( );
 			foreach ( var exchange in Exchanges.Keys )
 				result[exchange] = GetAll ( exchange );
 
 			return result;
 		}
 
-		public Dictionary<CryptoExchange, Dictionary<CryptoExchange, Dictionary<string, decimal>>> Get (
-			params CryptoExchange[] exchanges
+		public Dictionary<CryptoExchangeId, Dictionary<CryptoExchangeId, Dictionary<CryptoCoinId, decimal>>> Get (
+			params CryptoExchangeId[] exchanges
 		)
 		{
-			var result = new Dictionary<CryptoExchange, Dictionary<CryptoExchange, Dictionary<string, decimal>>> ( );
+			var result = new Dictionary<CryptoExchangeId, Dictionary<CryptoExchangeId, Dictionary<CryptoCoinId, decimal>>> ( );
 			foreach ( var exchange in exchanges.Intersect ( Exchanges.Keys ) )
 				result[exchange] = GetAll ( exchange )
 					.Where ( pair => exchanges.Contains ( pair.Key ) )
@@ -75,8 +76,8 @@ namespace CryptoTickerBot.Helpers
 		}
 
 		public static void RemoveExchange (
-			Dictionary<CryptoExchange, Dictionary<string, decimal>> compare,
-			params CryptoExchange[] cryptoExchanges
+			Dictionary<CryptoExchangeId, Dictionary<string, decimal>> compare,
+			params CryptoExchangeId[] cryptoExchanges
 		)
 		{
 			foreach ( var exchange in cryptoExchanges )
@@ -84,8 +85,8 @@ namespace CryptoTickerBot.Helpers
 		}
 
 		public static void RemoveExchange (
-			Dictionary<CryptoExchange, Dictionary<CryptoExchange, Dictionary<string, decimal>>> compare,
-			params CryptoExchange[] cryptoExchanges
+			Dictionary<CryptoExchangeId, Dictionary<CryptoExchangeId, Dictionary<string, decimal>>> compare,
+			params CryptoExchangeId[] cryptoExchanges
 		)
 		{
 			foreach ( var exchange in cryptoExchanges )
@@ -95,10 +96,10 @@ namespace CryptoTickerBot.Helpers
 				RemoveExchange ( compareValue, cryptoExchanges );
 		}
 
-		public static (string best, string leastWorst, decimal profit) GetBestPair (
-			Dictionary<CryptoExchange, Dictionary<CryptoExchange, Dictionary<string, decimal>>> compare,
-			CryptoExchange from,
-			CryptoExchange to
+		public static (CryptoCoinId best, CryptoCoinId leastWorst, decimal profit) GetBestPair (
+			Dictionary<CryptoExchangeId, Dictionary<CryptoExchangeId, Dictionary<CryptoCoinId, decimal>>> compare,
+			CryptoExchangeId from,
+			CryptoExchangeId to
 		)
 		{
 			var best = compare[from][to].MaxBy ( x => x.Value ).Key;
@@ -108,21 +109,31 @@ namespace CryptoTickerBot.Helpers
 				* ( 1m + compare[to][from][leastWorst] )
 				- 1m;
 
-			return (best, leastWorst, profit);
+			return ( best, leastWorst, profit );
 		}
 
-		public (string best, string leastWorst, decimal profit) GetBestPair ( CryptoExchange from, CryptoExchange to )
+		public (CryptoCoinId best, CryptoCoinId leastWorst, decimal profit) GetBestPair (
+			CryptoExchangeId from, CryptoExchangeId to )
 		{
 			var compare = GetAll ( );
 			return GetBestPair ( compare, from, to );
 		}
 
-		public (CryptoExchange from, CryptoExchange to, string first, string second, decimal profit) GetBest ( )
+		public
+			(
+			CryptoExchangeId from,
+			CryptoExchangeId to,
+			CryptoCoinId first,
+			CryptoCoinId second,
+			decimal profit
+			)
+			GetBest ( )
 		{
 			var all = GetAll ( );
 			var exchanges = Exchanges.Keys.ToList ( );
 			var bestGain = decimal.MinValue;
-			(CryptoExchange from, CryptoExchange to, string first, string second, decimal profit) result = default;
+			(CryptoExchangeId from, CryptoExchangeId to, CryptoCoinId first, CryptoCoinId second, decimal profit) result =
+				default;
 
 			foreach ( var from in exchanges )
 			foreach ( var to in exchanges )
@@ -134,7 +145,7 @@ namespace CryptoTickerBot.Helpers
 				if ( profit > bestGain )
 				{
 					bestGain = profit;
-					result   = (from, to, best, leastWorst, profit);
+					result   = ( from, to, best, leastWorst, profit );
 				}
 			}
 

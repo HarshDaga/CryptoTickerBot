@@ -3,23 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CryptoTickerBot;
-using CryptoTickerBot.Exchanges;
+using CryptoTickerBot.Data.Domain;
+using CryptoTickerBot.Data.Enums;
+using CryptoTickerBot.Data.Persistence;
+using CryptoTickerBot.Exchanges.Core;
 using CryptoTickerBot.Extensions;
-using Newtonsoft.Json;
 using Tababular;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using TelegramBot.Extensions;
-using File = System.IO.File;
+using CryptoCoin = CryptoTickerBot.CryptoCoin;
 
 namespace TelegramBot.CryptoTickerTeleBot
 {
 	public partial class TeleBot
 	{
-		private const string SubscriptionFileName = "Subscriptions.json";
 		private readonly object subscriptionLock = new object ( );
-		private List<CryptoExchangeObserver.ResumableSubscription> subscriptions;
+		public List<TelegramSubscription> Subscriptions;
 
 		private void ParseMessage ( Message message, out string command, out List<string> parameters, out string userName )
 		{
@@ -33,21 +33,27 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 		private async Task<bool> ValidateUserCommand ( string userName, string command, Message message )
 		{
-			if ( !users.Contains ( userName ) )
+			if ( !Users.Contains ( userName ) )
 			{
 				Logger.Info ( $"First message received from {userName}" );
-				users.Add ( new TeleBotUser ( userName ) );
+				var user = new TeleBotUser ( userName );
+				Users.Add ( user );
+				using ( var unit = new UnitOfWork ( ) )
+				{
+					unit.Users.Add ( user.UserName, user.Role, user.Created );
+					unit.Complete ( );
+				}
 			}
 
 			if ( !commands.Keys.Contains ( command ) ) return true;
 
-			if ( Settings.Instance.WhitelistMode && !users.HasUserWithFlag ( userName, UserRole.Registered ) )
+			if ( Settings.Instance.WhitelistMode && Users.Get ( userName )?.Role < UserRole.Registered )
 			{
 				await RequestPurchase ( message, userName );
 				return true;
 			}
 
-			if ( !users.HasUserWithFlag ( userName, commands[command].role ) )
+			if ( Users.Get ( userName )?.Role < commands[command].role )
 			{
 				await SendBlockText ( message, $"You do not have access to {command}" );
 				return true;
@@ -70,91 +76,112 @@ namespace TelegramBot.CryptoTickerTeleBot
 			);
 		}
 
-		private async Task SendSubscriptionReply ( long id, CryptoExchangeBase ex, CryptoCoin oldValue, CryptoCoin newValue )
+		private async Task SendSubscriptionReply (
+			TelegramSubscription subscription,
+			CryptoCoin oldValue,
+			CryptoCoin newValue
+		)
 		{
 			var change = newValue - oldValue;
 			var builder = new StringBuilder ( );
 			builder
-				.AppendLine ( $"{ex.Name,-14} {newValue.Symbol}" )
-				.AppendLine ( $"Current Price: {ex[newValue.Symbol].Average:C}" )
+				.AppendLine ( $"{subscription.Exchange.Name,-14} {newValue.Symbol}" )
+				.AppendLine ( $"Current Price: {subscription.Exchange[newValue.Id].Average:C}" )
 				.AppendLine ( $"Change:        {change.Value.ToCurrency ( )}" )
 				.AppendLine ( $"Change %:      {change.Percentage:P}" )
 				.AppendLine ( $"in {change.TimeDiff:dd\\:hh\\:mm\\:ss}" );
 
-			SaveSubscriptions ( );
-
-			await bot.SendTextMessageAsync ( id, $"```\n{builder}\n```", ParseMode.Markdown );
+			await bot.SendTextMessageAsync (
+				subscription.ChatId,
+				$"```\n{builder}\n```", ParseMode.Markdown
+			);
 		}
 
-		private async Task AddSubscription ( Message message, CryptoExchange[] chosen, decimal threshold )
+		private static async Task UpdateSubscriptionInDb (
+			TelegramSubscription subscription,
+			CryptoCoinId coinId
+		)
 		{
-			foreach ( var exchange in chosen )
-				lock ( subscriptionLock )
+			await Task.Run ( ( ) =>
 				{
-					subscriptions.Add (
-						ctb.Observers[exchange].Subscribe (
-							message.Chat.Id,
-							threshold,
-							async ( ex, oldValue, newValue ) =>
-								await SendSubscriptionReply ( message.Chat.Id, ex, oldValue, newValue ) )
-					);
+					using ( var unit = new UnitOfWork ( ) )
+					{
+						var sub = unit.Subscriptions.Get ( subscription.Id );
+						unit.Subscriptions.Update ( sub, coinId );
+						unit.Complete ( );
+					}
 				}
-
-			var reply = $"Subscribed to {chosen.Join ( ", " )} at a threshold of {threshold:P}";
-			Logger.Info ( reply );
-			await SendBlockText ( message, reply );
-
-			SaveSubscriptions ( );
+			);
 		}
 
-		private void SaveSubscriptions ( )
+		private void StartSubscription ( CryptoExchangeBase exchange, TeleSubscription sub )
 		{
-			Logger.Debug ( $"Saving subscriptions to {SubscriptionFileName}" );
+			var subscription = new TelegramSubscription ( exchange, sub );
+			subscription.Changed += SendSubscriptionReply;
+			subscription.Changed += async ( s, o, n ) => await UpdateSubscriptionInDb ( s, n.Id );
+			exchange.Subscribe ( subscription );
 			lock ( subscriptionLock )
+				Subscriptions.Add ( subscription );
+		}
+
+		private async Task AddSubscription (
+			Message message,
+			CryptoExchangeBase exchange,
+			decimal threshold,
+			IEnumerable<CryptoCoinId> coinIds
+		)
+		{
+			var ids = coinIds.ToList ( );
+			TeleSubscription sub;
+
+			using ( var unit = new UnitOfWork ( ) )
 			{
-				var json = JsonConvert.SerializeObject ( subscriptions, Formatting.Indented );
-				File.WriteAllText ( SubscriptionFileName, json );
+				sub = unit.Subscriptions.Add ( exchange.Id, message.Chat.Id, message.From.Username, threshold, ids );
+				unit.Complete ( );
 			}
+
+			StartSubscription ( exchange, sub );
+
+			await SendBlockText (
+				message,
+				$"Subscribed to {exchange.Name} at a threshold of {threshold:P}\n" +
+				$"For coins: {ids.Join ( ", " )}"
+			);
 		}
 
 		private void LoadSubscriptions ( )
 		{
-			if ( !File.Exists ( SubscriptionFileName ) )
-			{
-				SaveSubscriptions ( );
-				return;
-			}
-
-			Logger.Debug ( $"Loading subscriptions from {SubscriptionFileName}" );
-			var json = File.ReadAllText ( SubscriptionFileName );
 			lock ( subscriptionLock )
-				subscriptions = JsonConvert.DeserializeObject<List<CryptoExchangeObserver.ResumableSubscription>> ( json );
+				Subscriptions = new List<TelegramSubscription> ( );
+
+			using ( var unit = new UnitOfWork ( ) )
+			{
+				foreach ( var exchange in exchanges.Values )
+				{
+					var subscriptions = unit.Subscriptions.GetAll ( exchange.Id );
+					foreach ( var subscription in subscriptions.Where ( x => !x.Expired ) )
+						StartSubscription ( exchange, subscription );
+				}
+
+				unit.Complete ( );
+			}
 		}
 
-		private void ResumeSubscriptions ( )
+		private void SendResumeNotifications ( )
 		{
+			List<IGrouping<long, CryptoExchangeBase>> groups;
 			lock ( subscriptionLock )
-			{
-				foreach ( var subscription in subscriptions )
-					ctb.Observers[subscription.Exchange].Subscribe (
-						subscription,
-						async ( ex, oldValue, newValue ) =>
-							await SendSubscriptionReply ( subscription.Id, ex, oldValue, newValue ) );
-			}
-
-			List<IGrouping<long, CryptoExchange>> groups;
-			lock ( subscriptionLock )
-				groups = subscriptions.GroupBy ( x => x.Id, x => x.Exchange ).ToList ( );
+				groups = Subscriptions.GroupBy ( x => x.ChatId, x => x.Exchange ).ToList ( );
 			foreach ( var group in groups )
 			{
-				var reply = $"Resumed subscription(s) for {group.Join ( ", " )}.";
+				var reply = $"Resumed subscription(s) for {group.Select ( x => x.Name ).Join ( ", " )}.";
 				Logger.Info ( reply );
 				bot.SendTextMessageAsync ( group.Key, $"```\n{reply}\n```", ParseMode.Markdown );
 			}
 		}
 
 		private static IList<string> BuildCompareTables (
-			Dictionary<CryptoExchange, Dictionary<CryptoExchange, Dictionary<string, decimal>>> compare )
+			Dictionary<CryptoExchangeId, Dictionary<CryptoExchangeId, Dictionary<CryptoCoinId, decimal>>> compare )
 		{
 			var tables = new List<string> ( );
 
@@ -165,15 +192,15 @@ namespace TelegramBot.CryptoTickerTeleBot
 				var objects = new List<IDictionary<string, object>> ( );
 				table.AppendLine ( $"{from.Key}" );
 
-				var symbols = ExtractSymbols ( from );
+				var coinIds = ExtractSymbols ( from );
 
 				foreach ( var value in from.Value )
 				{
 					var dict = new Dictionary<string, object> {["Exchange"] = $"{value.Key}"};
-					foreach ( var symbol in symbols )
-						dict[symbol] =
-							value.Value.ContainsKey ( symbol )
-								? $"{value.Value[symbol]:P}"
+					foreach ( var id in coinIds )
+						dict[id.ToString ( )] =
+							value.Value.ContainsKey ( id )
+								? $"{value.Value[id]:P}"
 								: "";
 					objects.Add ( dict );
 				}
@@ -191,11 +218,11 @@ namespace TelegramBot.CryptoTickerTeleBot
 				.AsEnumerable ( )
 				.FirstOrDefault ( x => x.Name.Equals ( name, StringComparison.CurrentCultureIgnoreCase ) );
 
-		private static IList<string> ExtractSymbols (
-			KeyValuePair<CryptoExchange, Dictionary<CryptoExchange, Dictionary<string, decimal>>> from
+		private static IList<CryptoCoinId> ExtractSymbols (
+			KeyValuePair<CryptoExchangeId, Dictionary<CryptoExchangeId, Dictionary<CryptoCoinId, decimal>>> from
 		) =>
 			from.Value.Values.Aggregate (
-				new List<string> ( ),
+				new List<CryptoCoinId> ( ),
 				( current, to ) =>
 					current.Union ( to.Keys )
 						.OrderBy ( x => x )

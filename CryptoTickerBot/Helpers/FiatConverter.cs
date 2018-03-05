@@ -4,49 +4,13 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using CryptoTickerBot.Data.Enums;
 using Flurl.Http;
 using Newtonsoft.Json;
 using NLog;
 
 namespace CryptoTickerBot.Helpers
 {
-	public enum FiatCurrency
-	{
-		USD,
-		AUD,
-		BGN,
-		BRL,
-		CAD,
-		CHF,
-		CNY,
-		CZK,
-		DKK,
-		EUR,
-		GBP,
-		HKD,
-		HRK,
-		HUF,
-		IDR,
-		ILS,
-		INR,
-		ISK,
-		JPY,
-		KRW,
-		MXN,
-		MYR,
-		NOK,
-		NZD,
-		PHP,
-		PLN,
-		RON,
-		RUB,
-		SEK,
-		SGD,
-		THB,
-		TRY,
-		ZAR
-	}
-
 	public static class FiatConverter
 	{
 		private const string TickerUrl = "http://api.fixer.io/latest?base=USD";

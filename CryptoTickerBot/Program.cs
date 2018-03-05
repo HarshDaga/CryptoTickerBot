@@ -11,6 +11,9 @@ namespace CryptoTickerBot
 
 		public static void Main ( )
 		{
+			AppDomain.CurrentDomain.UnhandledException += ( sender, args ) =>
+				Logger.Error ( args );
+
 			Console.Title = Settings.Instance.ApplicationName;
 			Logger.Info ( $"Started {Settings.Instance.ApplicationName}" );
 			var ctb = new Bot ( );

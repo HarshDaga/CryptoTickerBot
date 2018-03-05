@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using CryptoTickerBot.Exchanges;
+using CryptoTickerBot.Data.Enums;
 using Newtonsoft.Json;
 
 // ReSharper disable CollectionNeverUpdated.Global
@@ -40,11 +39,10 @@ namespace CryptoTickerBot.Core
 
 		#region Properties
 
-		public Dictionary<CryptoExchange, string> SheetsRanges { get; set; }
+		public Dictionary<CryptoExchangeId, string> SheetsRanges { get; set; }
 		public string ApplicationName { get; set; }
 		public string SheetName { get; set; }
 		public string SheetId { get; set; }
-		public TimeSpan HistorySpan { get; set; } = TimeSpan.FromMinutes ( 60 );
 
 		#endregion Properties
 	}

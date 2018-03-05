@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using CryptoTickerBot.Data.Enums;
+using CryptoTickerBot.Exchanges.Core;
 using Flurl.Http;
 using Newtonsoft.Json;
 using NLog;
@@ -11,35 +13,13 @@ namespace CryptoTickerBot.Exchanges
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
-		public KrakenExchange ( )
+		public KrakenExchange ( ) : base ( CryptoExchangeId.Kraken )
 		{
-			Name      = "Kraken";
-			Url       = "https://www.kraken.com/";
-			TickerUrl = "https://api.kraken.com/0/public/Ticker?pair=XBTUSD,BCHUSD,ETHUSD,LTCUSD";
-			Id        = CryptoExchange.Kraken;
-
-			WithdrawalFees = new Dictionary<string, decimal>
-			{
-				["BTC"] = 0.00025m,
-				["ETH"] = 0.005m,
-				["LTC"] = 0.02m,
-				["BCH"] = 0.001m
-			};
-			DepositFees = new Dictionary<string, decimal>
-			{
-				["BTC"] = 0m,
-				["ETH"] = 0m,
-				["LTC"] = 0m,
-				["BCH"] = 0m
-			};
-
-			BuyFees  = 0.26m;
-			SellFees = 0.26m;
 		}
 
 		public override async Task GetExchangeData ( CancellationToken ct )
 		{
-			ExchangeData = new Dictionary<string, CryptoCoin> ( );
+			ExchangeData = new Dictionary<CryptoCoinId, CryptoCoin> ( );
 
 			while ( !ct.IsCancellationRequested )
 			{
@@ -62,13 +42,13 @@ namespace CryptoTickerBot.Exchanges
 			}
 		}
 
-		protected override void DeserializeData ( dynamic data, string symbol )
+		protected override void DeserializeData ( dynamic data, CryptoCoinId id )
 		{
 			KrakenCoinInfo coinInfo = data;
 
-			ExchangeData[symbol].LowestAsk  = coinInfo.Ask[0];
-			ExchangeData[symbol].HighestBid = coinInfo.Bid[0];
-			ExchangeData[symbol].Rate       = coinInfo.LastTrade[0];
+			ExchangeData[id].LowestAsk  = coinInfo.Ask[0];
+			ExchangeData[id].HighestBid = coinInfo.Bid[0];
+			ExchangeData[id].Rate       = coinInfo.LastTrade[0];
 		}
 
 		#region JSON Structure

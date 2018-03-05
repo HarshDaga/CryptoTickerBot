@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2024
+VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoTickerBot", "CryptoTickerBot\CryptoTickerBot.csproj", "{E5B5113A-89F5-4211-97EF-388130A85FFA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelegramBot", "TelegramBot\TelegramBot.csproj", "{DAD483B5-F8A5-426B-9B40-ABDA25B17CE3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoTickerBot.Data", "CryptoTickerBot.Data\CryptoTickerBot.Data.csproj", "{E6348A63-F393-4DCD-B6BD-7C40301DE399}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{DAD483B5-F8A5-426B-9B40-ABDA25B17CE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DAD483B5-F8A5-426B-9B40-ABDA25B17CE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DAD483B5-F8A5-426B-9B40-ABDA25B17CE3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6348A63-F393-4DCD-B6BD-7C40301DE399}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6348A63-F393-4DCD-B6BD-7C40301DE399}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6348A63-F393-4DCD-B6BD-7C40301DE399}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6348A63-F393-4DCD-B6BD-7C40301DE399}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

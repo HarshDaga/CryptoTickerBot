@@ -1,33 +1,21 @@
 ﻿using System;
+using CryptoTickerBot.Data.Enums;
 
 // ReSharper disable NonReadonlyMemberInGetHashCode
 
 namespace TelegramBot.CryptoTickerTeleBot
 {
-	[Flags]
-	public enum UserRole : uint
-	{
-		Admin = 1 << 0,
-		Registered = 1 << 1,
-		Guest = 1 << 2,
-		None = 1 << 20
-	}
-
 	public class TeleBotUser : IEquatable<TeleBotUser>
 	{
-		public const UserRole Guest = UserRole.Guest;
-		public const UserRole Registered = Guest | UserRole.Registered;
-		public const UserRole Admin = Registered | UserRole.Admin;
-		private static readonly UserRole[] RolePriority = {UserRole.Admin, UserRole.Registered, UserRole.Guest};
-
-		public UserRole Role { get; set; }
+		public UserRole Role { get; }
 		public string UserName { get; }
-		public DateTime Created { get; set; } = DateTime.Now;
+		public DateTime Created { get; }
 
-		public TeleBotUser ( string userName, UserRole role = Guest )
+		public TeleBotUser ( string userName, UserRole role = UserRole.Guest, DateTime? created = null )
 		{
 			UserName = userName;
 			Role     = role;
+			Created  = created ?? DateTime.UtcNow;
 		}
 
 		public bool Equals ( TeleBotUser other )
@@ -37,19 +25,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 			return Equals ( UserName, other.UserName );
 		}
 
-		public void Register ( ) => Role = Registered;
-
-		public void MakeAdmin ( ) => Role = Admin;
-
-		public static UserRole GetHighestRole ( UserRole role )
-		{
-			foreach ( var r in RolePriority )
-				if ( role.HasFlag ( r ) )
-					return r;
-			return UserRole.None;
-		}
-
-		public override string ToString ( ) => $"{GetHighestRole ( Role ),-12} Username: {UserName}";
+		public override string ToString ( ) => $"{Role,-12} Username: {UserName}";
 
 		public override bool Equals ( object obj )
 		{

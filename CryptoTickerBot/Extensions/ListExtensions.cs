@@ -5,8 +5,8 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
-using CryptoTickerBot.Exchanges;
-using CryptoTickerBot.Helpers;
+using CryptoTickerBot.Data.Enums;
+using CryptoTickerBot.Exchanges.Core;
 
 namespace CryptoTickerBot.Extensions
 {

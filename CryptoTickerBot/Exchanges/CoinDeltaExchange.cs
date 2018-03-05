@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using CryptoTickerBot.Data.Enums;
+using CryptoTickerBot.Exchanges.Core;
 using CryptoTickerBot.Helpers;
 using Flurl.Http;
 using Newtonsoft.Json;
@@ -9,35 +11,13 @@ namespace CryptoTickerBot.Exchanges
 {
 	public class CoinDeltaExchange : CryptoExchangeBase
 	{
-		public CoinDeltaExchange ( )
+		public CoinDeltaExchange ( ) : base ( CryptoExchangeId.CoinDelta )
 		{
-			Name      = "CoinDelta";
-			Url       = "https://coindelta.com/";
-			TickerUrl = "https://coindelta.com/api/v1/public/getticker/";
-			Id        = CryptoExchange.CoinDelta;
-
-			WithdrawalFees = new Dictionary<string, decimal>
-			{
-				["BTC"] = 0.001m,
-				["ETH"] = 0.001m,
-				["LTC"] = 0.002m,
-				["BCH"] = 0.001m
-			};
-			DepositFees = new Dictionary<string, decimal>
-			{
-				["BTC"] = 0m,
-				["ETH"] = 0m,
-				["LTC"] = 0m,
-				["BCH"] = 0m
-			};
-
-			BuyFees  = 0.3m;
-			SellFees = 0.3m;
 		}
 
 		public override async Task GetExchangeData ( CancellationToken ct )
 		{
-			ExchangeData = new Dictionary<string, CryptoCoin> ( );
+			ExchangeData = new Dictionary<CryptoCoinId, CryptoCoin> ( );
 
 			while ( !ct.IsCancellationRequested )
 			{
@@ -54,14 +34,14 @@ namespace CryptoTickerBot.Exchanges
 			}
 		}
 
-		protected override void DeserializeData ( dynamic data, string symbol )
+		protected override void DeserializeData ( dynamic data, CryptoCoinId id )
 		{
 			var cdc = (CoinDeltaCoin) data;
 			decimal InrToUsd ( decimal amount ) => FiatConverter.Convert ( amount, FiatCurrency.INR, FiatCurrency.USD );
 
-			ExchangeData[symbol].LowestAsk  = InrToUsd ( cdc.Ask );
-			ExchangeData[symbol].HighestBid = InrToUsd ( cdc.Bid );
-			ExchangeData[symbol].Rate       = InrToUsd ( cdc.Last );
+			ExchangeData[id].LowestAsk  = InrToUsd ( cdc.Ask );
+			ExchangeData[id].HighestBid = InrToUsd ( cdc.Bid );
+			ExchangeData[id].Rate       = InrToUsd ( cdc.Last );
 		}
 
 		private class CoinDeltaCoin

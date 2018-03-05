@@ -1,48 +1,28 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using CryptoTickerBot.Data.Enums;
+using CryptoTickerBot.Exchanges.Core;
 using Flurl.Http;
 
 namespace CryptoTickerBot.Exchanges
 {
 	public class BitBayExchange : CryptoExchangeBase
 	{
-		public BitBayExchange ( )
+		public BitBayExchange ( ) : base ( CryptoExchangeId.BitBay )
 		{
-			Name      = "BitBay";
-			Url       = "https://bitbay.net/en";
-			TickerUrl = "https://api.bitbay.net/rest/trading/ticker";
-			Id        = CryptoExchange.BitBay;
-
-			WithdrawalFees = new Dictionary<string, decimal>
-			{
-				["BTC"] = 0.0009m,
-				["ETH"] = 0.00126m,
-				["LTC"] = 0.005m,
-				["BCH"] = 0.0006m
-			};
-			DepositFees = new Dictionary<string, decimal>
-			{
-				["BTC"] = 0m,
-				["ETH"] = 0m,
-				["LTC"] = 0m,
-				["BCH"] = 0m
-			};
-
-			BuyFees  = 0.3m;
-			SellFees = 0.3m;
 		}
 
 		public override async Task GetExchangeData ( CancellationToken ct )
 		{
-			ExchangeData = new Dictionary<string, CryptoCoin> ( );
+			ExchangeData = new Dictionary<CryptoCoinId, CryptoCoin> ( );
 
 			var tickers = new List<(string symbol, string url)>
 			{
-				("BTC", "https://bitbay.net/API/Public/BTC/ticker.json"),
-				("ETH", "https://bitbay.net/API/Public/ETH/ticker.json"),
-				("LTC", "https://bitbay.net/API/Public/LTC/ticker.json"),
-				("BCH", "https://bitbay.net/API/Public/BCC/ticker.json")
+				( "BTC", "https://bitbay.net/API/Public/BTC/ticker.json" ),
+				( "ETH", "https://bitbay.net/API/Public/ETH/ticker.json" ),
+				( "LTC", "https://bitbay.net/API/Public/LTC/ticker.json" ),
+				( "BCH", "https://bitbay.net/API/Public/BCC/ticker.json" )
 			};
 
 			while ( !ct.IsCancellationRequested )
@@ -65,11 +45,11 @@ namespace CryptoTickerBot.Exchanges
 				}
 		}
 
-		protected override void DeserializeData ( dynamic data, string symbol )
+		protected override void DeserializeData ( dynamic data, CryptoCoinId id )
 		{
-			ExchangeData[symbol].LowestAsk  = (decimal) data.ask;
-			ExchangeData[symbol].HighestBid = (decimal) data.bid;
-			ExchangeData[symbol].Rate       = (decimal) data.last;
+			ExchangeData[id].LowestAsk  = (decimal) data.ask;
+			ExchangeData[id].HighestBid = (decimal) data.bid;
+			ExchangeData[id].Rate       = (decimal) data.last;
 		}
 	}
 }

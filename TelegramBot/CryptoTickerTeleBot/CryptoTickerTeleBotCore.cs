@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core;
-using CryptoTickerBot.Exchanges;
+using CryptoTickerBot.Data.Enums;
+using CryptoTickerBot.Data.Persistence;
+using CryptoTickerBot.Exchanges.Core;
 using CryptoTickerBot.Helpers;
 using NLog;
 using Telegram.Bot;
@@ -13,6 +15,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InlineQueryResults;
 using Telegram.Bot.Types.InputMessageContents;
+using TelegramBot.Extensions;
 
 namespace TelegramBot.CryptoTickerTeleBot
 {
@@ -23,20 +26,23 @@ namespace TelegramBot.CryptoTickerTeleBot
 		private readonly Dictionary<string, (UserRole role, MessageHandlerDelegate func)> commands;
 
 		private readonly Bot ctb;
-		private readonly Dictionary<CryptoExchange, CryptoExchangeBase> exchanges;
-		private readonly TeleBotUserList users;
+
+		private readonly Dictionary<CryptoExchangeId, CryptoExchangeBase> exchanges;
+
 		private TelegramBotClient bot;
 		private User me;
 
 		public string BotToken { get; }
+		public List<TeleBotUser> Users { get; private set; }
 
 		public TeleBot ( string botToken, Bot ctb )
 		{
 			BotToken      = botToken;
-			subscriptions = new List<CryptoExchangeObserver.ResumableSubscription> ( );
-			users         = new TeleBotUserList ( Settings.Instance.UsersFileName );
+			Subscriptions = new List<TelegramSubscription> ( );
 			this.ctb      = ctb;
 			exchanges     = ctb.Exchanges;
+
+			FetchUserList ( );
 
 			commands = new
 				Dictionary<string, (UserRole role, MessageHandlerDelegate func)>
@@ -47,11 +53,22 @@ namespace TelegramBot.CryptoTickerTeleBot
 					["/best"]        = ( UserRole.Registered, HandleBest ),
 					["/subscribe"]   = ( UserRole.Registered, HandleSubscribe ),
 					["/unsubscribe"] = ( UserRole.Registered, HandleUnsubscribe ),
-					["/register"]    = ( UserRole.Admin, HandleRegister ),
 					["/restart"]     = ( UserRole.Admin, HandleRestart ),
 					["/users"]       = ( UserRole.Admin, HandleUsers ),
-					["/kill"]        = ( UserRole.Admin, HandleKill )
+					["/kill"]        = ( UserRole.Admin, HandleKill ),
+					["/putgroup"]    = ( UserRole.Owner, HandlePutGroup )
 				};
+		}
+
+		private void FetchUserList ( )
+		{
+			using ( var unit = new UnitOfWork ( ) )
+			{
+				Users = unit.Users.GetAll ( )
+					.Select ( x => new TeleBotUser ( x.UserName, x.Role, x.Created ) )
+					.ToList ( );
+				unit.Complete ( );
+			}
 		}
 
 		public void Start ( )
@@ -72,7 +89,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 					Thread.Sleep ( 10 );
 
 				LoadSubscriptions ( );
-				ResumeSubscriptions ( );
+				SendResumeNotifications ( );
 
 				Console.ReadLine ( );
 			}
@@ -95,8 +112,16 @@ namespace TelegramBot.CryptoTickerTeleBot
 		{
 			var userName = eventArgs.InlineQuery.From.Username;
 			Logger.Debug ( $"Received inline query from: {userName}" );
-			if ( !users.Contains ( userName ) )
-				users.Add ( new TeleBotUser ( userName ) );
+			if ( !Users.Contains ( userName ) )
+			{
+				var user = new TeleBotUser ( userName );
+				Users.Add ( user );
+				using ( var unit = new UnitOfWork ( ) )
+				{
+					unit.Users.Add ( user.UserName, user.Role, user.Created );
+					unit.Complete ( );
+				}
+			}
 
 			var fiat = eventArgs.InlineQuery.Query.ToFiatCurrency ( );
 			var inlineQueryResults = exchanges.Values

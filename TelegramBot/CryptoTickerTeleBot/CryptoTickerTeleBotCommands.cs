@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CryptoTickerBot.Exchanges;
+using CryptoTickerBot.Core;
+using CryptoTickerBot.Data;
+using CryptoTickerBot.Data.Enums;
+using CryptoTickerBot.Data.Persistence;
 using CryptoTickerBot.Extensions;
 using CryptoTickerBot.Helpers;
 using Tababular;
 using Telegram.Bot.Types;
+using TelegramBot.Extensions;
 
 // ReSharper disable UnusedParameter.Local
 
@@ -15,22 +19,28 @@ namespace TelegramBot.CryptoTickerTeleBot
 {
 	public partial class TeleBot
 	{
-		public DateTime StartTime { get; } = DateTime.Now;
-		public TimeSpan UpTime => DateTime.Now - StartTime;
+		public DateTime StartTime { get; } = DateTime.UtcNow;
+		public TimeSpan UpTime => DateTime.UtcNow - StartTime;
 
 		private async Task HandleSubscribe ( Message message, IList<string> @params )
 		{
+			// Check exchange name
 			var chosen = @params
 				.Where ( x => GetExchangeBase ( x ) != null )
-				.Select ( x => GetExchangeBase ( x ).Id )
-				.ToArray ( );
+				.Select ( GetExchangeBase )
+				.FirstOrDefault ( );
 
-			if ( chosen.Length == 0 )
+			if ( chosen == null )
 			{
-				chosen = exchanges.Keys.ToArray ( );
-				await SendBlockText ( message, "No exchanges provided, subscribing to all exchanges." );
+				await SendBlockText ( message, "No exchanges provided." );
+				await SendBlockText ( message,
+				                      "Supported Exchanges:\n" +
+				                      $"{exchanges.Select ( e => e.Value.Name ).Join ( "\n" )}"
+				);
+				return;
 			}
 
+			// Check threshold value
 			var threshold = 0.05m;
 			var thresholdString = @params.FirstOrDefault ( x => decimal.TryParse ( x.Trim ( '%' ), out var _ ) );
 			if ( !string.IsNullOrEmpty ( thresholdString ) )
@@ -38,18 +48,42 @@ namespace TelegramBot.CryptoTickerTeleBot
 			else
 				await SendBlockText ( message, $"No threshold provided, setting to default {threshold:P}" );
 
-			await AddSubscription ( message, chosen, threshold );
+			// Check coin symbols
+			var supported = Bot.SupportedCoins;
+			var coinIds = supported
+				.Where ( x => @params.Any (
+					         c => c.Equals ( x.Symbol, StringComparison.InvariantCultureIgnoreCase )
+				         )
+				)
+				.Select ( x => x.Id )
+				.ToList ( );
+			if ( coinIds.Count == 0 )
+			{
+				await SendBlockText (
+					message,
+					"No coin symbols provided. Subscribing to all coin notifications."
+				);
+				coinIds = supported.Select ( x => x.Id ).ToList ( );
+			}
+
+			await AddSubscription ( message, chosen, threshold, coinIds );
 		}
 
 		private async Task HandleUnsubscribe ( Message message, IList<string> _ )
 		{
-			foreach ( var observer in ctb.Observers.Values )
-				observer.Unsubscribe ( message.Chat.Id );
-
 			lock ( subscriptionLock )
-				subscriptions.RemoveAll ( x => x.Id == message.Chat.Id );
+			{
+				foreach ( var subscription in Subscriptions.Where ( x => x.ChatId == message.Chat.Id ) )
+					subscription.Dispose ( );
 
-			SaveSubscriptions ( );
+				Subscriptions.RemoveAll ( x => x.ChatId == message.Chat.Id );
+			}
+
+			using ( var unit = new UnitOfWork ( ) )
+			{
+				unit.Subscriptions.Remove ( message.Chat.Id );
+				unit.Complete ( );
+			}
 
 			await SendBlockText ( message, "Unsubscribed from all exchanges." );
 		}
@@ -69,7 +103,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 		private async Task HandleCompare ( Message message, IList<string> @params )
 		{
-			Dictionary<CryptoExchange, Dictionary<CryptoExchange, Dictionary<string, decimal>>> compare;
+			Dictionary<CryptoExchangeId, Dictionary<CryptoExchangeId, Dictionary<CryptoCoinId, decimal>>> compare;
 			if ( @params?.Count >= 2 )
 				compare = ctb.CompareTable.Get (
 					@params
@@ -92,7 +126,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 		{
 			var (from, to, first, second, profit) = ctb.CompareTable.GetBest ( );
 
-			if ( first == null || second == null )
+			if ( first == CryptoCoinId.NULL || second == CryptoCoinId.NULL )
 			{
 				await SendBlockText ( message, "ERROR: Not enough data received." );
 				return;
@@ -192,9 +226,33 @@ namespace TelegramBot.CryptoTickerTeleBot
 			await SendBlockText ( message, builder.ToString ( ) );
 		}
 
-		private async Task HandleRegister ( Message message, IList<string> userNames )
+		private async Task HandlePutGroup ( Message message, IList<string> @params )
 		{
-			foreach ( var userName in userNames )
+			if ( @params.Count < 2 )
+			{
+				await SendBlockText (
+					message,
+					"Not enough arguments.\n" +
+					"Syntax: /putgroup <Role Name> <Usernames CSV>" );
+				return;
+			}
+
+			UserRole role;
+			try
+			{
+				role = @params[0].ToEnum<UserRole> ( );
+			}
+			catch
+			{
+				await SendBlockText (
+					message,
+					$"Unknown role {@params[0]}.\n" +
+					$"Roles: {Enum.GetNames ( typeof ( UserRole ) ).Join ( ", " )}"
+				);
+				return;
+			}
+
+			foreach ( var userName in @params.Skip ( 1 ) )
 			{
 				if ( string.IsNullOrWhiteSpace ( userName ) )
 				{
@@ -203,17 +261,24 @@ namespace TelegramBot.CryptoTickerTeleBot
 				}
 
 				Logger.Info ( $"Registered {userName}." );
-				users.Add ( new TeleBotUser ( userName, TeleBotUser.Registered ) );
+
+				var user = new TeleBotUser ( userName, role );
+				Users.Add ( user );
+				using ( var unit = new UnitOfWork ( ) )
+				{
+					unit.Users.Add ( user.UserName, user.Role, user.Created );
+					unit.Complete ( );
+				}
 			}
 
-			await SendBlockText ( message, $"Registered {userNames.Join ( ", " )}." );
+			await SendBlockText ( message, $"Registered {@params.Join ( ", " )}." );
 		}
 
 		private async Task HandleRestart ( Message message, IList<string> _ )
 		{
 			CryptoTickerBot.Core.Settings.Load ( );
 			Settings.Load ( );
-			users.Load ( );
+			FetchUserList ( );
 
 			ctb.Stop ( );
 			ctb.Start ( );
@@ -224,7 +289,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 				await Task.Delay ( 10 );
 
 			LoadSubscriptions ( );
-			ResumeSubscriptions ( );
+			SendResumeNotifications ( );
 		}
 
 		private async Task HandleUsers ( Message message, IList<string> @params )
@@ -232,19 +297,24 @@ namespace TelegramBot.CryptoTickerTeleBot
 			if ( @params.Count == 0 )
 			{
 				foreach ( UserRole value in Enum.GetValues ( typeof ( UserRole ) ) )
-					await SendBlockText ( message, $"{value} List:\n{users[value].Select ( x => x.UserName ).Join ( "\n" )}" );
+					await SendBlockText (
+						message,
+						$"{value} List:\n{Users.OfRole ( value ).Select ( x => x.UserName ).Join ( "\n" )}"
+					);
 
 				return;
 			}
 
 			if ( !Enum.TryParse ( @params[0], true, out UserRole role ) )
 			{
-				await SendBlockText ( message,
-					$"{@params[0]} is not a known role.\nRoles: {Enum.GetNames ( typeof ( UserRole ) )}" );
+				await SendBlockText (
+					message,
+					$"{@params[0]} is not a known role.\nRoles: {Enum.GetNames ( typeof ( UserRole ) )}"
+				);
 				return;
 			}
 
-			var list = users[role];
+			var list = Users.OfRole ( role );
 			await SendBlockText ( message, $"{role} List:\n{list.Select ( x => x.UserName ).Join ( "\n" )}" );
 		}
 

@@ -1,29 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using CryptoTickerBot.Data.Domain;
+using CryptoTickerBot.Data.Enums;
 
 namespace CryptoTickerBot
 {
-	public struct PriceChange
-	{
-		public decimal Value { get; private set; }
-		public decimal Percentage { get; private set; }
-		public TimeSpan TimeDiff { get; private set; }
-		public DateTime AbsoluteTime { get; private set; }
-
-		public static PriceChange From ( CryptoCoin coin1, CryptoCoin coin2 )
-			=> new PriceChange
-			{
-				Value        = coin1.Average - coin2.Average,
-				Percentage   = ( coin1.Average - coin2.Average ) / ( coin1.Average + coin2.Average ) * 2m,
-				TimeDiff     = coin1.Time - coin2.Time,
-				AbsoluteTime = coin1.Time
-			};
-
-		public override string ToString ( ) => $"{Value:N} {Percentage:P}";
-	}
-
 	public class CryptoCoin : IEquatable<CryptoCoin>
 	{
+		public CryptoCoinId Id { get; }
 		public string Symbol { get; }
 		public decimal HighestBid { get; set; }
 		public decimal LowestAsk { get; set; }
@@ -41,11 +25,23 @@ namespace CryptoTickerBot
 			decimal rate = 0m
 		)
 		{
+			if ( Enum.TryParse<CryptoCoinId> ( symbol, out var id ) )
+				Id = id;
 			Symbol     = symbol;
 			HighestBid = highestBid;
 			LowestAsk  = lowestAsk;
 			Rate       = rate;
-			Time       = DateTime.Now;
+			Time       = DateTime.UtcNow;
+		}
+
+		public CryptoCoin ( CryptoCoinValue coinValue )
+		{
+			Id         = coinValue.CoinId;
+			Symbol     = coinValue.CoinId.ToString ( );
+			HighestBid = coinValue.HighestBid;
+			LowestAsk  = coinValue.LowestAsk;
+			Time       = coinValue.Time;
+			Rate       = ( HighestBid + LowestAsk ) / 2m;
 		}
 
 		public bool Equals ( CryptoCoin other ) =>
@@ -77,6 +73,6 @@ namespace CryptoTickerBot
 			$"{Symbol}: Highest Bid = {HighestBid,-10:C} Lowest Ask = {LowestAsk,-10:C}";
 
 		public IList<object> ToSheetsRow ( ) =>
-			new List<object> {Symbol, LowestAsk, HighestBid, Rate};
+			new List<object> {Symbol, LowestAsk, HighestBid, $"{Time:G}"};
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Extensions;
@@ -56,8 +57,10 @@ namespace CryptoTickerBot.Core
 		private List<ValueRange> GetValueRangesToUpdate ( )
 		{
 			var valueRanges = new List<ValueRange> ( );
-			while ( pendingUpdates.TryDequeue ( out var id ) )
+			while ( pendingUpdates.Count > 0 )
 			{
+				var id = pendingUpdates.First ( );
+				pendingUpdates = pendingUpdates.Remove ( id );
 				var exchange = Exchanges[id];
 				if ( !exchange.IsComplete )
 				{
