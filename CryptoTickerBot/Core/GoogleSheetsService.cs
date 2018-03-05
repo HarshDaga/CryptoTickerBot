@@ -100,6 +100,11 @@ namespace CryptoTickerBot.Core
 
 				await request.ExecuteAsync ( Cts.Token );
 			}
+			catch ( TaskCanceledException tce )
+			{
+				if ( !Cts.IsCancellationRequested )
+					Logger.Error ( tce );
+			}
 			catch ( Exception e )
 			{
 				if ( e is GoogleApiException gae && gae.Error.Code == 429 )

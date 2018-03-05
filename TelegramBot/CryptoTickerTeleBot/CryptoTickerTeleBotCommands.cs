@@ -277,7 +277,6 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 		private async Task HandleRestart ( Message message, IList<string> _ )
 		{
-			CryptoTickerBot.Core.Settings.Load ( );
 			Settings.Load ( );
 			FetchUserList ( );
 

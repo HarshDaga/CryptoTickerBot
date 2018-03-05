@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace CryptoTickerBot.Core
 {
-	public class Settings
+	public sealed class Settings
 	{
 		private const string SETTINGSFILE = "Settings.json";
 		private static readonly object LoadLock;
@@ -20,6 +20,10 @@ namespace CryptoTickerBot.Core
 			Instance = new Settings ( );
 			Load ( );
 			Save ( );
+		}
+
+		private Settings ( )
+		{
 		}
 
 		public static void Save ( )

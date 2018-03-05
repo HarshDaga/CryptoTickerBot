@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace TelegramBot
 {
-	public class Settings
+	public sealed class Settings
 	{
 		private const string SETTINGSFILE = "TelegramSettings.json";
 		private static readonly object LoadLock;
@@ -18,6 +18,10 @@ namespace TelegramBot
 			Instance = new Settings ( );
 			Load ( );
 			Save ( );
+		}
+
+		private Settings ( )
+		{
 		}
 
 		public static void Save ( )

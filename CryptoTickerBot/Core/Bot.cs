@@ -11,6 +11,7 @@ using CryptoTickerBot.Exchanges.Core;
 using CryptoTickerBot.Extensions;
 using CryptoTickerBot.Helpers;
 using Google.Apis.Sheets.v4.Data;
+using JetBrains.Annotations;
 using NLog;
 using Timer = System.Timers.Timer;
 
@@ -64,8 +65,8 @@ namespace CryptoTickerBot.Core
 		}
 
 		public Bot (
-			GoogleSheetsService service,
-			IDictionary<CryptoExchangeId, string> sheetsRanges
+			[CanBeNull] GoogleSheetsService service,
+			[CanBeNull] IDictionary<CryptoExchangeId, string> sheetsRanges
 		)
 		{
 			Service      = service;
@@ -79,11 +80,11 @@ namespace CryptoTickerBot.Core
 		}
 
 		public static Bot CreateAndStart (
-			CancellationTokenSource cts,
-			string applicationName,
-			string sheetName,
-			string sheetId,
-			IDictionary<CryptoExchangeId, string> sheetsRanges
+			[NotNull] CancellationTokenSource cts,
+			[NotNull] string applicationName,
+			[NotNull] string sheetName,
+			[NotNull] string sheetId,
+			[NotNull] IDictionary<CryptoExchangeId, string> sheetsRanges
 		)
 		{
 			var service = GoogleSheetsService.Build (
@@ -98,14 +99,14 @@ namespace CryptoTickerBot.Core
 			return bot;
 		}
 
-		public static Bot CreateAndStart ( CancellationTokenSource cts )
+		public static Bot CreateAndStart ( [NotNull] CancellationTokenSource cts )
 		{
 			var bot = new Bot ( null, null );
 			bot.Start ( cts );
 			return bot;
 		}
 
-		public void Start ( CancellationTokenSource cts )
+		public void Start ( [NotNull] CancellationTokenSource cts )
 		{
 			Cts       = cts;
 			IsRunning = true;
