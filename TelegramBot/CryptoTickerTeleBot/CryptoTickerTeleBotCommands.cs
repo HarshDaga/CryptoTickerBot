@@ -80,11 +80,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 				Subscriptions.RemoveAll ( x => x.ChatId == message.Chat.Id );
 			}
 
-			using ( var unit = new UnitOfWork ( ) )
-			{
-				unit.Subscriptions.Remove ( message.Chat.Id );
-				unit.Complete ( );
-			}
+			UnitOfWork.Do ( u => u.Subscriptions.Remove ( message.Chat.Id ) );
 
 			await SendBlockText ( message, "Unsubscribed from all exchanges." );
 		}
@@ -265,11 +261,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 				var user = new TeleBotUser ( userName, role );
 				Users.AddOrUpdate ( user );
-				using ( var unit = new UnitOfWork ( ) )
-				{
-					unit.Users.AddOrUpdate ( user.UserName, user.Role );
-					unit.Complete ( );
-				}
+				UnitOfWork.Do ( unit => unit.Users.AddOrUpdate ( user.UserName, user.Role ) );
 			}
 
 			await SendBlockText ( message, $"Registered {@params.Join ( ", " )}." );

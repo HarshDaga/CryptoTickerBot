@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Data.Repositories;
 
@@ -7,11 +8,6 @@ namespace CryptoTickerBot.Data.Persistence
 	public class UnitOfWork : IUnitOfWork
 	{
 		private readonly CtbContext context;
-
-		public UnitOfWork ( ) :
-			this ( new CtbContext ( ) )
-		{
-		}
 
 		public UnitOfWork ( CtbContext context )
 		{
@@ -38,5 +34,47 @@ namespace CryptoTickerBot.Data.Persistence
 
 		public async Task<int> CompleteAsync ( CancellationToken cancellationToken ) =>
 			await context.SaveChangesAsync ( cancellationToken );
+
+		public static void Do ( Action<IUnitOfWork> action )
+		{
+			using ( var unit = new UnitOfWork ( new CtbContext ( ) ) )
+			{
+				action ( unit );
+				unit.Complete ( );
+			}
+		}
+
+		public static T Get<T> ( Func<IUnitOfWork, T> func )
+		{
+			T result;
+
+			using ( var unit = new UnitOfWork ( new CtbContext ( ) ) )
+			{
+				result = func ( unit );
+				unit.Complete ( );
+			}
+
+			return result;
+		}
+
+		public static async void DoAsync ( Func<IUnitOfWork, Task> action )
+		{
+			using ( var unit = new UnitOfWork ( new CtbContext ( ) ) )
+			{
+				await action ( unit );
+				await unit.CompleteAsync ( CancellationToken.None );
+			}
+		}
+
+		public static async void DoAsync (
+			Func<IUnitOfWork, CancellationToken, Task> action,
+			CancellationToken cancellationToken )
+		{
+			using ( var unit = new UnitOfWork ( new CtbContext ( ) ) )
+			{
+				await action ( unit, cancellationToken );
+				await unit.CompleteAsync ( cancellationToken );
+			}
+		}
 	}
 }

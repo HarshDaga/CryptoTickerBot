@@ -49,20 +49,8 @@ namespace CryptoTickerBot.Core
 		public bool IsRunning { get; private set; }
 		public bool IsInitialized { get; private set; }
 
-		public static List<Data.Domain.CryptoCoin> SupportedCoins
-		{
-			get
-			{
-				List<Data.Domain.CryptoCoin> result;
-				using ( var unit = new UnitOfWork ( ) )
-				{
-					result = unit.Coins.GetAll ( ).ToList ( );
-					unit.Complete ( );
-				}
-
-				return result;
-			}
-		}
+		public static List<Data.Domain.CryptoCoin> SupportedCoins =>
+			UnitOfWork.Get ( u => u.Coins.GetAll ( ).ToList ( ) );
 
 		public Bot (
 			[CanBeNull] GoogleSheetsService service,
@@ -156,32 +144,17 @@ namespace CryptoTickerBot.Core
 			}
 		}
 
-		private static void StoreCoinValueInDb ( CryptoExchangeBase exchange, CryptoCoin coin )
-		{
-			using ( var unit = new UnitOfWork ( ) )
-			{
-				unit.CoinValues.AddCoinValue ( coin.Id, exchange.Id, coin.LowestAsk, coin.HighestBid, coin.Time );
-				unit.Complete ( );
-			}
-		}
+		private static void StoreCoinValueInDb ( CryptoExchangeBase exchange, CryptoCoin coin ) =>
+			UnitOfWork.Do ( u => u.CoinValues.AddCoinValue (
+				                coin.Id, exchange.Id,
+				                coin.LowestAsk, coin.HighestBid, coin.Time
+			                ) );
 
-		private static void UpdateExchangeLastChangeInDb ( CryptoExchangeBase exchange, CryptoCoin coin )
-		{
-			using ( var unit = new UnitOfWork ( ) )
-			{
-				unit.Exchanges.UpdateExchange ( exchange.Id, lastChange: DateTime.UtcNow );
-				unit.Complete ( );
-			}
-		}
+		private static void UpdateExchangeLastChangeInDb ( CryptoExchangeBase exchange, CryptoCoin coin ) =>
+			UnitOfWork.Do ( u => u.Exchanges.UpdateExchange ( exchange.Id, lastChange: DateTime.UtcNow ) );
 
-		private static void UpdateExchangeLastUpdateInDb ( CryptoExchangeBase exchange, CryptoCoin coin )
-		{
-			using ( var unit = new UnitOfWork ( ) )
-			{
-				unit.Exchanges.UpdateExchange ( exchange.Id, lastUpdate: DateTime.UtcNow );
-				unit.Complete ( );
-			}
-		}
+		private static void UpdateExchangeLastUpdateInDb ( CryptoExchangeBase exchange, CryptoCoin coin ) =>
+			UnitOfWork.Do ( u => u.Exchanges.UpdateExchange ( exchange.Id, lastUpdate: DateTime.UtcNow ) );
 
 		private void Dispose ( bool disposing )
 		{

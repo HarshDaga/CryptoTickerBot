@@ -23,13 +23,13 @@ namespace TelegramBot.CryptoTickerTeleBot
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
+		private readonly Dictionary<CryptoExchangeId, CryptoExchangeBase> exchanges;
+
 		private TelegramBotClient bot;
 
 		private Dictionary<string, (UserRole role, MessageHandlerDelegate func)> commands;
 
 		private Bot ctb;
-
-		private readonly Dictionary<CryptoExchangeId, CryptoExchangeBase> exchanges;
 		private User me;
 
 		public string BotToken { get; }
@@ -65,16 +65,11 @@ namespace TelegramBot.CryptoTickerTeleBot
 				};
 		}
 
-		private void FetchUserList ( )
-		{
-			using ( var unit = new UnitOfWork ( ) )
-			{
-				Users = unit.Users.GetAll ( )
-					.Select ( x => new TeleBotUser ( x.UserName, x.Role, x.Created ) )
-					.ToList ( );
-				unit.Complete ( );
-			}
-		}
+		private void FetchUserList ( ) =>
+			UnitOfWork.Do ( u => Users = u.Users.GetAll ( )
+				                .Select ( x => new TeleBotUser ( x.UserName, x.Role, x.Created ) )
+				                .ToList ( )
+			);
 
 		public void Start ( )
 		{
@@ -121,11 +116,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 			{
 				var user = new TeleBotUser ( userName );
 				Users.Add ( user );
-				using ( var unit = new UnitOfWork ( ) )
-				{
-					unit.Users.AddOrUpdate ( user.UserName, user.Role, user.Created );
-					unit.Complete ( );
-				}
+				UnitOfWork.Do ( u => u.Users.AddOrUpdate ( user.UserName, user.Role, user.Created ) );
 			}
 
 			var fiat = eventArgs.InlineQuery.Query.ToFiatCurrency ( );

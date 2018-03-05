@@ -38,11 +38,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 				Logger.Info ( $"First message received from {userName}" );
 				var user = new TeleBotUser ( userName );
 				Users.Add ( user );
-				using ( var unit = new UnitOfWork ( ) )
-				{
-					unit.Users.AddOrUpdate ( user.UserName, user.Role, user.Created );
-					unit.Complete ( );
-				}
+				UnitOfWork.Do ( u => u.Users.AddOrUpdate ( user.UserName, user.Role, user.Created ) );
 			}
 
 			if ( !commands.Keys.Contains ( command ) ) return true;
@@ -103,15 +99,12 @@ namespace TelegramBot.CryptoTickerTeleBot
 		)
 		{
 			await Task.Run ( ( ) =>
-				{
-					using ( var unit = new UnitOfWork ( ) )
-					{
-						var sub = unit.Subscriptions.Get ( subscription.Id );
-						unit.Subscriptions.UpdateCoin ( sub, coinId );
-						unit.Complete ( );
-					}
-				}
-			);
+				                 UnitOfWork.Do ( u =>
+					                 {
+						                 var sub = u.Subscriptions.Get ( subscription.Id );
+						                 u.Subscriptions.UpdateCoin ( sub, coinId );
+					                 }
+				                 ) );
 		}
 
 		private void StartSubscription ( CryptoExchangeBase exchange, TeleSubscription sub )
@@ -132,16 +125,17 @@ namespace TelegramBot.CryptoTickerTeleBot
 		)
 		{
 			var ids = coinIds.ToList ( );
-			TeleSubscription sub;
 
-			using ( var unit = new UnitOfWork ( ) )
-			{
-				sub = unit.Subscriptions.Add ( exchange.Id, message.Chat.Id, message.From.Username, threshold, ids );
-				foreach ( var coinId in coinIds )
-					unit.Subscriptions.UpdateCoin ( sub, coinId );
-
-				unit.Complete ( );
-			}
+			var sub = UnitOfWork.Get ( unit =>
+				{
+					var subscription = unit.Subscriptions.Add (
+						exchange.Id, message.Chat.Id, message.From.Username, threshold, ids
+					);
+					foreach ( var coinId in coinIds )
+						unit.Subscriptions.UpdateCoin ( subscription, coinId );
+					return subscription;
+				}
+			);
 
 			StartSubscription ( exchange, sub );
 
@@ -157,17 +151,16 @@ namespace TelegramBot.CryptoTickerTeleBot
 			lock ( subscriptionLock )
 				Subscriptions = new List<TelegramSubscription> ( );
 
-			using ( var unit = new UnitOfWork ( ) )
-			{
-				foreach ( var exchange in exchanges.Values )
+			UnitOfWork.Do ( unit =>
 				{
-					var subscriptions = unit.Subscriptions.GetAll ( exchange.Id );
-					foreach ( var subscription in subscriptions.Where ( x => !x.Expired ) )
-						StartSubscription ( exchange, subscription );
+					foreach ( var exchange in exchanges.Values )
+					{
+						var subscriptions = unit.Subscriptions.GetAll ( exchange.Id );
+						foreach ( var subscription in subscriptions.Where ( x => !x.Expired ) )
+							StartSubscription ( exchange, subscription );
+					}
 				}
-
-				unit.Complete ( );
-			}
+			);
 		}
 
 		private void SendResumeNotifications ( )

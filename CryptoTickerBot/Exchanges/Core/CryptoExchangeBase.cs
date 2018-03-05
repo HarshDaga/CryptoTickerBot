@@ -61,26 +61,21 @@ namespace CryptoTickerBot.Exchanges.Core
 			Observers    = ImmutableHashSet<IObserver<CryptoCoin>>.Empty;
 			Id           = id;
 
-			using ( var unit = new UnitOfWork ( ) )
+			var exchange = UnitOfWork.Get ( u => u.Exchanges.Get ( id ) );
+
+			if ( exchange == null )
 			{
-				var exchange = unit.Exchanges.Get ( id );
-
-				if ( exchange == null )
-				{
-					Logger.Error ( "Exchange info not found in repository." );
-					return;
-				}
-
-				Name           = exchange.Name;
-				Url            = exchange.Url;
-				TickerUrl      = exchange.TickerUrl;
-				BuyFees        = exchange.BuyFees;
-				SellFees       = exchange.SellFees;
-				WithdrawalFees = exchange.WithdrawalFees.ToDictionary ( x => x.CoinId, x => x.Value );
-				DepositFees    = exchange.DepositFees.ToDictionary ( x => x.CoinId, x => x.Value );
-
-				unit.Complete ( );
+				Logger.Error ( "Exchange info not found in repository." );
+				return;
 			}
+
+			Name           = exchange.Name;
+			Url            = exchange.Url;
+			TickerUrl      = exchange.TickerUrl;
+			BuyFees        = exchange.BuyFees;
+			SellFees       = exchange.SellFees;
+			WithdrawalFees = exchange.WithdrawalFees.ToDictionary ( x => x.CoinId, x => x.Value );
+			DepositFees    = exchange.DepositFees.ToDictionary ( x => x.CoinId, x => x.Value );
 		}
 
 		public IDisposable Subscribe ( IObserver<CryptoCoin> observer )
@@ -92,8 +87,10 @@ namespace CryptoTickerBot.Exchanges.Core
 
 		public IDisposable Subscribe ( CryptoExchangeSubscription subscription )
 		{
-			Observers               = Observers.Add ( subscription );
-			subscription.Disposable = Disposable.Create ( ( ) => Observers = Observers.Remove ( subscription ) );
+			Observers = Observers.Add ( subscription );
+			subscription.Disposable = Disposable.Create (
+				( ) => Observers = Observers.Remove ( subscription )
+			);
 
 			return subscription.Disposable;
 		}
