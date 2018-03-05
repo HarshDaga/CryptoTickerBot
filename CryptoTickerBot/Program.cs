@@ -16,8 +16,15 @@ namespace CryptoTickerBot
 
 			Console.Title = Settings.Instance.ApplicationName;
 			Logger.Info ( $"Started {Settings.Instance.ApplicationName}" );
-			var ctb = new Bot ( );
-			ctb.Start ( );
+
+			Bot.CreateAndStart (
+				new CancellationTokenSource ( ),
+				Settings.Instance.ApplicationName,
+				Settings.Instance.SheetName,
+				Settings.Instance.SheetId,
+				Settings.Instance.SheetsRanges
+			);
+
 			Thread.Sleep ( int.MaxValue );
 		}
 	}

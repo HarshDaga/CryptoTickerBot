@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using CryptoTickerBot.Data.Enums;
 using Newtonsoft.Json;
 
 namespace TelegramBot
@@ -34,6 +36,11 @@ namespace TelegramBot
 		}
 
 		#region Properties
+
+		public string ApplicationName { get; set; }
+		public string SheetName { get; set; }
+		public string SheetId { get; set; }
+		public Dictionary<CryptoExchangeId, string> SheetsRanges { get; set; }
 
 		public string BotToken { get; set; }
 		public bool WhitelistMode { get; set; }

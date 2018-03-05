@@ -23,13 +23,13 @@ namespace TelegramBot.CryptoTickerTeleBot
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
-		private readonly Dictionary<string, (UserRole role, MessageHandlerDelegate func)> commands;
+		private TelegramBotClient bot;
 
-		private readonly Bot ctb;
+		private Dictionary<string, (UserRole role, MessageHandlerDelegate func)> commands;
+
+		private Bot ctb;
 
 		private readonly Dictionary<CryptoExchangeId, CryptoExchangeBase> exchanges;
-
-		private TelegramBotClient bot;
 		private User me;
 
 		public string BotToken { get; }
@@ -44,6 +44,11 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 			FetchUserList ( );
 
+			InitializeCommands ( );
+		}
+
+		private void InitializeCommands ( )
+		{
 			commands = new
 				Dictionary<string, (UserRole role, MessageHandlerDelegate func)>
 				{

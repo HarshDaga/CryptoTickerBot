@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core;
 using CryptoTickerBot.Data;
@@ -281,7 +282,13 @@ namespace TelegramBot.CryptoTickerTeleBot
 			FetchUserList ( );
 
 			ctb.Stop ( );
-			ctb.Start ( );
+			ctb = Bot.CreateAndStart (
+				new CancellationTokenSource ( ),
+				Settings.Instance.ApplicationName,
+				Settings.Instance.SheetName,
+				Settings.Instance.SheetId,
+				Settings.Instance.SheetsRanges
+			);
 
 			await SendBlockText ( message, "Restarted all exchange monitors." );
 

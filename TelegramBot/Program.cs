@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using CryptoTickerBot.Core;
 using NLog;
 using TelegramBot.CryptoTickerTeleBot;
@@ -15,8 +16,15 @@ namespace TelegramBot
 				Logger.Error ( args );
 
 			Console.Title = "Crypto Ticker Telegram Bot";
-			var ctb = new Bot ( );
-			ctb.Start ( );
+
+			var ctb = Bot.CreateAndStart (
+				new CancellationTokenSource ( ),
+				Settings.Instance.ApplicationName,
+				Settings.Instance.SheetName,
+				Settings.Instance.SheetId,
+				Settings.Instance.SheetsRanges
+			);
+
 			var teleBot = new TeleBot ( Settings.Instance.BotToken, ctb );
 			teleBot.Start ( );
 		}
