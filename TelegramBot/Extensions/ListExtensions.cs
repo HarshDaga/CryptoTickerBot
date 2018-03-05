@@ -20,6 +20,19 @@ namespace TelegramBot.Extensions
 				                       StringComparison.InvariantCultureIgnoreCase
 			                       ) );
 
+		public static TeleBotUser AddOrUpdate (
+			this IList<TeleBotUser> users,
+			TeleBotUser user
+		)
+		{
+			if ( users.Contains ( user.UserName ) )
+				users.Remove ( users.Get ( user.UserName ) );
+
+			users.Add ( user );
+
+			return user;
+		}
+
 		public static IEnumerable<TeleBotUser> OfRole (
 			this IEnumerable<TeleBotUser> users,
 			UserRole role
