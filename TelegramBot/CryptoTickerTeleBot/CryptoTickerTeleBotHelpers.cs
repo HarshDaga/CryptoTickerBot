@@ -107,7 +107,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 					using ( var unit = new UnitOfWork ( ) )
 					{
 						var sub = unit.Subscriptions.Get ( subscription.Id );
-						unit.Subscriptions.Update ( sub, coinId );
+						unit.Subscriptions.UpdateCoin ( sub, coinId );
 						unit.Complete ( );
 					}
 				}
@@ -128,7 +128,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 			Message message,
 			CryptoExchangeBase exchange,
 			decimal threshold,
-			IEnumerable<CryptoCoinId> coinIds
+			IList<CryptoCoinId> coinIds
 		)
 		{
 			var ids = coinIds.ToList ( );
@@ -137,6 +137,9 @@ namespace TelegramBot.CryptoTickerTeleBot
 			using ( var unit = new UnitOfWork ( ) )
 			{
 				sub = unit.Subscriptions.Add ( exchange.Id, message.Chat.Id, message.From.Username, threshold, ids );
+				foreach ( var coinId in coinIds )
+					unit.Subscriptions.UpdateCoin ( sub, coinId );
+
 				unit.Complete ( );
 			}
 
