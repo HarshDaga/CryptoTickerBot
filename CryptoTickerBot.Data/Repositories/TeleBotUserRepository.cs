@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Entity.Migrations;
 using CryptoTickerBot.Data.Domain;
 using CryptoTickerBot.Data.Enums;
 using CryptoTickerBot.Data.Persistence;
@@ -12,8 +13,8 @@ namespace CryptoTickerBot.Data.Repositories
 		{
 		}
 
-		public void Add ( string userName, UserRole role, DateTime? created = null ) =>
-			Add ( new TeleBotUser ( userName, role, created ) );
+		public void AddOrUpdate ( string userName, UserRole role, DateTime? created = null ) =>
+			Context.TeleBotUsers.AddOrUpdate ( new TeleBotUser ( userName, role, created ) );
 
 		public void Remove ( string userName ) =>
 			Remove ( x => x.UserName.Equals ( userName, StringComparison.InvariantCultureIgnoreCase ) );

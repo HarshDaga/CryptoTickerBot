@@ -118,7 +118,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 				Users.Add ( user );
 				using ( var unit = new UnitOfWork ( ) )
 				{
-					unit.Users.Add ( user.UserName, user.Role, user.Created );
+					unit.Users.AddOrUpdate ( user.UserName, user.Role, user.Created );
 					unit.Complete ( );
 				}
 			}
