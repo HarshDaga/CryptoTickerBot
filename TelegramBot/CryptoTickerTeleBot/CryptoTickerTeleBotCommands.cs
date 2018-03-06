@@ -43,7 +43,8 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 			// Check threshold value
 			var threshold = 0.05m;
-			var thresholdString = @params.FirstOrDefault ( x => decimal.TryParse ( x.Trim ( '%' ), out var _ ) );
+			var thresholdString = @params
+				.FirstOrDefault ( x => decimal.TryParse ( x.Trim ( '%' ), out var _ ) );
 			if ( !string.IsNullOrEmpty ( thresholdString ) )
 				threshold = decimal.Parse ( thresholdString ) / 100m;
 			else

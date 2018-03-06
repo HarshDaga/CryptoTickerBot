@@ -1,8 +1,10 @@
-﻿namespace CryptoTickerBot.Data.Enums
+﻿using System.ComponentModel;
+
+namespace CryptoTickerBot.Data.Enums
 {
 	public enum CryptoCoinId
 	{
-		NULL = 0,
+		[Description ( "Not a coin" )] NULL = 0,
 		BTC = 1,
 		ETH,
 		BCH,

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -12,12 +13,15 @@ namespace CryptoTickerBot.Extensions
 {
 	public static class ListExtensions
 	{
+		[DebuggerStepThrough]
 		public static string Join<T> ( this IEnumerable<T> enumerable, string delimiter ) =>
 			string.Join ( delimiter, enumerable );
 
+		[DebuggerStepThrough]
 		public static IList<T> TakeLast<T> ( this IList<T> source, int count ) =>
 			source.Skip ( Math.Max ( 0, source.Count - count ) ).ToList ( );
 
+		[DebuggerStepThrough]
 		public static T[] TakeLast<T> ( this T[] source, int count ) =>
 			source.Skip ( Math.Max ( 0, source.Length - count ) ).ToArray ( );
 
@@ -27,12 +31,14 @@ namespace CryptoTickerBot.Extensions
 		) =>
 			exchanges.Select ( exchange => $"{exchange.Name}\n{exchange.ToTable ( fiat )}" );
 
+		[DebuggerStepThrough]
 		public static T GetFieldValue<T> ( this object obj, string name )
 		{
 			var field = obj.GetType ( ).GetField ( name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance );
 			return (T) field?.GetValue ( obj );
 		}
 
+		[DebuggerStepThrough]
 		public static object GetFieldValue ( this object obj, string name )
 		{
 			var field = obj.GetType ( ).GetField ( name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance );

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -58,6 +59,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 			return false;
 		}
 
+		[DebuggerStepThrough]
 		private async Task SendBlockText ( Message message, string str )
 		{
 			await bot.SendTextMessageAsync ( message.Chat.Id, $"```\n{str}\n```", ParseMode.Markdown );

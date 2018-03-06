@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Threading;
@@ -95,6 +96,7 @@ namespace CryptoTickerBot.Exchanges.Core
 			return subscription.Disposable;
 		}
 
+		[DebuggerStepThrough]
 		public void ClearObservers ( ) =>
 			Observers = ImmutableHashSet<IObserver<CryptoCoin>>.Empty;
 

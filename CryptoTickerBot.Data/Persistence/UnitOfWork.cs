@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Data.Repositories;
@@ -30,8 +31,10 @@ namespace CryptoTickerBot.Data.Persistence
 		public ITeleBotUserRepository Users { get; }
 		public ITeleSubscriptionRepository Subscriptions { get; }
 
+		[DebuggerStepThrough]
 		public int Complete ( ) => context.SaveChanges ( );
 
+		[DebuggerStepThrough]
 		public async Task<int> CompleteAsync ( CancellationToken cancellationToken ) =>
 			await context.SaveChangesAsync ( cancellationToken );
 

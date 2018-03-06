@@ -3,6 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using CryptoTickerBot.Data.Enums;
 using JetBrains.Annotations;
 
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+
 // ReSharper disable UnusedMember.Local
 
 namespace CryptoTickerBot.Data.Domain

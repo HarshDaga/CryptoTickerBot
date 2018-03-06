@@ -22,6 +22,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 	public partial class TeleBot
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
+		private static readonly Logger TeleMessageLogger = LogManager.GetLogger ( "TeleMessageReceived" );
 
 		public Dictionary<CryptoExchangeId, CryptoExchangeBase> Exchanges => ctb.Exchanges;
 
@@ -72,6 +73,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 		public void Start ( )
 		{
+			Logger.Info ( "Starting Telegram Bot" );
 			try
 			{
 				bot                =  new TelegramBotClient ( BotToken );
@@ -165,7 +167,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 					return;
 
 				ParseMessage ( message, out var command, out var parameters, out var userName );
-				Logger.Debug ( $"Message received from {userName}: {message.Text}" );
+				TeleMessageLogger.Info ( $"Message received from {userName}: {message.Text}" );
 
 				if ( await ValidateUserCommand ( userName, command, message ) )
 					return;

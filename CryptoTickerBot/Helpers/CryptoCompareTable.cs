@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using CryptoTickerBot.Data.Enums;
 using CryptoTickerBot.Exchanges.Core;
@@ -17,6 +18,7 @@ namespace CryptoTickerBot.Helpers
 				AddExchange ( exchange );
 		}
 
+		[DebuggerStepThrough]
 		public void AddExchange ( CryptoExchangeBase exchange ) =>
 			Exchanges[exchange.Id] = exchange;
 

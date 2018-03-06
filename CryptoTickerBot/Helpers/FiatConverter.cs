@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -50,6 +51,7 @@ namespace CryptoTickerBot.Helpers
 				StringMap[fiat.ToString ( )] = fiat;
 		}
 
+		[DebuggerStepThrough]
 		public static FiatCurrency ToFiatCurrency ( this string symbol )
 		{
 			var upper = symbol.ToUpper ( );
@@ -95,9 +97,11 @@ namespace CryptoTickerBot.Helpers
 			}
 		}
 
+		[DebuggerStepThrough]
 		public static decimal Convert ( decimal amount, FiatCurrency from, FiatCurrency to ) =>
 			amount * UsdTo[to] / UsdTo[from];
 
+		[DebuggerStepThrough]
 		public static string ToString ( decimal amount, FiatCurrency from, FiatCurrency to )
 		{
 			var result = Convert ( amount, from, to );

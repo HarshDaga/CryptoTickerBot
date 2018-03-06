@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using CryptoTickerBot.Data.Domain;
 using CryptoTickerBot.Data.Enums;
 
@@ -48,8 +49,10 @@ namespace CryptoTickerBot
 			other != null && Symbol == other.Symbol &&
 			HighestBid == other.HighestBid && LowestAsk == other.LowestAsk;
 
+		[DebuggerStepThrough]
 		public virtual decimal Buy ( decimal amountInUsd ) => amountInUsd / BuyPrice;
 
+		[DebuggerStepThrough]
 		public virtual decimal Sell ( decimal quantity ) => SellPrice * quantity;
 
 		public override bool Equals ( object obj ) => Equals ( obj as CryptoCoin );
@@ -57,12 +60,15 @@ namespace CryptoTickerBot
 		public override int GetHashCode ( ) =>
 			-1758840423 + EqualityComparer<string>.Default.GetHashCode ( Symbol );
 
+		[DebuggerStepThrough]
 		public CryptoCoin Clone ( ) =>
 			new CryptoCoin ( Symbol, HighestBid, LowestAsk, Rate );
 
+		[DebuggerStepThrough]
 		public static bool operator == ( CryptoCoin coin1, CryptoCoin coin2 ) =>
 			EqualityComparer<CryptoCoin>.Default.Equals ( coin1, coin2 );
 
+		[DebuggerStepThrough]
 		public static bool operator != ( CryptoCoin coin1, CryptoCoin coin2 ) =>
 			!( coin1 == coin2 );
 

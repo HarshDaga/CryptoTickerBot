@@ -72,6 +72,7 @@ namespace CryptoTickerBot.Core
 			string sheetId
 		)
 		{
+			Logger.Info ( $"Building Google Sheets Service for {applicationName}" );
 			var credential = GetCredentials ( );
 
 			var service = new SheetsService ( new BaseClientService.Initializer

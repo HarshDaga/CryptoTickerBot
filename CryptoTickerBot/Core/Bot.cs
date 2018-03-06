@@ -96,6 +96,7 @@ namespace CryptoTickerBot.Core
 
 		public void Start ( [NotNull] CancellationTokenSource cts )
 		{
+			Logger.Info ( "Starting Bot" );
 			Cts       = cts;
 			IsRunning = true;
 			Task.Run ( async ( ) =>
@@ -116,8 +117,9 @@ namespace CryptoTickerBot.Core
 
 		public void Stop ( )
 		{
+			Logger.Info ( "Stopping Bot" );
 			fiatMonitor?.Stop ( );
-			Cts.Cancel ( );
+			Cts?.Cancel ( );
 		}
 
 		private void InitExchanges ( )

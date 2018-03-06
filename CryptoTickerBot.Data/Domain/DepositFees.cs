@@ -3,6 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using CryptoTickerBot.Data.Enums;
 using JetBrains.Annotations;
 
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+
 namespace CryptoTickerBot.Data.Domain
 {
 	public class DepositFees

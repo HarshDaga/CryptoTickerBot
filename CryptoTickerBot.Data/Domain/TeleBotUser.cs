@@ -31,5 +31,8 @@ namespace CryptoTickerBot.Data.Domain
 		private TeleBotUser ( )
 		{
 		}
+
+		public override string ToString ( ) =>
+			$"{UserName} {Role} {Created:g}";
 	}
 }

@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -9,6 +10,7 @@ namespace TelegramBot.Extensions
 {
 	public static class TelegramBotClientExtensions
 	{
+		[DebuggerStepThrough]
 		public static async Task<Message> ReplyTextMessageAsync (
 			this TelegramBotClient bot, Message message, string text,
 			ParseMode parseMode = ParseMode.Default,
