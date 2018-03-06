@@ -64,10 +64,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Persistence\CtbContextInitialzer.cs" />
+    <Compile Include="Extensions\DbSetExtensions.cs" />
     <Compile Include="Domain\CryptoCoin.cs" />
     <Compile Include="Domain\CryptoCoinValue.cs" />
     <Compile Include="Domain\CryptoExchange.cs" />
+    <Compile Include="Persistence\Configurations\CryptoExchangeConfiguration.cs" />
     <Compile Include="Persistence\CtbContext.cs" />
     <Compile Include="Domain\DepositFees.cs" />
     <Compile Include="Domain\TeleBotUser.cs" />
@@ -77,13 +78,14 @@
     <Compile Include="Enums\CryptoExchangeId.cs" />
     <Compile Include="Enums\FiatCurrency.cs" />
     <Compile Include="Enums\UserRole.cs" />
-    <Compile Include="EnumUtils.cs" />
+    <Compile Include="Extensions\EnumUtils.cs" />
     <Compile Include="Persistence\IUnitOfWork.cs" />
     <Compile Include="Migrations\201803050426325_InitialMigration.cs" />
     <Compile Include="Migrations\201803050426325_InitialMigration.Designer.cs">
       <DependentUpon>201803050426325_InitialMigration.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Persistence\Configurations\TeleSubscriptionConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\CryptoCoinRepository.cs" />
     <Compile Include="Repositories\CryptoCoinValueRepository.cs" />

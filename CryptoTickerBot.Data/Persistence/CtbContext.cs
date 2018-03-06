@@ -1,5 +1,7 @@
 ﻿using System.Data.Entity;
 using CryptoTickerBot.Data.Domain;
+using CryptoTickerBot.Data.Migrations;
+using CryptoTickerBot.Data.Persistence.Configurations;
 using NLog;
 
 namespace CryptoTickerBot.Data.Persistence
@@ -20,28 +22,17 @@ namespace CryptoTickerBot.Data.Persistence
 			: base ( "name=DefaultConnection" )
 		{
 			Database.Log = Logger.Trace;
-			Database.SetInitializer ( new CtbContextInitialzer ( ) );
+			Database.SetInitializer (
+				new MigrateDatabaseToLatestVersion<CtbContext, Configuration> ( )
+			);
 		}
 
 		protected override void OnModelCreating ( DbModelBuilder modelBuilder )
 		{
-			modelBuilder.Entity<CryptoExchange> ( )
-				.HasMany ( e => e.CoinValues )
-				.WithRequired ( ccv => ccv.Exchange )
-				.HasForeignKey ( ccv => ccv.ExchangeId )
-				.WillCascadeOnDelete ( );
+			Logger.Debug ( "Creating Database model" );
 
-			modelBuilder.Entity<CryptoExchange> ( )
-				.HasMany ( e => e.WithdrawalFees )
-				.WithRequired ( f => f.Exchange )
-				.HasForeignKey ( f => f.ExchangeId )
-				.WillCascadeOnDelete ( );
-
-			modelBuilder.Entity<CryptoExchange> ( )
-				.HasMany ( e => e.DepositFees )
-				.WithRequired ( f => f.Exchange )
-				.HasForeignKey ( f => f.ExchangeId )
-				.WillCascadeOnDelete ( );
+			modelBuilder.Configurations.Add ( new CryptoExchangeConfiguration ( ) );
+			modelBuilder.Configurations.Add ( new TeleSubscriptionConfiguration ( ) );
 
 			modelBuilder.Entity<WithdrawalFees> ( )
 				.Property ( e => e.Value )
@@ -50,19 +41,6 @@ namespace CryptoTickerBot.Data.Persistence
 			modelBuilder.Entity<DepositFees> ( )
 				.Property ( e => e.Value )
 				.HasPrecision ( 18, 6 );
-
-			modelBuilder.Entity<TeleSubscription> ( )
-				.Property ( s => s.Threshold )
-				.HasPrecision ( 18, 4 );
-
-			modelBuilder.Entity<TeleSubscription> ( )
-				.HasMany ( s => s.Coins )
-				.WithMany ( )
-				.Map ( m => m
-					       .ToTable ( "TeleSubscriptionCoins" )
-					       .MapLeftKey ( "SubscriptionId" )
-					       .MapRightKey ( "CoinId" )
-				);
 
 			base.OnModelCreating ( modelBuilder );
 		}

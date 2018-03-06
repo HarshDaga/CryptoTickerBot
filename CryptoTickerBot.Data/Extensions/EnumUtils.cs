@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CryptoTickerBot.Data
+namespace CryptoTickerBot.Data.Extensions
 {
 	public static class EnumUtils
 	{
