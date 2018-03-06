@@ -23,7 +23,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
-		private readonly Dictionary<CryptoExchangeId, CryptoExchangeBase> exchanges;
+		public Dictionary<CryptoExchangeId, CryptoExchangeBase> Exchanges => ctb.Exchanges;
 
 		private TelegramBotClient bot;
 
@@ -40,7 +40,6 @@ namespace TelegramBot.CryptoTickerTeleBot
 			BotToken      = botToken;
 			Subscriptions = new List<TelegramSubscription> ( );
 			this.ctb      = ctb;
-			exchanges     = ctb.Exchanges;
 
 			FetchUserList ( );
 
@@ -120,7 +119,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 			}
 
 			var fiat = eventArgs.InlineQuery.Query.ToFiatCurrency ( );
-			var inlineQueryResults = exchanges.Values
+			var inlineQueryResults = Exchanges.Values
 				.Select ( x => ToInlineQueryResult ( x, x.Name, fiat ) )
 				.ToList<InlineQueryResult> ( );
 

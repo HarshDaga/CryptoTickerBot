@@ -36,7 +36,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 				await SendBlockText ( message, "No exchanges provided." );
 				await SendBlockText ( message,
 				                      "Supported Exchanges:\n" +
-				                      $"{exchanges.Select ( e => e.Value.Name ).Join ( "\n" )}"
+				                      $"{Exchanges.Select ( e => e.Value.Name ).Join ( "\n" )}"
 				);
 				return;
 			}
@@ -91,7 +91,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 			if ( @params.Count >= 1 )
 				fiat = @params[0].ToFiatCurrency ( );
 
-			var tables = exchanges.Values.ToTables ( fiat );
+			var tables = Exchanges.Values.ToTables ( fiat );
 			Logger.Info ( $"Sending ticker data to {message.From.Username}" );
 
 			foreach ( var table in tables )
@@ -129,8 +129,8 @@ namespace TelegramBot.CryptoTickerTeleBot
 				return;
 			}
 
-			var fromExchange = exchanges[from];
-			var toExchange = exchanges[to];
+			var fromExchange = Exchanges[from];
+			var toExchange = Exchanges[to];
 			var fees =
 				fromExchange.ExchangeData[first].Buy ( fromExchange.DepositFees[first] ) +
 				fromExchange.ExchangeData[first].Sell ( fromExchange.WithdrawalFees[first] ) +
@@ -205,7 +205,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 		{
 			var formatter = new TableFormatter ( );
 			var objects = new List<IDictionary<string, string>> ( );
-			foreach ( var exchange in exchanges.Values )
+			foreach ( var exchange in Exchanges.Values )
 				objects.Add ( new Dictionary<string, string>
 				{
 					["Exchange"]    = exchange.Name,

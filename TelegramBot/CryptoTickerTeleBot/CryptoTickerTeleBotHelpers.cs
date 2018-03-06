@@ -153,7 +153,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 			UnitOfWork.Do ( unit =>
 				{
-					foreach ( var exchange in exchanges.Values )
+					foreach ( var exchange in Exchanges.Values )
 					{
 						var subscriptions = unit.Subscriptions.GetAll ( exchange.Id );
 						foreach ( var subscription in subscriptions.Where ( x => !x.Expired ) )
@@ -210,7 +210,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 		}
 
 		private CryptoExchangeBase GetExchangeBase ( string name ) =>
-			exchanges.Values
+			Exchanges.Values
 				.AsEnumerable ( )
 				.FirstOrDefault ( x => x.Name.Equals ( name, StringComparison.CurrentCultureIgnoreCase ) );
 

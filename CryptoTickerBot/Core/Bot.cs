@@ -116,7 +116,7 @@ namespace CryptoTickerBot.Core
 
 		public void Stop ( )
 		{
-			fiatMonitor.Stop ( );
+			fiatMonitor?.Stop ( );
 			Cts.Cancel ( );
 		}
 
