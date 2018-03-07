@@ -11,24 +11,35 @@ namespace CryptoTickerBot.Data.Domain
 	public class TeleBotUser
 	{
 		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.None)]
+		[DatabaseGenerated ( DatabaseGeneratedOption.None )]
 		public int Id { get; set; }
-
-		public string UserName { get; set; }
 
 		[Required]
 		public UserRole Role { get; set; }
+
+		public string UserName { get; set; }
+		public string FirstName { get; set; }
+		public string LastName { get; set; }
 
 		[Required]
 		[DatabaseGenerated ( DatabaseGeneratedOption.None )]
 		public DateTime Created { get; set; }
 
-		public TeleBotUser ( int id, string userName, UserRole role, DateTime? created = null )
+		public TeleBotUser (
+			int id,
+			UserRole role,
+			string userName,
+			string firstName,
+			string lastName = null,
+			DateTime? created = null
+		)
 		{
-			Id       = id;
-			UserName = userName;
-			Role     = role;
-			Created  = created ?? DateTime.UtcNow;
+			Id        = id;
+			Role      = role;
+			UserName  = userName;
+			FirstName = firstName;
+			LastName  = lastName;
+			Created   = created ?? DateTime.UtcNow;
 		}
 
 		[UsedImplicitly]
@@ -37,6 +48,6 @@ namespace CryptoTickerBot.Data.Domain
 		}
 
 		public override string ToString ( ) =>
-			$"{Id,-10} {UserName} {Role} {Created:g}";
+			$"{Id,-10} {Role,-12} {FirstName} {LastName} {Created:g}";
 	}
 }

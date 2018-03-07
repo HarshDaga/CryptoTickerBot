@@ -7,30 +7,30 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-using System;
-using System.CodeDom.Compiler;
-using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Infrastructure.MappingViews;
-using CryptoTickerBot.Data.Persistence;
 
-[assembly: DbMappingViewCacheType(
+[assembly: DbMappingViewCacheTypeAttribute(
     typeof(CryptoTickerBot.Data.Persistence.CtbContext),
-    typeof(ViewsForBaseEntitySets74955d47881c1ed38ad4bd6fe995387dcf122d5564bbc5cd95b7addbf13cf598))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsb52f5de5f2470a66b882433607494f705bbcaf379cc02c8e6b1adcd3c3a6a35b))]
 
-namespace CryptoTickerBot.Data.Persistence
+namespace Edm_EntityMappingGeneratedViews
 {
-	/// <summary>
+    using System;
+    using System.CodeDom.Compiler;
+    using System.Data.Entity.Core.Metadata.Edm;
+
+    /// <summary>
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework 6 Power Tools", "0.9.2.0")]
-    internal sealed class ViewsForBaseEntitySets74955d47881c1ed38ad4bd6fe995387dcf122d5564bbc5cd95b7addbf13cf598 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsb52f5de5f2470a66b882433607494f705bbcaf379cc02c8e6b1adcd3c3a6a35b : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "74955d47881c1ed38ad4bd6fe995387dcf122d5564bbc5cd95b7addbf13cf598"; }
+            get { return "b52f5de5f2470a66b882433607494f705bbcaf379cc02c8e6b1adcd3c3a6a35b"; }
         }
 
         /// <summary>
@@ -440,12 +440,14 @@ namespace CryptoTickerBot.Data.Persistence
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing TeleBotUser
-        [CodeFirstDatabaseSchema.TeleBotUser](T1.TeleBotUser_Id, T1.TeleBotUser_UserName, T1.TeleBotUser_Role, T1.TeleBotUser_Created)
+        [CodeFirstDatabaseSchema.TeleBotUser](T1.TeleBotUser_Id, T1.TeleBotUser_Role, T1.TeleBotUser_UserName, T1.TeleBotUser_FirstName, T1.TeleBotUser_LastName, T1.TeleBotUser_Created)
     FROM (
         SELECT 
             T.Id AS TeleBotUser_Id, 
-            T.UserName AS TeleBotUser_UserName, 
             CAST(T.Role AS [Edm.Int32]) AS TeleBotUser_Role, 
+            T.UserName AS TeleBotUser_UserName, 
+            T.FirstName AS TeleBotUser_FirstName, 
+            T.LastName AS TeleBotUser_LastName, 
             T.Created AS TeleBotUser_Created, 
             True AS _from0
         FROM CtbContext.TeleBotUsers AS T
@@ -460,12 +462,14 @@ namespace CryptoTickerBot.Data.Persistence
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing TeleBotUsers
-        [CryptoTickerBot.Data.Persistence.TeleBotUser](T1.TeleBotUser_Id, T1.TeleBotUser_UserName, T1.TeleBotUser_Role, T1.TeleBotUser_Created)
+        [CryptoTickerBot.Data.Persistence.TeleBotUser](T1.TeleBotUser_Id, T1.TeleBotUser_Role, T1.TeleBotUser_UserName, T1.TeleBotUser_FirstName, T1.TeleBotUser_LastName, T1.TeleBotUser_Created)
     FROM (
         SELECT 
             T.Id AS TeleBotUser_Id, 
-            T.UserName AS TeleBotUser_UserName, 
             CAST(T.Role AS [CryptoTickerBot.Data.Persistence.UserRole]) AS TeleBotUser_Role, 
+            T.UserName AS TeleBotUser_UserName, 
+            T.FirstName AS TeleBotUser_FirstName, 
+            T.LastName AS TeleBotUser_LastName, 
             T.Created AS TeleBotUser_Created, 
             True AS _from0
         FROM CodeFirstDatabase.TeleBotUser AS T

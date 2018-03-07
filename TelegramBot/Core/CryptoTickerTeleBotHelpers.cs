@@ -39,9 +39,9 @@ namespace TelegramBot.Core
 			if ( !Users.Contains ( from.Id ) )
 			{
 				Logger.Info ( $"First message received from {from.Id}" );
-				var user = new TeleBotUser ( from );
+				var user = new TelegramBotUser ( from );
 				Users.Add ( user );
-				UnitOfWork.Do ( u => u.Users.AddOrUpdate ( user.Id, user.UserName, user.Role, user.Created ) );
+				UnitOfWork.Do ( u => u.Users.AddOrUpdate ( user ) );
 			}
 
 			if ( !commands.Keys.Contains ( command ) ) return true;

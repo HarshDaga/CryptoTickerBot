@@ -260,15 +260,15 @@ namespace TelegramBot.Core
 				return;
 			}
 
-			var userName = @params.Count > 2 ? @params[2] : string.Empty;
 
-			Logger.Info ( $"Registered {id,-10} {userName}." );
-
-			var user = new TeleBotUser ( id, userName, role );
+			var tbu = UnitOfWork.Get ( unit => unit.Users.Get ( id ) );
+			TelegramBotUser user = tbu ?? new TelegramBotUser ( id );
+			user.Role = role;
 			Users.AddOrUpdate ( user );
-			UnitOfWork.Do ( unit => unit.Users.AddOrUpdate ( id, user.UserName, user.Role, user.Created ) );
+			UnitOfWork.Do ( unit => unit.Users.AddOrUpdate ( user ) );
 
-			await SendBlockText ( message, $"Registered {@params.Join ( ", " )}." );
+			Logger.Info ( $"Registered {user}" );
+			await SendBlockText ( message, $"Registered {user}." );
 		}
 
 		private async Task HandleRestart ( Message message, IList<string> _ )

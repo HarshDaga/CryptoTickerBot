@@ -2,23 +2,22 @@
 using System.Diagnostics;
 using System.Linq;
 using CryptoTickerBot.Data.Enums;
-using TelegramBot.Core;
 
 namespace TelegramBot.Extensions
 {
 	public static class ListExtensions
 	{
 		[DebuggerStepThrough]
-		public static bool Contains ( this IEnumerable<TeleBotUser> users, int id ) =>
+		public static bool Contains ( this IEnumerable<TelegramBotUser> users, int id ) =>
 			users.Any ( x => x.Id == id );
 
 		[DebuggerStepThrough]
-		public static TeleBotUser Get ( this IEnumerable<TeleBotUser> users, int id ) =>
+		public static TelegramBotUser Get ( this IEnumerable<TelegramBotUser> users, int id ) =>
 			users.FirstOrDefault ( x => x.Id == id );
 
-		public static TeleBotUser AddOrUpdate (
-			this IList<TeleBotUser> users,
-			TeleBotUser user
+		public static TelegramBotUser AddOrUpdate (
+			this IList<TelegramBotUser> users,
+			TelegramBotUser user
 		)
 		{
 			if ( users.Contains ( user.Id ) )
@@ -30,8 +29,8 @@ namespace TelegramBot.Extensions
 		}
 
 		[DebuggerStepThrough]
-		public static IEnumerable<TeleBotUser> OfRole (
-			this IEnumerable<TeleBotUser> users,
+		public static IEnumerable<TelegramBotUser> OfRole (
+			this IEnumerable<TelegramBotUser> users,
 			UserRole role
 		) =>
 			users.Where ( x => x.Role == role );

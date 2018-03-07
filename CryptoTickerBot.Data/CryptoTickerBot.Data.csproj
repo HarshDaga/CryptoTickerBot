@@ -72,6 +72,10 @@
     <Compile Include="Migrations\201803070603458_ChangeTeleBotUserPrimaryKeyToId.Designer.cs">
       <DependentUpon>201803070603458_ChangeTeleBotUserPrimaryKeyToId.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201803070826161_AddFirstNameAndLastNameToTeleBotUser.cs" />
+    <Compile Include="Migrations\201803070826161_AddFirstNameAndLastNameToTeleBotUser.Designer.cs">
+      <DependentUpon>201803070826161_AddFirstNameAndLastNameToTeleBotUser.cs</DependentUpon>
+    </Compile>
     <Compile Include="Persistence\Configurations\CryptoExchangeConfiguration.cs" />
     <Compile Include="Domain\DepositFees.cs" />
     <Compile Include="Domain\TeleBotUser.cs" />
@@ -122,6 +126,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201803070603458_ChangeTeleBotUserPrimaryKeyToId.resx">
       <DependentUpon>201803070603458_ChangeTeleBotUserPrimaryKeyToId.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201803070826161_AddFirstNameAndLastNameToTeleBotUser.resx">
+      <DependentUpon>201803070826161_AddFirstNameAndLastNameToTeleBotUser.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

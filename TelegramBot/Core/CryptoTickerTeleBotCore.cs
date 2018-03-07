@@ -26,7 +26,7 @@ namespace TelegramBot.Core
 
 		private TelegramBotClient bot;
 
-		private Dictionary<string, (UserRole role, MessageHandlerDelegate func)> commands;
+		private Dictionary<string, (UserRole role, MessageHandlerDelegate handler)> commands;
 
 		private Bot ctb;
 		private User me;
@@ -34,7 +34,7 @@ namespace TelegramBot.Core
 		public Dictionary<CryptoExchangeId, CryptoExchangeBase> Exchanges => ctb.Exchanges;
 
 		public string BotToken { get; }
-		public List<TeleBotUser> Users { get; private set; }
+		public List<TelegramBotUser> Users { get; private set; }
 
 		public TeleBot ( string botToken, Bot ctb )
 		{
@@ -50,7 +50,7 @@ namespace TelegramBot.Core
 		private void InitializeCommands ( )
 		{
 			commands = new
-				Dictionary<string, (UserRole role, MessageHandlerDelegate func)>
+				Dictionary<string, (UserRole role, MessageHandlerDelegate handler)>
 				{
 					["/status"]      = ( UserRole.Guest, HandleStatus ),
 					["/fetch"]       = ( UserRole.Guest, HandleFetch ),
@@ -67,7 +67,7 @@ namespace TelegramBot.Core
 
 		private void FetchUserList ( ) =>
 			UnitOfWork.Do ( u => Users = u.Users.GetAll ( )
-				                .Select ( x => new TeleBotUser ( x.Id, x.UserName, x.Role, x.Created ) )
+				                .Select ( x => (TelegramBotUser) x )
 				                .ToList ( )
 			);
 
@@ -112,12 +112,12 @@ namespace TelegramBot.Core
 		private async void BotClientOnInlineQuery ( object sender, InlineQueryEventArgs eventArgs )
 		{
 			var from = eventArgs.InlineQuery.From;
-			Logger.Info ( $"Received inline query from: {from.Id,-10} {from.Username}" );
+			Logger.Info ( $"Received inline query from: {from.Id,-10} {from.FirstName}" );
 			if ( !Users.Contains ( from.Id ) )
 			{
-				var user = new TeleBotUser ( from );
+				var user = new TelegramBotUser ( from );
 				Users.Add ( user );
-				UnitOfWork.Do ( u => u.Users.AddOrUpdate ( user.Id, user.UserName, user.Role, user.Created ) );
+				UnitOfWork.Do ( u => u.Users.AddOrUpdate ( user ) );
 			}
 
 			var fiat = eventArgs.InlineQuery.Query.ToFiatCurrency ( );
@@ -168,12 +168,12 @@ namespace TelegramBot.Core
 
 				var from = message.From;
 				ParseMessage ( message, out var command, out var parameters );
-				TeleMessageLogger.Info ( $"{from.Id,-10} {from.Username}: {message.Text}" );
+				TeleMessageLogger.Info ( $"{from.Id,-10} {from.FirstName}: {message.Text}" );
 
 				if ( await ValidateUserCommand ( from, command, message ) )
 					return;
 
-				await commands[command].func ( message, parameters );
+				await commands[command].handler ( message, parameters );
 			}
 			catch ( Exception e )
 			{
