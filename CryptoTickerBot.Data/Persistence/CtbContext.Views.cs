@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(CryptoTickerBot.Data.Persistence.CtbContext),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets56a2da0a954b6760945b89a4211d1386f85a9ea9c2bd75dc0467c8a23e68dc87))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets74955d47881c1ed38ad4bd6fe995387dcf122d5564bbc5cd95b7addbf13cf598))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework 6 Power Tools", "0.9.2.0")]
-    internal sealed class ViewsForBaseEntitySets56a2da0a954b6760945b89a4211d1386f85a9ea9c2bd75dc0467c8a23e68dc87 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets74955d47881c1ed38ad4bd6fe995387dcf122d5564bbc5cd95b7addbf13cf598 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "56a2da0a954b6760945b89a4211d1386f85a9ea9c2bd75dc0467c8a23e68dc87"; }
+            get { return "74955d47881c1ed38ad4bd6fe995387dcf122d5564bbc5cd95b7addbf13cf598"; }
         }
 
         /// <summary>
@@ -440,9 +440,10 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing TeleBotUser
-        [CodeFirstDatabaseSchema.TeleBotUser](T1.TeleBotUser_UserName, T1.TeleBotUser_Role, T1.TeleBotUser_Created)
+        [CodeFirstDatabaseSchema.TeleBotUser](T1.TeleBotUser_Id, T1.TeleBotUser_UserName, T1.TeleBotUser_Role, T1.TeleBotUser_Created)
     FROM (
         SELECT 
+            T.Id AS TeleBotUser_Id, 
             T.UserName AS TeleBotUser_UserName, 
             CAST(T.Role AS [Edm.Int32]) AS TeleBotUser_Role, 
             T.Created AS TeleBotUser_Created, 
@@ -459,9 +460,10 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing TeleBotUsers
-        [CryptoTickerBot.Data.Persistence.TeleBotUser](T1.TeleBotUser_UserName, T1.TeleBotUser_Role, T1.TeleBotUser_Created)
+        [CryptoTickerBot.Data.Persistence.TeleBotUser](T1.TeleBotUser_Id, T1.TeleBotUser_UserName, T1.TeleBotUser_Role, T1.TeleBotUser_Created)
     FROM (
         SELECT 
+            T.Id AS TeleBotUser_Id, 
             T.UserName AS TeleBotUser_UserName, 
             CAST(T.Role AS [CryptoTickerBot.Data.Persistence.UserRole]) AS TeleBotUser_Role, 
             T.Created AS TeleBotUser_Created, 

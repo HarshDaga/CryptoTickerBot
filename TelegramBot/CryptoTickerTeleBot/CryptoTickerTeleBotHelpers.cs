@@ -22,35 +22,34 @@ namespace TelegramBot.CryptoTickerTeleBot
 		private readonly object subscriptionLock = new object ( );
 		public List<TelegramSubscription> Subscriptions;
 
-		private void ParseMessage ( Message message, out string command, out List<string> parameters, out string userName )
+		private void ParseMessage ( Message message, out string command, out List<string> parameters )
 		{
 			var text = message.Text;
 			command = text.Split ( ' ' ).First ( );
 			if ( command.Contains ( $"@{me.Username}" ) )
 				command = command.Substring ( 0, command.IndexOf ( $"@{me.Username}", StringComparison.Ordinal ) );
 			parameters = text.Split ( ' ' ).Skip ( 1 ).ToList ( );
-			userName   = message.From.Username;
 		}
 
-		private async Task<bool> ValidateUserCommand ( string userName, string command, Message message )
+		private async Task<bool> ValidateUserCommand ( User from, string command, Message message )
 		{
-			if ( !Users.Contains ( userName ) )
+			if ( !Users.Contains ( from.Id ) )
 			{
-				Logger.Info ( $"First message received from {userName}" );
-				var user = new TeleBotUser ( userName );
+				Logger.Info ( $"First message received from {from.Id}" );
+				var user = new TeleBotUser ( from );
 				Users.Add ( user );
-				UnitOfWork.Do ( u => u.Users.AddOrUpdate ( user.UserName, user.Role, user.Created ) );
+				UnitOfWork.Do ( u => u.Users.AddOrUpdate ( user.Id, user.UserName, user.Role, user.Created ) );
 			}
 
 			if ( !commands.Keys.Contains ( command ) ) return true;
 
-			if ( Settings.Instance.WhitelistMode && Users.Get ( userName )?.Role < UserRole.Registered )
+			if ( Settings.Instance.WhitelistMode && Users.Get ( from.Id )?.Role < UserRole.Registered )
 			{
-				await RequestPurchase ( message, userName );
+				await RequestPurchase ( message );
 				return true;
 			}
 
-			if ( Users.Get ( userName )?.Role < commands[command].role )
+			if ( Users.Get ( from.Id )?.Role < commands[command].role )
 			{
 				await SendBlockText ( message, $"You do not have access to {command}" );
 				return true;
@@ -65,9 +64,9 @@ namespace TelegramBot.CryptoTickerTeleBot
 			await bot.SendTextMessageAsync ( message.Chat.Id, $"```\n{str}\n```", ParseMode.Markdown );
 		}
 
-		private async Task RequestPurchase ( Message message, string userName )
+		private async Task RequestPurchase ( Message message )
 		{
-			await SendBlockText ( message, $"You need to purchase before you can use this command, {userName}." );
+			await SendBlockText ( message, "You need to purchase before you can use this command." );
 			await bot.SendTextMessageAsync (
 				message.Chat.Id,
 				$"{Settings.Instance.PurchaseMessageText}"

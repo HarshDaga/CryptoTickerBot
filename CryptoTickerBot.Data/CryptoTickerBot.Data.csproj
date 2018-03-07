@@ -68,8 +68,11 @@
     <Compile Include="Domain\CryptoCoin.cs" />
     <Compile Include="Domain\CryptoCoinValue.cs" />
     <Compile Include="Domain\CryptoExchange.cs" />
+    <Compile Include="Migrations\201803070603458_ChangeTeleBotUserPrimaryKeyToId.cs" />
+    <Compile Include="Migrations\201803070603458_ChangeTeleBotUserPrimaryKeyToId.Designer.cs">
+      <DependentUpon>201803070603458_ChangeTeleBotUserPrimaryKeyToId.cs</DependentUpon>
+    </Compile>
     <Compile Include="Persistence\Configurations\CryptoExchangeConfiguration.cs" />
-    <Compile Include="Persistence\CtbContext.cs" />
     <Compile Include="Domain\DepositFees.cs" />
     <Compile Include="Domain\TeleBotUser.cs" />
     <Compile Include="Domain\TeleSubscription.cs" />
@@ -79,6 +82,7 @@
     <Compile Include="Enums\FiatCurrency.cs" />
     <Compile Include="Enums\UserRole.cs" />
     <Compile Include="Extensions\EnumUtils.cs" />
+    <Compile Include="Persistence\CtbContext.cs" />
     <Compile Include="Persistence\CtbContext.Views.cs" />
     <Compile Include="Persistence\IUnitOfWork.cs" />
     <Compile Include="Migrations\201803050426325_InitialMigration.cs" />
@@ -115,6 +119,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201803050426325_InitialMigration.resx">
       <DependentUpon>201803050426325_InitialMigration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201803070603458_ChangeTeleBotUserPrimaryKeyToId.resx">
+      <DependentUpon>201803070603458_ChangeTeleBotUserPrimaryKeyToId.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

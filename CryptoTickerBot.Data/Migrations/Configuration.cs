@@ -206,8 +206,8 @@ namespace CryptoTickerBot.Data.Migrations
 			);
 
 			context.TeleBotUsers.AddIfNotExists (
-				new TeleBotUser ( "DevilDaga", UserRole.Owner ),
-				"DevilDaga"
+				new TeleBotUser ( 295348666, "DevilDaga", UserRole.Owner ),
+				295348666
 			);
 		}
 	}

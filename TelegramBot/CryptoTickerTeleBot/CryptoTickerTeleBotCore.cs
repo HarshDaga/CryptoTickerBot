@@ -24,14 +24,14 @@ namespace TelegramBot.CryptoTickerTeleBot
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 		private static readonly Logger TeleMessageLogger = LogManager.GetLogger ( "TeleMessageReceived" );
 
-		public Dictionary<CryptoExchangeId, CryptoExchangeBase> Exchanges => ctb.Exchanges;
-
 		private TelegramBotClient bot;
 
 		private Dictionary<string, (UserRole role, MessageHandlerDelegate func)> commands;
 
 		private Bot ctb;
 		private User me;
+
+		public Dictionary<CryptoExchangeId, CryptoExchangeBase> Exchanges => ctb.Exchanges;
 
 		public string BotToken { get; }
 		public List<TeleBotUser> Users { get; private set; }
@@ -67,7 +67,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 		private void FetchUserList ( ) =>
 			UnitOfWork.Do ( u => Users = u.Users.GetAll ( )
-				                .Select ( x => new TeleBotUser ( x.UserName, x.Role, x.Created ) )
+				                .Select ( x => new TeleBotUser ( x.Id, x.UserName, x.Role, x.Created ) )
 				                .ToList ( )
 			);
 
@@ -111,13 +111,13 @@ namespace TelegramBot.CryptoTickerTeleBot
 
 		private async void BotClientOnInlineQuery ( object sender, InlineQueryEventArgs eventArgs )
 		{
-			var userName = eventArgs.InlineQuery.From.Username;
-			Logger.Debug ( $"Received inline query from: {userName}" );
-			if ( !Users.Contains ( userName ) )
+			var from = eventArgs.InlineQuery.From;
+			Logger.Debug ( $"Received inline query from: {from.Id,-10} {from.Username}" );
+			if ( !Users.Contains ( from.Id ) )
 			{
-				var user = new TeleBotUser ( userName );
+				var user = new TeleBotUser ( from );
 				Users.Add ( user );
-				UnitOfWork.Do ( u => u.Users.AddOrUpdate ( user.UserName, user.Role, user.Created ) );
+				UnitOfWork.Do ( u => u.Users.AddOrUpdate ( user.Id, user.UserName, user.Role, user.Created ) );
 			}
 
 			var fiat = eventArgs.InlineQuery.Query.ToFiatCurrency ( );
@@ -166,10 +166,11 @@ namespace TelegramBot.CryptoTickerTeleBot
 				if ( message == null || message.Type != MessageType.TextMessage )
 					return;
 
-				ParseMessage ( message, out var command, out var parameters, out var userName );
-				TeleMessageLogger.Info ( $"Message received from {userName}: {message.Text}" );
+				var from = message.From;
+				ParseMessage ( message, out var command, out var parameters );
+				TeleMessageLogger.Info ( $"{from.Id,-10} {from.Username}: {message.Text}" );
 
-				if ( await ValidateUserCommand ( userName, command, message ) )
+				if ( await ValidateUserCommand ( from, command, message ) )
 					return;
 
 				await commands[command].func ( message, parameters );

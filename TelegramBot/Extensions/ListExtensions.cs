@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using CryptoTickerBot.Data.Enums;
@@ -10,26 +9,20 @@ namespace TelegramBot.Extensions
 	public static class ListExtensions
 	{
 		[DebuggerStepThrough]
-		public static bool Contains ( this IEnumerable<TeleBotUser> users, string userName ) =>
-			users.Any ( x => x.UserName.Equals (
-				            userName,
-				            StringComparison.InvariantCultureIgnoreCase
-			            ) );
+		public static bool Contains ( this IEnumerable<TeleBotUser> users, int id ) =>
+			users.Any ( x => x.Id == id );
 
 		[DebuggerStepThrough]
-		public static TeleBotUser Get ( this IEnumerable<TeleBotUser> users, string userName ) =>
-			users.FirstOrDefault ( x => x.UserName.Equals (
-				                       userName,
-				                       StringComparison.InvariantCultureIgnoreCase
-			                       ) );
+		public static TeleBotUser Get ( this IEnumerable<TeleBotUser> users, int id ) =>
+			users.FirstOrDefault ( x => x.Id == id );
 
 		public static TeleBotUser AddOrUpdate (
 			this IList<TeleBotUser> users,
 			TeleBotUser user
 		)
 		{
-			if ( users.Contains ( user.UserName ) )
-				users.Remove ( users.Get ( user.UserName ) );
+			if ( users.Contains ( user.Id ) )
+				users.Remove ( users.Get ( user.Id ) );
 
 			users.Add ( user );
 

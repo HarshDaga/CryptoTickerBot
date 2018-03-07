@@ -13,10 +13,10 @@ namespace CryptoTickerBot.Data.Repositories
 		{
 		}
 
-		public void AddOrUpdate ( string userName, UserRole role, DateTime? created = null ) =>
-			Context.TeleBotUsers.AddOrUpdate ( new TeleBotUser ( userName, role, created ) );
+		public void AddOrUpdate ( int id, string userName, UserRole role, DateTime? created = null ) =>
+			Context.TeleBotUsers.AddOrUpdate ( new TeleBotUser ( id, userName, role, created ) );
 
-		public void Remove ( string userName ) =>
-			Remove ( x => x.UserName.Equals ( userName, StringComparison.InvariantCultureIgnoreCase ) );
+		public void Remove ( int id ) =>
+			Remove ( x => x.Id == id );
 	}
 }

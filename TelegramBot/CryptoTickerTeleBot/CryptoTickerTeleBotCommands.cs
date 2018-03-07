@@ -231,7 +231,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 				await SendBlockText (
 					message,
 					"Not enough arguments.\n" +
-					"Syntax: /putgroup <Role Name> <Usernames CSV>" );
+					"Syntax: /putgroup <Role Name> <User ID> <Username>" );
 				return;
 			}
 
@@ -250,20 +250,23 @@ namespace TelegramBot.CryptoTickerTeleBot
 				return;
 			}
 
-			foreach ( var userName in @params.Skip ( 1 ) )
+			if ( !int.TryParse ( @params[1], out var id ) )
 			{
-				if ( string.IsNullOrWhiteSpace ( userName ) )
-				{
-					await SendBlockText ( message, "Malformed UserName." );
-					return;
-				}
-
-				Logger.Info ( $"Registered {userName}." );
-
-				var user = new TeleBotUser ( userName, role );
-				Users.AddOrUpdate ( user );
-				UnitOfWork.Do ( unit => unit.Users.AddOrUpdate ( user.UserName, user.Role ) );
+				await SendBlockText (
+					message,
+					$"Invalid ID {@params[1]}.\n" +
+					"ID must be an integer."
+				);
+				return;
 			}
+
+			var userName = @params.Count >= 2 ? @params[2] : string.Empty;
+
+			Logger.Info ( $"Registered {id,-10} {userName}." );
+
+			var user = new TeleBotUser ( id, userName, role );
+			Users.AddOrUpdate ( user );
+			UnitOfWork.Do ( unit => unit.Users.AddOrUpdate ( id, user.UserName, user.Role, user.Created ) );
 
 			await SendBlockText ( message, $"Registered {@params.Join ( ", " )}." );
 		}
@@ -296,10 +299,16 @@ namespace TelegramBot.CryptoTickerTeleBot
 			if ( @params.Count == 0 )
 			{
 				foreach ( UserRole value in Enum.GetValues ( typeof ( UserRole ) ) )
+				{
+					var query = Users
+						.OfRole ( value )
+						.OrderBy ( x => x.Created )
+						.Select ( x => $"{x.Id,-10} {x.UserName}" );
 					await SendBlockText (
 						message,
-						$"{value} List:\n{Users.OfRole ( value ).Select ( x => x.UserName ).Join ( "\n" )}"
+						$"{value} List:\n{query.Join ( "\n" )}"
 					);
+				}
 
 				return;
 			}
@@ -313,8 +322,15 @@ namespace TelegramBot.CryptoTickerTeleBot
 				return;
 			}
 
-			var list = Users.OfRole ( role );
-			await SendBlockText ( message, $"{role} List:\n{list.Select ( x => x.UserName ).Join ( "\n" )}" );
+			var list = Users
+				.OfRole ( role )
+				.OrderBy ( x => x.Created )
+				.Select ( x => $"{x.Id,-10} {x.UserName}" );
+
+			await SendBlockText (
+				message,
+				$"{role} List:\n{list.Join ( "\n" )}"
+			);
 		}
 
 		private async Task HandleKill ( Message message, IList<string> @params )
