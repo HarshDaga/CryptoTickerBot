@@ -97,15 +97,15 @@ namespace CryptoTickerBot.Core
 		public void Start ( [NotNull] CancellationTokenSource cts )
 		{
 			Logger.Info ( "Starting Bot" );
+
 			Cts       = cts;
 			IsRunning = true;
+
 			Task.Run ( async ( ) =>
 			{
 				fiatMonitor = FiatConverter.StartMonitor ( );
 
 				InitExchanges ( );
-
-				IsInitialized = true;
 
 				StartAutoSheetsUpdater ( );
 
@@ -144,6 +144,8 @@ namespace CryptoTickerBot.Core
 					throw;
 				}
 			}
+
+			IsInitialized = true;
 		}
 
 		private static void StoreCoinValueInDb ( CryptoExchangeBase exchange, CryptoCoin coin ) =>
@@ -227,9 +229,9 @@ namespace CryptoTickerBot.Core
 				valueRanges.Add ( new ValueRange
 				{
 					Values = exchange.ToSheetRows ( ),
-					Range  = $"{Settings.Instance.SheetName}!{range}"
+					Range  = $"{Service.SheetName}!{range}"
 				} );
-				Logger.Info ( $"Updated Sheets for {id}" );
+				Logger.Debug ( $"Updated Sheets for {id}" );
 			}
 
 			return valueRanges;
