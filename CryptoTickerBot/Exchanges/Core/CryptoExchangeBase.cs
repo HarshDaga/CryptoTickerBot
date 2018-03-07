@@ -158,7 +158,10 @@ namespace CryptoTickerBot.Exchanges.Core
 
 		[Pure]
 		public List<IList<object>> ToSheetRows ( ) =>
-			ExchangeData.Values.OrderBy ( coin => coin.Symbol ).Select ( coin => coin.ToSheetsRow ( ) ).ToList ( );
+			ExchangeData.Values
+				.OrderBy ( coin => coin.Id )
+				.Select ( coin => coin.ToSheetsRow ( ) )
+				.ToList ( );
 
 		public event OnUpdateDelegate Changed;
 		public event OnUpdateDelegate Next;
