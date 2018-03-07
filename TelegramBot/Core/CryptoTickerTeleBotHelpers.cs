@@ -28,7 +28,10 @@ namespace TelegramBot.Core
 			command = text.Split ( ' ' ).First ( );
 			if ( command.Contains ( $"@{me.Username}" ) )
 				command = command.Substring ( 0, command.IndexOf ( $"@{me.Username}", StringComparison.Ordinal ) );
-			parameters = text.Split ( ' ' ).Skip ( 1 ).ToList ( );
+			parameters = text
+				.Split ( new[] {' '}, StringSplitOptions.RemoveEmptyEntries )
+				.Skip ( 1 )
+				.ToList ( );
 		}
 
 		private async Task<bool> ValidateUserCommand ( User from, string command, Message message )

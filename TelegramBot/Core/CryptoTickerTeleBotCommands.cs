@@ -260,7 +260,7 @@ namespace TelegramBot.Core
 				return;
 			}
 
-			var userName = @params.Count >= 2 ? @params[2] : string.Empty;
+			var userName = @params.Count > 2 ? @params[2] : string.Empty;
 
 			Logger.Info ( $"Registered {id,-10} {userName}." );
 
