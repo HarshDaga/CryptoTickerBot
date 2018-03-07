@@ -79,6 +79,7 @@
     <Compile Include="Enums\FiatCurrency.cs" />
     <Compile Include="Enums\UserRole.cs" />
     <Compile Include="Extensions\EnumUtils.cs" />
+    <Compile Include="Persistence\CtbContext.Views.cs" />
     <Compile Include="Persistence\IUnitOfWork.cs" />
     <Compile Include="Migrations\201803050426325_InitialMigration.cs" />
     <Compile Include="Migrations\201803050426325_InitialMigration.Designer.cs">
