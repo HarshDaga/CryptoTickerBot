@@ -17,7 +17,7 @@ using Telegram.Bot.Types.InlineQueryResults;
 using Telegram.Bot.Types.InputMessageContents;
 using TelegramBot.Extensions;
 
-namespace TelegramBot.CryptoTickerTeleBot
+namespace TelegramBot.Core
 {
 	public partial class TeleBot
 	{
@@ -112,7 +112,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 		private async void BotClientOnInlineQuery ( object sender, InlineQueryEventArgs eventArgs )
 		{
 			var from = eventArgs.InlineQuery.From;
-			Logger.Debug ( $"Received inline query from: {from.Id,-10} {from.Username}" );
+			Logger.Info ( $"Received inline query from: {from.Id,-10} {from.Username}" );
 			if ( !Users.Contains ( from.Id ) )
 			{
 				var user = new TeleBotUser ( from );

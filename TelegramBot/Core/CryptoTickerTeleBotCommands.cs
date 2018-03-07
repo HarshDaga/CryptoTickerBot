@@ -16,7 +16,7 @@ using TelegramBot.Extensions;
 
 // ReSharper disable UnusedParameter.Local
 
-namespace TelegramBot.CryptoTickerTeleBot
+namespace TelegramBot.Core
 {
 	public partial class TeleBot
 	{

@@ -15,7 +15,7 @@ using Telegram.Bot.Types.Enums;
 using TelegramBot.Extensions;
 using CryptoCoin = CryptoTickerBot.CryptoCoin;
 
-namespace TelegramBot.CryptoTickerTeleBot
+namespace TelegramBot.Core
 {
 	public partial class TeleBot
 	{

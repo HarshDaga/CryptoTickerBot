@@ -5,7 +5,7 @@ using Telegram.Bot.Types;
 
 // ReSharper disable NonReadonlyMemberInGetHashCode
 
-namespace TelegramBot.CryptoTickerTeleBot
+namespace TelegramBot
 {
 	public class TeleBotUser : IEquatable<TeleBotUser>
 	{

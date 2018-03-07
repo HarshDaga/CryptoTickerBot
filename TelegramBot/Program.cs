@@ -2,7 +2,7 @@
 using System.Threading;
 using CryptoTickerBot.Core;
 using NLog;
-using TelegramBot.CryptoTickerTeleBot;
+using TelegramBot.Core;
 
 namespace TelegramBot
 {

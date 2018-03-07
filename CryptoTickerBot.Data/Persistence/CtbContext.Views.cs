@@ -7,19 +7,19 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using System;
+using System.CodeDom.Compiler;
+using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Infrastructure.MappingViews;
+using CryptoTickerBot.Data.Persistence;
 
-[assembly: DbMappingViewCacheTypeAttribute(
+[assembly: DbMappingViewCacheType(
     typeof(CryptoTickerBot.Data.Persistence.CtbContext),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets74955d47881c1ed38ad4bd6fe995387dcf122d5564bbc5cd95b7addbf13cf598))]
+    typeof(ViewsForBaseEntitySets74955d47881c1ed38ad4bd6fe995387dcf122d5564bbc5cd95b7addbf13cf598))]
 
-namespace Edm_EntityMappingGeneratedViews
+namespace CryptoTickerBot.Data.Persistence
 {
-    using System;
-    using System.CodeDom.Compiler;
-    using System.Data.Entity.Core.Metadata.Edm;
-
-    /// <summary>
+	/// <summary>
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework 6 Power Tools", "0.9.2.0")]

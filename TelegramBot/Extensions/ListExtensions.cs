@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using CryptoTickerBot.Data.Enums;
-using TelegramBot.CryptoTickerTeleBot;
+using TelegramBot.Core;
 
 namespace TelegramBot.Extensions
 {

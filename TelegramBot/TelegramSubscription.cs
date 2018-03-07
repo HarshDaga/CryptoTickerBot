@@ -10,7 +10,7 @@ using JetBrains.Annotations;
 using NLog;
 using CryptoCoin = CryptoTickerBot.CryptoCoin;
 
-namespace TelegramBot.CryptoTickerTeleBot
+namespace TelegramBot
 {
 	public class TelegramSubscription : CryptoExchangeSubscription
 	{

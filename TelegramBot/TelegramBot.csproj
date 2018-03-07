@@ -68,11 +68,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CryptoTickerTeleBot\CryptoTickerTeleBotCommands.cs" />
-    <Compile Include="CryptoTickerTeleBot\TelegramSubscription.cs" />
-    <Compile Include="CryptoTickerTeleBot\CryptoTickerTeleBotHelpers.cs" />
-    <Compile Include="CryptoTickerTeleBot\CryptoTickerTeleBotCore.cs" />
-    <Compile Include="CryptoTickerTeleBot\TeleBotUser.cs" />
+    <Compile Include="Core\CryptoTickerTeleBotCommands.cs" />
+    <Compile Include="TelegramSubscription.cs" />
+    <Compile Include="Core\CryptoTickerTeleBotHelpers.cs" />
+    <Compile Include="Core\CryptoTickerTeleBotCore.cs" />
+    <Compile Include="TeleBotUser.cs" />
     <Compile Include="Extensions\DecimalExtensions.cs" />
     <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
