@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using CryptoTickerBot.Data.Enums;
 
 // ReSharper disable NonReadonlyMemberInGetHashCode
@@ -25,6 +26,7 @@ namespace TelegramBot.CryptoTickerTeleBot
 			return Equals ( UserName, other.UserName );
 		}
 
+		[Pure]
 		public override string ToString ( ) => $"{Role,-12} Username: {UserName}";
 
 		public override bool Equals ( object obj )

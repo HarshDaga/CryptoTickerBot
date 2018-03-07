@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using CryptoTickerBot.Data.Enums;
 using CryptoTickerBot.Exchanges.Core;
@@ -22,6 +23,7 @@ namespace CryptoTickerBot.Helpers
 		public void AddExchange ( CryptoExchangeBase exchange ) =>
 			Exchanges[exchange.Id] = exchange;
 
+		[Pure]
 		public Dictionary<CryptoCoinId, decimal> GetPair ( CryptoExchangeId from, CryptoExchangeId to )
 		{
 			if ( !Exchanges.ContainsKey ( from ) || !Exchanges.ContainsKey ( to ) )
@@ -43,6 +45,7 @@ namespace CryptoTickerBot.Helpers
 			return result;
 		}
 
+		[Pure]
 		public Dictionary<CryptoExchangeId, Dictionary<CryptoCoinId, decimal>> GetAll ( CryptoExchangeId from )
 		{
 			if ( !Exchanges.ContainsKey ( from ) )
@@ -55,6 +58,7 @@ namespace CryptoTickerBot.Helpers
 			return result;
 		}
 
+		[Pure]
 		public Dictionary<CryptoExchangeId, Dictionary<CryptoExchangeId, Dictionary<CryptoCoinId, decimal>>> GetAll ( )
 		{
 			var result = new Dictionary<CryptoExchangeId, Dictionary<CryptoExchangeId, Dictionary<CryptoCoinId, decimal>>> ( );
@@ -64,6 +68,7 @@ namespace CryptoTickerBot.Helpers
 			return result;
 		}
 
+		[Pure]
 		public Dictionary<CryptoExchangeId, Dictionary<CryptoExchangeId, Dictionary<CryptoCoinId, decimal>>> Get (
 			params CryptoExchangeId[] exchanges
 		)
@@ -98,6 +103,7 @@ namespace CryptoTickerBot.Helpers
 				RemoveExchange ( compareValue, cryptoExchanges );
 		}
 
+		[Pure]
 		public static (CryptoCoinId best, CryptoCoinId leastWorst, decimal profit) GetBestPair (
 			Dictionary<CryptoExchangeId, Dictionary<CryptoExchangeId, Dictionary<CryptoCoinId, decimal>>> compare,
 			CryptoExchangeId from,
@@ -114,6 +120,7 @@ namespace CryptoTickerBot.Helpers
 			return ( best, leastWorst, profit );
 		}
 
+		[Pure]
 		public (CryptoCoinId best, CryptoCoinId leastWorst, decimal profit) GetBestPair (
 			CryptoExchangeId from, CryptoExchangeId to )
 		{
@@ -121,6 +128,7 @@ namespace CryptoTickerBot.Helpers
 			return GetBestPair ( compare, from, to );
 		}
 
+		[Pure]
 		public
 			(
 			CryptoExchangeId from,

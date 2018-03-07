@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Data.Enums;
 using CryptoTickerBot.Data.Persistence;
+using CryptoTickerBot.Data.Extensions;
 using CryptoTickerBot.Helpers;
 using NLog;
 using Tababular;
@@ -50,6 +52,7 @@ namespace CryptoTickerBot.Exchanges.Core
 		public TimeSpan LastChangeDuration => DateTime.UtcNow - LastChange;
 		public int Count => ExchangeData.Count;
 
+		[Pure]
 		public CryptoCoin this [ CryptoCoinId symbol ]
 		{
 			get => ExchangeData[symbol];
@@ -128,7 +131,7 @@ namespace CryptoTickerBot.Exchanges.Core
 		protected void Update ( dynamic data, string symbol )
 		{
 			CryptoCoin old = null;
-			var id = (CryptoCoinId) Enum.Parse ( typeof ( CryptoCoinId ), symbol, true );
+			var id = symbol.ToEnum ( CryptoCoinId.NULL );
 			if ( ExchangeData.ContainsKey ( id ) )
 				old = ExchangeData[id].Clone ( );
 			ExchangeData[id] = new CryptoCoin ( symbol );
@@ -153,6 +156,7 @@ namespace CryptoTickerBot.Exchanges.Core
 			ExchangeData[id] =  coin;
 		}
 
+		[Pure]
 		public List<IList<object>> ToSheetRows ( ) =>
 			ExchangeData.Values.OrderBy ( coin => coin.Symbol ).Select ( coin => coin.ToSheetsRow ( ) ).ToList ( );
 
@@ -168,9 +172,11 @@ namespace CryptoTickerBot.Exchanges.Core
 				observer.OnNext ( ExchangeData[coin.Id].Clone ( ) );
 		}
 
+		[Pure]
 		public override string ToString ( ) =>
 			$"{Name,-12} {UpTime:hh\\:mm\\:ss} {Age:hh\\:mm\\:ss} {LastChangeDuration:hh\\:mm\\:ss}";
 
+		[Pure]
 		public string ToTable ( FiatCurrency fiat )
 		{
 			var formatter = new TableFormatter ( );

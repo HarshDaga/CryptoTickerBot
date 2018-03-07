@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using CryptoTickerBot.Data.Domain;
 using CryptoTickerBot.Data.Enums;
+using CryptoTickerBot.Data.Extensions;
 
 namespace CryptoTickerBot
 {
@@ -26,8 +28,7 @@ namespace CryptoTickerBot
 			decimal rate = 0m
 		)
 		{
-			if ( Enum.TryParse<CryptoCoinId> ( symbol, out var id ) )
-				Id = id;
+			Id         = symbol.ToEnum ( CryptoCoinId.NULL );
 			Symbol     = symbol;
 			HighestBid = highestBid;
 			LowestAsk  = lowestAsk;
@@ -50,9 +51,11 @@ namespace CryptoTickerBot
 			HighestBid == other.HighestBid && LowestAsk == other.LowestAsk;
 
 		[DebuggerStepThrough]
+		[Pure]
 		public virtual decimal Buy ( decimal amountInUsd ) => amountInUsd / BuyPrice;
 
 		[DebuggerStepThrough]
+		[Pure]
 		public virtual decimal Sell ( decimal quantity ) => SellPrice * quantity;
 
 		public override bool Equals ( object obj ) => Equals ( obj as CryptoCoin );
@@ -61,6 +64,7 @@ namespace CryptoTickerBot
 			-1758840423 + EqualityComparer<string>.Default.GetHashCode ( Symbol );
 
 		[DebuggerStepThrough]
+		[Pure]
 		public CryptoCoin Clone ( ) =>
 			new CryptoCoin ( Symbol, HighestBid, LowestAsk, Rate );
 
@@ -75,9 +79,11 @@ namespace CryptoTickerBot
 		public static PriceChange operator - ( CryptoCoin coin1, CryptoCoin coin2 ) =>
 			PriceChange.From ( coin1, coin2 );
 
+		[Pure]
 		public override string ToString ( ) =>
 			$"{Symbol}: Highest Bid = {HighestBid,-10:C} Lowest Ask = {LowestAsk,-10:C}";
 
+		[Pure]
 		public IList<object> ToSheetsRow ( ) =>
 			new List<object> {Symbol, LowestAsk, HighestBid, $"{Time:G}"};
 	}

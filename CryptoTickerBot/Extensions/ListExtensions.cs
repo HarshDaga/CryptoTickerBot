@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -14,17 +15,21 @@ namespace CryptoTickerBot.Extensions
 	public static class ListExtensions
 	{
 		[DebuggerStepThrough]
+		[Pure]
 		public static string Join<T> ( this IEnumerable<T> enumerable, string delimiter ) =>
 			string.Join ( delimiter, enumerable );
 
 		[DebuggerStepThrough]
+		[Pure]
 		public static IList<T> TakeLast<T> ( this IList<T> source, int count ) =>
 			source.Skip ( Math.Max ( 0, source.Count - count ) ).ToList ( );
 
 		[DebuggerStepThrough]
+		[Pure]
 		public static T[] TakeLast<T> ( this T[] source, int count ) =>
 			source.Skip ( Math.Max ( 0, source.Length - count ) ).ToArray ( );
 
+		[Pure]
 		public static IEnumerable<string> ToTables (
 			this IEnumerable<CryptoExchangeBase> exchanges,
 			FiatCurrency fiat = FiatCurrency.USD
@@ -32,6 +37,7 @@ namespace CryptoTickerBot.Extensions
 			exchanges.Select ( exchange => $"{exchange.Name}\n{exchange.ToTable ( fiat )}" );
 
 		[DebuggerStepThrough]
+		[Pure]
 		public static T GetFieldValue<T> ( this object obj, string name )
 		{
 			var field = obj.GetType ( ).GetField ( name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance );
@@ -39,6 +45,7 @@ namespace CryptoTickerBot.Extensions
 		}
 
 		[DebuggerStepThrough]
+		[Pure]
 		public static object GetFieldValue ( this object obj, string name )
 		{
 			var field = obj.GetType ( ).GetField ( name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance );
