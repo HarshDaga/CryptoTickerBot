@@ -205,6 +205,33 @@ namespace CryptoTickerBot.Data.Migrations
 				CryptoExchangeId.Kraken
 			);
 
+			context.Exchanges.AddIfNotExists (
+				new CryptoExchange
+				(
+					CryptoExchangeId.Bitstamp,
+					"Bitstamp",
+					"https://www.bitstamp.net/",
+					"wss://ws.pusherapp.com/app/de504dc5763aeef9ff52?protocol=7&client=js&version=2.1.6&flash=false",
+					0m,
+					0m,
+					withdrawalFees: new Dictionary<CryptoCoinId, decimal>
+					{
+						[CryptoCoinId.BTC] = 0m,
+						[CryptoCoinId.ETH] = 0m,
+						[CryptoCoinId.BCH] = 0m,
+						[CryptoCoinId.LTC] = 0m
+					},
+					depositFees: new Dictionary<CryptoCoinId, decimal>
+					{
+						[CryptoCoinId.BTC] = 0,
+						[CryptoCoinId.ETH] = 0,
+						[CryptoCoinId.BCH] = 0,
+						[CryptoCoinId.LTC] = 0
+					}
+				),
+				CryptoExchangeId.Bitstamp
+			);
+
 			context.TeleBotUsers.AddIfNotExists (
 				new TeleBotUser ( 295348666, UserRole.Owner, "DevilDaga", "Harsh", "Daga" ),
 				295348666

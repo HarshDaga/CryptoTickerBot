@@ -29,7 +29,8 @@ namespace CryptoTickerBot.Core
 				[CryptoExchangeId.Binance]   = new BinanceExchange ( ),
 				[CryptoExchangeId.CoinDelta] = new CoinDeltaExchange ( ),
 				[CryptoExchangeId.Coinbase]  = new CoinbaseExchange ( ),
-				[CryptoExchangeId.Kraken]    = new KrakenExchange ( )
+				[CryptoExchangeId.Kraken]    = new KrakenExchange ( ),
+				[CryptoExchangeId.Bitstamp]  = new BitstampExchange ( ),
 			};
 
 		private Timer fiatMonitor;

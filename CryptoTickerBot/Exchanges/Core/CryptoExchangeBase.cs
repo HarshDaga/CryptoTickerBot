@@ -8,8 +8,8 @@ using System.Reactive.Disposables;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Data.Enums;
-using CryptoTickerBot.Data.Persistence;
 using CryptoTickerBot.Data.Extensions;
+using CryptoTickerBot.Data.Persistence;
 using CryptoTickerBot.Helpers;
 using NLog;
 using Tababular;
@@ -128,7 +128,7 @@ namespace CryptoTickerBot.Exchanges.Core
 				}
 		}
 
-		protected void Update ( dynamic data, string symbol )
+		protected virtual void Update ( dynamic data, string symbol )
 		{
 			CryptoCoin old = null;
 			var id = symbol.ToEnum ( CryptoCoinId.NULL );
@@ -141,9 +141,9 @@ namespace CryptoTickerBot.Exchanges.Core
 			ApplyFees ( id );
 
 			LastUpdate = DateTime.UtcNow;
-			Next?.Invoke ( this, ExchangeData[id].Clone ( ) );
+			OnNext ( ExchangeData[id].Clone ( ) );
 
-			if ( ExchangeData[id] != old ) OnChanged ( this, ExchangeData[id] );
+			if ( ExchangeData[id] != old ) OnChanged ( ExchangeData[id] );
 		}
 
 		protected abstract void DeserializeData ( dynamic data, CryptoCoinId id );
@@ -166,13 +166,18 @@ namespace CryptoTickerBot.Exchanges.Core
 		public event OnUpdateDelegate Changed;
 		public event OnUpdateDelegate Next;
 
-		public void OnChanged ( CryptoExchangeBase exchange, CryptoCoin coin )
+		protected void OnChanged ( CryptoCoin coin )
 		{
-			Changed?.Invoke ( exchange, coin.Clone ( ) );
+			Changed?.Invoke ( this, coin.Clone ( ) );
 			LastChange = DateTime.UtcNow;
 
 			foreach ( var observer in Observers )
 				observer.OnNext ( ExchangeData[coin.Id].Clone ( ) );
+		}
+
+		protected void OnNext ( CryptoCoin coin )
+		{
+			Next?.Invoke ( this, coin );
 		}
 
 		[Pure]
