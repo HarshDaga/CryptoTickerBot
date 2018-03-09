@@ -37,7 +37,7 @@ namespace CryptoTickerBot.Exchanges.Core
 		public string TickerUrl { get; }
 		public CryptoExchangeId Id { get; }
 		public Dictionary<CryptoCoinId, CryptoCoin> ExchangeData { get; protected set; }
-		public ImmutableHashSet<IObserver<CryptoCoin>> Observers { get; protected set; }
+		protected ImmutableHashSet<IObserver<CryptoCoin>> Observers { get; set; }
 		public Dictionary<CryptoCoinId, decimal> DepositFees { get; }
 		public Dictionary<CryptoCoinId, decimal> WithdrawalFees { get; }
 		public decimal BuyFees { get; }

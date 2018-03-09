@@ -24,13 +24,14 @@ namespace CryptoTickerBot.Core
 		public readonly Dictionary<CryptoExchangeId, CryptoExchangeBase> Exchanges =
 			new Dictionary<CryptoExchangeId, CryptoExchangeBase>
 			{
-				[CryptoExchangeId.Koinex]    = new KoinexExchange ( ),
-				[CryptoExchangeId.BitBay]    = new BitBayExchange ( ),
-				[CryptoExchangeId.Binance]   = new BinanceExchange ( ),
-				[CryptoExchangeId.CoinDelta] = new CoinDeltaExchange ( ),
-				[CryptoExchangeId.Coinbase]  = new CoinbaseExchange ( ),
-				[CryptoExchangeId.Kraken]    = new KrakenExchange ( ),
-				[CryptoExchangeId.Bitstamp]  = new BitstampExchange ( ),
+				//[CryptoExchangeId.Binance]   = new BinanceExchange ( ),
+				//[CryptoExchangeId.BitBay]    = new BitBayExchange ( ),
+				//[CryptoExchangeId.Bitstamp]  = new BitstampExchange ( ),
+				//[CryptoExchangeId.Coinbase]  = new CoinbaseExchange ( ),
+				//[CryptoExchangeId.CoinDelta] = new CoinDeltaExchange ( ),
+				//[CryptoExchangeId.Koinex]    = new KoinexExchange ( ),
+				//[CryptoExchangeId.Kraken]    = new KrakenExchange ( ),
+				[CryptoExchangeId.Zebpay]    = new ZebpayExchange ( ),
 			};
 
 		private Timer fiatMonitor;

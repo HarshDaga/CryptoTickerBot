@@ -10,6 +10,7 @@
 		Kraken,
 		Bitstamp,
 		Bitfinex,
-		Poloniex
+		Poloniex,
+		Zebpay
 	}
 }

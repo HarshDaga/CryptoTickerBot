@@ -232,6 +232,33 @@ namespace CryptoTickerBot.Data.Migrations
 				CryptoExchangeId.Bitstamp
 			);
 
+			context.Exchanges.AddIfNotExists (
+				new CryptoExchange
+				(
+					CryptoExchangeId.Zebpay,
+					"Zebpay",
+					"https://www.zebpay.com/",
+					"https://www.zebapi.com/api/v1/market/ticker-new/",
+					0,
+					0,
+					withdrawalFees: new Dictionary<CryptoCoinId, decimal>
+					{
+						[CryptoCoinId.BTC] = 0.0009m,
+						[CryptoCoinId.ETH] = 0.002m,
+						[CryptoCoinId.BCH] = 0.0001m,
+						[CryptoCoinId.LTC] = 0.006m
+					},
+					depositFees: new Dictionary<CryptoCoinId, decimal>
+					{
+						[CryptoCoinId.BTC] = 0,
+						[CryptoCoinId.ETH] = 0,
+						[CryptoCoinId.BCH] = 0,
+						[CryptoCoinId.LTC] = 0
+					}
+				),
+				CryptoExchangeId.Zebpay
+			);
+
 			context.TeleBotUsers.AddIfNotExists (
 				new TeleBotUser ( 295348666, UserRole.Owner, "DevilDaga", "Harsh", "Daga" ),
 				295348666

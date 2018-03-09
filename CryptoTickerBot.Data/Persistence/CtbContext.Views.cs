@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(CryptoTickerBot.Data.Persistence.CtbContext),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsb52f5de5f2470a66b882433607494f705bbcaf379cc02c8e6b1adcd3c3a6a35b))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets9f5510769c674df5ad7cb5dfa795b6af60abf869a937f74c8cf2977610917089))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework 6 Power Tools", "0.9.2.0")]
-    internal sealed class ViewsForBaseEntitySetsb52f5de5f2470a66b882433607494f705bbcaf379cc02c8e6b1adcd3c3a6a35b : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets9f5510769c674df5ad7cb5dfa795b6af60abf869a937f74c8cf2977610917089 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "b52f5de5f2470a66b882433607494f705bbcaf379cc02c8e6b1adcd3c3a6a35b"; }
+            get { return "9f5510769c674df5ad7cb5dfa795b6af60abf869a937f74c8cf2977610917089"; }
         }
 
         /// <summary>

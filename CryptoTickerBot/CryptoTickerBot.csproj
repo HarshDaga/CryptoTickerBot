@@ -120,6 +120,7 @@
     <Compile Include="Core\GoogleSheetsService.cs" />
     <Compile Include="Core\Settings.cs" />
     <Compile Include="Exchanges\BinanceExchange.cs" />
+    <Compile Include="Exchanges\ZebpayExchange.cs" />
     <Compile Include="Exchanges\BitBayExchange.cs" />
     <Compile Include="Exchanges\CoinbaseExchange.cs" />
     <Compile Include="Exchanges\CoinDeltaExchange.cs" />
