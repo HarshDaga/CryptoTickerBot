@@ -9,6 +9,7 @@ namespace CryptoTickerBot.Data.Persistence
 	public class UnitOfWork : IUnitOfWork
 	{
 		private readonly CtbContext context;
+		private static readonly object Lock = new object ( );
 
 		public UnitOfWork ( CtbContext context )
 		{
@@ -40,21 +41,26 @@ namespace CryptoTickerBot.Data.Persistence
 
 		public static void Do ( Action<IUnitOfWork> action )
 		{
-			using ( var unit = new UnitOfWork ( new CtbContext ( ) ) )
+			lock ( Lock )
 			{
-				action ( unit );
-				unit.Complete ( );
+				using ( var unit = new UnitOfWork ( new CtbContext ( ) ) )
+				{
+					action ( unit );
+					unit.Complete ( );
+				}
 			}
 		}
 
 		public static T Get<T> ( Func<IUnitOfWork, T> func )
 		{
 			T result;
-
-			using ( var unit = new UnitOfWork ( new CtbContext ( ) ) )
+			lock ( Lock )
 			{
-				result = func ( unit );
-				unit.Complete ( );
+				using ( var unit = new UnitOfWork ( new CtbContext ( ) ) )
+				{
+					result = func ( unit );
+					unit.Complete ( );
+				}
 			}
 
 			return result;
