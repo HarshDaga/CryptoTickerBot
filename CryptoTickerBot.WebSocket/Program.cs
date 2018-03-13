@@ -32,13 +32,21 @@ namespace CryptoTickerBot.WebSocket
 			var teleBot = new TeleBot ( Settings.Instance.BotToken, ctb );
 			teleBot.Start ( );
 
-			var sv = new WebSocketServer ( $"ws://{Settings.Instance.Ip}:{Settings.Instance.Port}" );
-			sv.Log.Level = LogLevel.Trace;
-			sv.AddWebSocketService (
-				"/telebot",
-				( ) => new TeleBotWebSocketService ( teleBot )
-			);
-			sv.Start ( );
+			try
+			{
+				var sv = new WebSocketServer ( $"ws://{Settings.Instance.Ip}:{Settings.Instance.Port}" );
+				sv.Log.Level = LogLevel.Fatal;
+				sv.AddWebSocketService (
+					"/telebot",
+					( ) => new TeleBotWebSocketService ( teleBot )
+				);
+				sv.Start ( );
+			}
+			catch ( Exception e )
+			{
+				Logger.Error ( e );
+				throw;
+			}
 
 			Console.ReadLine ( );
 		}
