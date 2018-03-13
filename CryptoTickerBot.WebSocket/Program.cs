@@ -33,7 +33,7 @@ namespace CryptoTickerBot.WebSocket
 			var teleBot = new TeleBot ( Settings.Instance.BotToken, ctb );
 			teleBot.Start ( );
 
-			var sv = new WebSocketServer ( "ws://localhost" );
+			var sv = new WebSocketServer ( "ws://localhost:20421" );
 			sv.Log.Level = LogLevel.Trace;
 			sv.AddWebSocketService (
 				"/telebot",
