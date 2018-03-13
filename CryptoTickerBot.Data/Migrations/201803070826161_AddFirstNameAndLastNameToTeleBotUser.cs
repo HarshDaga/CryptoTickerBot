@@ -1,7 +1,7 @@
+using System.Data.Entity.Migrations;
+
 namespace CryptoTickerBot.Data.Migrations
 {
-	using System.Data.Entity.Migrations;
-
 	public partial class AddFirstNameAndLastNameToTeleBotUser : DbMigration
 	{
 		public override void Up ( )

@@ -20,7 +20,7 @@ namespace TelegramBot.Core
 	public partial class TeleBot
 	{
 		private readonly object subscriptionLock = new object ( );
-		public List<TelegramSubscription> Subscriptions;
+		public List<TelegramSubscription> Subscriptions { get; private set; }
 
 		private void ParseMessage ( Message message, out string command, out List<string> parameters )
 		{

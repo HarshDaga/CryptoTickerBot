@@ -25,6 +25,7 @@ namespace TelegramBot
 		public int Id { get; }
 		public long ChatId { get; }
 		public string UserName { get; }
+		public CryptoExchangeId ExchangeId { get; }
 		public decimal Threshold { get; }
 		public Dictionary<CryptoCoinId, CryptoCoin> LastSignificantPrice { get; }
 		public ISet<CryptoCoinId> Coins { get; }
@@ -39,10 +40,11 @@ namespace TelegramBot
 			IDictionary<CryptoCoinId, CryptoCoin> lastSignificantPrice = null
 		) : base ( exchange )
 		{
-			Id        = id;
-			ChatId    = chatId;
-			UserName  = userName;
-			Threshold = threshold;
+			Id         = id;
+			ChatId     = chatId;
+			UserName   = userName;
+			ExchangeId = exchange.Id;
+			Threshold  = threshold;
 			LastSignificantPrice = new Dictionary<CryptoCoinId, CryptoCoin> (
 				lastSignificantPrice ?? exchange.ExchangeData
 			);
@@ -54,10 +56,11 @@ namespace TelegramBot
 			TeleSubscription subscription )
 			: base ( exchange )
 		{
-			Id        = subscription.Id;
-			ChatId    = subscription.ChatId;
-			UserName  = subscription.UserName;
-			Threshold = subscription.Threshold;
+			Id         = subscription.Id;
+			ChatId     = subscription.ChatId;
+			UserName   = subscription.UserName;
+			ExchangeId = exchange.Id;
+			Threshold  = subscription.Threshold;
 			LastSignificantPrice = subscription.LastSignificantPrice.ToDictionary (
 				x => x.Key,
 				x => new CryptoCoin ( x.Value )
@@ -67,6 +70,9 @@ namespace TelegramBot
 
 		[UsedImplicitly]
 		public event TelegramSubscriptionValueChangeNotificationDelegate Changed;
+
+		[UsedImplicitly]
+		public event TelegramSubscriptionValueChangeNotificationDelegate Updated;
 
 		public override void OnNext ( CryptoCoin coin )
 		{
@@ -78,6 +84,7 @@ namespace TelegramBot
 
 			var change = coin - LastSignificantPrice[coin.Id];
 			var percentage = Math.Abs ( change.Percentage );
+			Updated?.Invoke ( this, LastSignificantPrice[coin.Id], coin );
 			if ( percentage >= Threshold )
 			{
 				Changed?.Invoke ( this, LastSignificantPrice[coin.Id], coin );

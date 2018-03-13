@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CryptoTickerBot.Core;
 using CryptoTickerBot.Data.Enums;
 using CryptoTickerBot.Data.Persistence;
 using CryptoTickerBot.Exchanges.Core;
 using CryptoTickerBot.Helpers;
+using JetBrains.Annotations;
 using NLog;
 using Telegram.Bot;
 using Telegram.Bot.Args;
@@ -16,6 +16,7 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InlineQueryResults;
 using Telegram.Bot.Types.InputMessageContents;
 using TelegramBot.Extensions;
+using CTB = CryptoTickerBot.Core.CryptoTickerBot;
 
 namespace TelegramBot.Core
 {
@@ -27,25 +28,28 @@ namespace TelegramBot.Core
 		private TelegramBotClient bot;
 
 		private Dictionary<string, (UserRole role, MessageHandlerDelegate handler)> commands;
-
-		private Bot ctb;
 		private User me;
 
-		public Dictionary<CryptoExchangeId, CryptoExchangeBase> Exchanges => ctb.Exchanges;
+		public CTB Ctb { get; private set; }
+
+		public Dictionary<CryptoExchangeId, CryptoExchangeBase> Exchanges => Ctb.Exchanges;
 
 		public string BotToken { get; }
 		public List<TelegramBotUser> Users { get; private set; }
 
-		public TeleBot ( string botToken, Bot ctb )
+		public TeleBot ( string botToken, CTB ctb )
 		{
 			BotToken      = botToken;
 			Subscriptions = new List<TelegramSubscription> ( );
-			this.ctb      = ctb;
+			Ctb           = ctb;
 
 			FetchUserList ( );
 
 			InitializeCommands ( );
 		}
+
+		[UsedImplicitly]
+		public event Action<TeleBot> Restart;
 
 		private void InitializeCommands ( )
 		{
@@ -86,13 +90,11 @@ namespace TelegramBot.Core
 
 				bot.StartReceiving ( );
 
-				while ( !ctb.IsInitialized )
+				while ( !Ctb.IsInitialized )
 					Thread.Sleep ( 10 );
 
 				LoadSubscriptions ( );
 				SendResumeNotifications ( );
-
-				Console.ReadLine ( );
 			}
 			catch ( Exception e )
 			{

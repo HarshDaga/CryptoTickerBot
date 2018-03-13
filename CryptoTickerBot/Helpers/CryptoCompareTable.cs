@@ -39,6 +39,10 @@ namespace CryptoTickerBot.Helpers
 			{
 				var buy = Exchanges[from].ExchangeData[symbol].BuyPrice;
 				var sell = Exchanges[to].ExchangeData[symbol].SellPrice;
+
+				if ( buy == 0 || sell == 0 )
+					continue;
+
 				result[symbol] = ( sell - buy ) / buy;
 			}
 
@@ -121,11 +125,21 @@ namespace CryptoTickerBot.Helpers
 		}
 
 		[Pure]
-		public (CryptoCoinId best, CryptoCoinId leastWorst, decimal profit) GetBestPair (
+		public (CryptoCoinId best, CryptoCoinId leastWorst, decimal profit, decimal fees) GetBestPair (
 			CryptoExchangeId from, CryptoExchangeId to )
 		{
 			var compare = GetAll ( );
-			return GetBestPair ( compare, from, to );
+			var result = GetBestPair ( compare, from, to );
+			var fromExchange = Exchanges[from];
+			var toExchange = Exchanges[to];
+
+			var fees =
+				fromExchange[result.best].Buy ( fromExchange.DepositFees[result.best] ) +
+				fromExchange[result.best].Sell ( fromExchange.WithdrawalFees[result.best] ) +
+				toExchange[result.leastWorst].Buy ( toExchange.DepositFees[result.leastWorst] ) +
+				toExchange[result.leastWorst].Sell ( toExchange.WithdrawalFees[result.leastWorst] );
+
+			return ( result.best, result.leastWorst, result.profit, fees );
 		}
 
 		[Pure]
@@ -135,29 +149,39 @@ namespace CryptoTickerBot.Helpers
 			CryptoExchangeId to,
 			CryptoCoinId first,
 			CryptoCoinId second,
-			decimal profit
+			decimal profit,
+			decimal fees
 			)
 			GetBest ( )
 		{
 			var all = GetAll ( );
 			var exchanges = Exchanges.Keys.ToList ( );
 			var bestGain = decimal.MinValue;
-			(CryptoExchangeId from, CryptoExchangeId to, CryptoCoinId first, CryptoCoinId second, decimal profit) result =
-				default;
+			(CryptoExchangeId from, CryptoExchangeId to, CryptoCoinId first, CryptoCoinId second, decimal profit, decimal fees)
+				result =
+					default;
 
 			foreach ( var from in exchanges )
 			foreach ( var to in exchanges )
 			{
-				if ( from == to || all[from][to].Count == 0 )
+				if ( from == to || all[from][to].Count == 0 || all[to][from].Count == 0 )
 					continue;
 
 				var (best, leastWorst, profit) = GetBestPair ( all, from, to );
 				if ( profit > bestGain )
 				{
 					bestGain = profit;
-					result   = ( from, to, best, leastWorst, profit );
+					result   = ( from, to, best, leastWorst, profit, 0 );
 				}
 			}
+
+			var fromExchange = Exchanges[result.from];
+			var toExchange = Exchanges[result.to];
+			result.fees =
+				fromExchange[result.first].Buy ( fromExchange.DepositFees[result.first] ) +
+				fromExchange[result.first].Sell ( fromExchange.WithdrawalFees[result.first] ) +
+				toExchange[result.second].Buy ( toExchange.DepositFees[result.second] ) +
+				toExchange[result.second].Sell ( toExchange.WithdrawalFees[result.second] );
 
 			return result;
 		}

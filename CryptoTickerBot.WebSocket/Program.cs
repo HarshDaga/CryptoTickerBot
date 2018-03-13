@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Threading;
+using CryptoTickerBot.WebSocket.Services;
 using NLog;
+using TelegramBot;
 using TelegramBot.Core;
+using WebSocketSharp.Server;
+using CTB = CryptoTickerBot.Core.CryptoTickerBot;
+using LogLevel = WebSocketSharp.LogLevel;
 
-namespace TelegramBot
+namespace CryptoTickerBot.WebSocket
 {
 	public class Program
 	{
@@ -14,10 +19,11 @@ namespace TelegramBot
 			AppDomain.CurrentDomain.UnhandledException += ( sender, args ) =>
 				Logger.Error ( args );
 
-			Console.Title = "Crypto Ticker Telegram Bot";
+			Console.Title = "Crypto Ticker Bot";
 
-			var ctb = CryptoTickerBot.Core.CryptoTickerBot.CreateAndStart (
-				new CancellationTokenSource ( ),
+			var cts = new CancellationTokenSource ( );
+			var ctb = CTB.CreateAndStart (
+				cts,
 				Settings.Instance.ApplicationName,
 				Settings.Instance.SheetName,
 				Settings.Instance.SheetId,
@@ -26,6 +32,14 @@ namespace TelegramBot
 
 			var teleBot = new TeleBot ( Settings.Instance.BotToken, ctb );
 			teleBot.Start ( );
+
+			var sv = new WebSocketServer ( "ws://localhost" );
+			sv.Log.Level = LogLevel.Trace;
+			sv.AddWebSocketService (
+				"/telebot",
+				( ) => new TeleBotWebSocketService ( teleBot )
+			);
+			sv.Start ( );
 
 			Console.ReadLine ( );
 		}

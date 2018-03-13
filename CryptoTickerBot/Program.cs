@@ -17,7 +17,7 @@ namespace CryptoTickerBot
 			Console.Title = Settings.Instance.ApplicationName;
 			Logger.Info ( $"Started {Settings.Instance.ApplicationName}" );
 
-			Bot.CreateAndStart (
+			Core.CryptoTickerBot.CreateAndStart (
 				new CancellationTokenSource ( ),
 				Settings.Instance.ApplicationName,
 				Settings.Instance.SheetName,

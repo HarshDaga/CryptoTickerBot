@@ -17,7 +17,7 @@ using Timer = System.Timers.Timer;
 
 namespace CryptoTickerBot.Core
 {
-	public class Bot : IDisposable
+	public class CryptoTickerBot : IDisposable
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
@@ -31,7 +31,7 @@ namespace CryptoTickerBot.Core
 				[CryptoExchangeId.CoinDelta] = new CoinDeltaExchange ( ),
 				[CryptoExchangeId.Koinex]    = new KoinexExchange ( ),
 				[CryptoExchangeId.Kraken]    = new KrakenExchange ( ),
-				[CryptoExchangeId.Zebpay]    = new ZebpayExchange ( ),
+				[CryptoExchangeId.Zebpay]    = new ZebpayExchange ( )
 			};
 
 		private Timer fiatMonitor;
@@ -54,7 +54,7 @@ namespace CryptoTickerBot.Core
 		public static List<Data.Domain.CryptoCoin> SupportedCoins =>
 			UnitOfWork.Get ( u => u.Coins.GetAll ( ).ToList ( ) );
 
-		public Bot (
+		public CryptoTickerBot (
 			[CanBeNull] GoogleSheetsService service,
 			[CanBeNull] IDictionary<CryptoExchangeId, string> sheetsRanges
 		)
@@ -69,7 +69,7 @@ namespace CryptoTickerBot.Core
 			GC.SuppressFinalize ( this );
 		}
 
-		public static Bot CreateAndStart (
+		public static CryptoTickerBot CreateAndStart (
 			[NotNull] CancellationTokenSource cts,
 			[NotNull] string applicationName,
 			[NotNull] string sheetName,
@@ -83,15 +83,15 @@ namespace CryptoTickerBot.Core
 				sheetName,
 				sheetId
 			);
-			var bot = new Bot ( service, sheetsRanges );
+			var bot = new CryptoTickerBot ( service, sheetsRanges );
 			bot.Start ( cts );
 
 			return bot;
 		}
 
-		public static Bot CreateAndStart ( [NotNull] CancellationTokenSource cts )
+		public static CryptoTickerBot CreateAndStart ( [NotNull] CancellationTokenSource cts )
 		{
-			var bot = new Bot ( null, null );
+			var bot = new CryptoTickerBot ( null, null );
 			bot.Start ( cts );
 			return bot;
 		}
@@ -100,17 +100,15 @@ namespace CryptoTickerBot.Core
 		{
 			Logger.Info ( "Starting Bot" );
 
-			Cts       = cts;
-			IsRunning = true;
+			Cts         = cts;
+			IsRunning   = true;
+			fiatMonitor = FiatConverter.StartMonitor ( );
+
+			InitExchanges ( );
+			StartAutoSheetsUpdater ( );
 
 			Task.Run ( async ( ) =>
 			{
-				fiatMonitor = FiatConverter.StartMonitor ( );
-
-				InitExchanges ( );
-
-				StartAutoSheetsUpdater ( );
-
 				await Task.Delay ( int.MaxValue, Cts.Token );
 
 				IsRunning = false;
@@ -239,7 +237,7 @@ namespace CryptoTickerBot.Core
 			return valueRanges;
 		}
 
-		~Bot ( )
+		~CryptoTickerBot ( )
 		{
 			Dispose ( false );
 		}

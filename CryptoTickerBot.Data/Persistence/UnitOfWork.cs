@@ -8,8 +8,8 @@ namespace CryptoTickerBot.Data.Persistence
 {
 	public class UnitOfWork : IUnitOfWork
 	{
-		private readonly CtbContext context;
 		private static readonly object Lock = new object ( );
+		private readonly CtbContext context;
 
 		public UnitOfWork ( CtbContext context )
 		{

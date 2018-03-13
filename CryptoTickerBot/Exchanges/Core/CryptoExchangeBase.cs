@@ -55,7 +55,7 @@ namespace CryptoTickerBot.Exchanges.Core
 		[Pure]
 		public CryptoCoin this [ CryptoCoinId symbol ]
 		{
-			get => ExchangeData[symbol];
+			get => ExchangeData.ContainsKey ( symbol ) ? ExchangeData[symbol] : null;
 			set => ExchangeData[symbol] = value;
 		}
 

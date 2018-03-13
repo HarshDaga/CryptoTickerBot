@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using CryptoTickerBot.Core;
 using CryptoTickerBot.Data.Enums;
 using CryptoTickerBot.Data.Extensions;
 using CryptoTickerBot.Data.Persistence;
@@ -13,6 +12,7 @@ using CryptoTickerBot.Helpers;
 using Tababular;
 using Telegram.Bot.Types;
 using TelegramBot.Extensions;
+using CTB = CryptoTickerBot.Core.CryptoTickerBot;
 
 // ReSharper disable UnusedParameter.Local
 
@@ -51,7 +51,7 @@ namespace TelegramBot.Core
 				await SendBlockText ( message, $"No threshold provided, setting to default {threshold:P}" );
 
 			// Check coin symbols
-			var supported = Bot.SupportedCoins;
+			var supported = CTB.SupportedCoins;
 			var coinIds = supported
 				.Where ( x => @params.Any (
 					         c => c.Equals ( x.Symbol, StringComparison.InvariantCultureIgnoreCase )
@@ -103,14 +103,14 @@ namespace TelegramBot.Core
 		{
 			Dictionary<CryptoExchangeId, Dictionary<CryptoExchangeId, Dictionary<CryptoCoinId, decimal>>> compare;
 			if ( @params?.Count >= 2 )
-				compare = ctb.CompareTable.Get (
+				compare = Ctb.CompareTable.Get (
 					@params
 						.Where ( x => GetExchangeBase ( x ) != null )
 						.Select ( x => GetExchangeBase ( x ).Id )
 						.ToArray ( )
 				);
 			else
-				compare = ctb.CompareTable.GetAll ( );
+				compare = Ctb.CompareTable.GetAll ( );
 
 			var tables = BuildCompareTables ( compare );
 
@@ -122,7 +122,7 @@ namespace TelegramBot.Core
 
 		private async Task HandleBestAll ( Message message )
 		{
-			var (from, to, first, second, profit) = ctb.CompareTable.GetBest ( );
+			var (from, to, first, second, profit, fees) = Ctb.CompareTable.GetBest ( );
 
 			if ( first == CryptoCoinId.NULL || second == CryptoCoinId.NULL )
 			{
@@ -132,11 +132,6 @@ namespace TelegramBot.Core
 
 			var fromExchange = Exchanges[from];
 			var toExchange = Exchanges[to];
-			var fees =
-				fromExchange.ExchangeData[first].Buy ( fromExchange.DepositFees[first] ) +
-				fromExchange.ExchangeData[first].Sell ( fromExchange.WithdrawalFees[first] ) +
-				toExchange.ExchangeData[second].Buy ( toExchange.DepositFees[second] ) +
-				toExchange.ExchangeData[second].Sell ( toExchange.WithdrawalFees[second] );
 			var minInvestment = fees / profit;
 
 			var reply =
@@ -181,12 +176,7 @@ namespace TelegramBot.Core
 				return;
 			}
 
-			var (best, leastWorst, profit) = ctb.CompareTable.GetBestPair ( from.Id, to.Id );
-			var fees =
-				from.ExchangeData[best].Buy ( from.DepositFees[best] ) +
-				from.ExchangeData[best].Sell ( from.WithdrawalFees[best] ) +
-				to.ExchangeData[leastWorst].Buy ( to.DepositFees[leastWorst] ) +
-				to.ExchangeData[leastWorst].Sell ( to.WithdrawalFees[leastWorst] );
+			var (best, leastWorst, profit, fees) = Ctb.CompareTable.GetBestPair ( from.Id, to.Id );
 			var minInvestment = fees / profit;
 
 			var reply =
@@ -276,8 +266,8 @@ namespace TelegramBot.Core
 			Settings.Load ( );
 			FetchUserList ( );
 
-			ctb.Stop ( );
-			ctb = Bot.CreateAndStart (
+			Ctb.Stop ( );
+			Ctb = CTB.CreateAndStart (
 				new CancellationTokenSource ( ),
 				Settings.Instance.ApplicationName,
 				Settings.Instance.SheetName,
@@ -287,11 +277,13 @@ namespace TelegramBot.Core
 
 			await SendBlockText ( message, "Restarted all exchange monitors." );
 
-			while ( !ctb.IsInitialized )
+			while ( !Ctb.IsInitialized )
 				await Task.Delay ( 10 );
 
 			LoadSubscriptions ( );
 			SendResumeNotifications ( );
+
+			Restart?.Invoke ( this );
 		}
 
 		private async Task HandleUsers ( Message message, IList<string> @params )
