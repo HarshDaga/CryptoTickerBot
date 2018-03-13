@@ -89,6 +89,7 @@
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Messages\WebSocketMessage.cs" />
     <Compile Include="Services\TeleBotWebSocketService.cs" />
+    <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

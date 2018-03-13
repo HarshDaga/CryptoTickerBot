@@ -2,7 +2,6 @@
 using System.Threading;
 using CryptoTickerBot.WebSocket.Services;
 using NLog;
-using TelegramBot;
 using TelegramBot.Core;
 using WebSocketSharp.Server;
 using CTB = CryptoTickerBot.Core.CryptoTickerBot;
@@ -33,7 +32,7 @@ namespace CryptoTickerBot.WebSocket
 			var teleBot = new TeleBot ( Settings.Instance.BotToken, ctb );
 			teleBot.Start ( );
 
-			var sv = new WebSocketServer ( "ws://localhost:20421" );
+			var sv = new WebSocketServer ( $"ws://{Settings.Instance.Ip}:{Settings.Instance.Port}" );
 			sv.Log.Level = LogLevel.Trace;
 			sv.AddWebSocketService (
 				"/telebot",
