@@ -127,9 +127,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\CryptoTickerBot.cs" />
-    <Compile Include="Core\GoogleSheetsService.cs" />
-    <Compile Include="Core\Settings.cs" />
+    <Compile Include="CryptoTickerBotCore.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="Exchanges\BinanceExchange.cs" />
     <Compile Include="Exchanges\ZebpayExchange.cs" />
     <Compile Include="Exchanges\BitBayExchange.cs" />

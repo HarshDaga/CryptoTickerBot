@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Threading;
+using CryptoTickerBot;
+using CryptoTickerBot.GoogleSheets;
 using NLog;
 using TelegramBot.Core;
 
@@ -16,18 +17,24 @@ namespace TelegramBot
 
 			Console.Title = "Crypto Ticker Telegram Bot";
 
-			var ctb = CryptoTickerBot.Core.CryptoTickerBot.CreateAndStart (
-				new CancellationTokenSource ( ),
-				Settings.Instance.ApplicationName,
-				Settings.Instance.SheetName,
-				Settings.Instance.SheetId,
-				Settings.Instance.SheetsRanges
-			);
+			var ctb = CryptoTickerBotCore.CreateAndStart ( );
+			StartGoogleSheetUpdater ( ctb );
 
 			var teleBot = new TeleBot ( Settings.Instance.BotToken, ctb );
 			teleBot.Start ( );
+			teleBot.Restart += bot => StartGoogleSheetUpdater ( bot.Ctb );
 
 			Console.ReadLine ( );
 		}
+
+		public static GoogleSheetsUpdater StartGoogleSheetUpdater ( CryptoTickerBotCore ctb ) =>
+			GoogleSheetsUpdater.Build (
+				ctb,
+				Settings.Instance.ApplicationName,
+				Settings.Instance.SheetName,
+				Settings.Instance.SheetId,
+				Settings.Instance.SheetsRanges,
+				Settings.Instance.SheetUpdateFrequency
+			);
 	}
 }

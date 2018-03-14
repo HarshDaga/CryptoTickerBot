@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CryptoTickerBot;
 using CryptoTickerBot.Data.Enums;
 using CryptoTickerBot.Data.Persistence;
 using CryptoTickerBot.Exchanges.Core;
@@ -16,7 +17,6 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InlineQueryResults;
 using Telegram.Bot.Types.InputMessageContents;
 using TelegramBot.Extensions;
-using CTB = CryptoTickerBot.Core.CryptoTickerBot;
 
 namespace TelegramBot.Core
 {
@@ -30,14 +30,14 @@ namespace TelegramBot.Core
 		private Dictionary<string, (UserRole role, MessageHandlerDelegate handler)> commands;
 		private User me;
 
-		public CTB Ctb { get; private set; }
+		public CryptoTickerBotCore Ctb { get; private set; }
 
 		public Dictionary<CryptoExchangeId, CryptoExchangeBase> Exchanges => Ctb.Exchanges;
 
 		public string BotToken { get; }
 		public List<TelegramBotUser> Users { get; private set; }
 
-		public TeleBot ( string botToken, CTB ctb )
+		public TeleBot ( string botToken, CryptoTickerBotCore ctb )
 		{
 			BotToken      = botToken;
 			Subscriptions = new List<TelegramSubscription> ( );

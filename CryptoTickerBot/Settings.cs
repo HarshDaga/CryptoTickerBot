@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using CryptoTickerBot.Data.Enums;
+﻿using System.IO;
 using Newtonsoft.Json;
 
-namespace TelegramBot
+// ReSharper disable CollectionNeverUpdated.Global
+
+namespace CryptoTickerBot
 {
 	public sealed class Settings
 	{
-		private const string SETTINGSFILE = "TelegramSettings.json";
+		private const string SETTINGSFILE = "CoreSettings.json";
 		private static readonly object LoadLock;
 
 		public static Settings Instance { get; private set; }
@@ -40,16 +40,6 @@ namespace TelegramBot
 		}
 
 		#region Properties
-
-		public int SheetUpdateFrequency { get; set; }
-		public string ApplicationName { get; set; }
-		public string SheetName { get; set; }
-		public string SheetId { get; set; }
-		public Dictionary<CryptoExchangeId, string> SheetsRanges { get; set; }
-
-		public string BotToken { get; set; }
-		public bool WhitelistMode { get; set; }
-		public string PurchaseMessageText { get; set; }
 
 		#endregion Properties
 	}

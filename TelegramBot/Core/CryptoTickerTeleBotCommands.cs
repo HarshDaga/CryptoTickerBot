@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CryptoTickerBot;
 using CryptoTickerBot.Data.Enums;
 using CryptoTickerBot.Data.Extensions;
 using CryptoTickerBot.Data.Persistence;
@@ -12,7 +13,6 @@ using CryptoTickerBot.Helpers;
 using Tababular;
 using Telegram.Bot.Types;
 using TelegramBot.Extensions;
-using CTB = CryptoTickerBot.Core.CryptoTickerBot;
 
 // ReSharper disable UnusedParameter.Local
 
@@ -51,7 +51,7 @@ namespace TelegramBot.Core
 				await SendBlockText ( message, $"No threshold provided, setting to default {threshold:P}" );
 
 			// Check coin symbols
-			var supported = CTB.SupportedCoins;
+			var supported = CryptoTickerBotCore.SupportedCoins;
 			var coinIds = supported
 				.Where ( x => @params.Any (
 					         c => c.Equals ( x.Symbol, StringComparison.InvariantCultureIgnoreCase )
@@ -267,13 +267,7 @@ namespace TelegramBot.Core
 			FetchUserList ( );
 
 			Ctb.Stop ( );
-			Ctb = CTB.CreateAndStart (
-				new CancellationTokenSource ( ),
-				Settings.Instance.ApplicationName,
-				Settings.Instance.SheetName,
-				Settings.Instance.SheetId,
-				Settings.Instance.SheetsRanges
-			);
+			Ctb = CryptoTickerBotCore.CreateAndStart ( new CancellationTokenSource ( ) );
 
 			await SendBlockText ( message, "Restarted all exchange monitors." );
 

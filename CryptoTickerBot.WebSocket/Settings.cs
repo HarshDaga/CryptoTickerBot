@@ -41,6 +41,7 @@ namespace CryptoTickerBot.WebSocket
 
 		#region Properties
 
+		public int SheetUpdateFrequency { get; set; }
 		public string ApplicationName { get; set; }
 		public string SheetName { get; set; }
 		public string SheetId { get; set; }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,16 +7,14 @@ using CryptoTickerBot.Data.Enums;
 using CryptoTickerBot.Data.Persistence;
 using CryptoTickerBot.Exchanges;
 using CryptoTickerBot.Exchanges.Core;
-using CryptoTickerBot.Extensions;
 using CryptoTickerBot.Helpers;
-using Google.Apis.Sheets.v4.Data;
 using JetBrains.Annotations;
 using NLog;
 using Timer = System.Timers.Timer;
 
-namespace CryptoTickerBot.Core
+namespace CryptoTickerBot
 {
-	public class CryptoTickerBot : IDisposable
+	public class CryptoTickerBotCore : IDisposable
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
@@ -36,17 +33,10 @@ namespace CryptoTickerBot.Core
 
 		private Timer fiatMonitor;
 
-		private ImmutableHashSet<CryptoExchangeId> pendingUpdates =
-			ImmutableHashSet<CryptoExchangeId>.Empty;
-
 		public CancellationTokenSource Cts { get; private set; }
-
-		public GoogleSheetsService Service { get; }
 
 		public CryptoCompareTable CompareTable { get; } =
 			new CryptoCompareTable ( );
-
-		public IDictionary<CryptoExchangeId, string> SheetsRanges { get; }
 
 		public bool IsRunning { get; private set; }
 		public bool IsInitialized { get; private set; }
@@ -54,47 +44,24 @@ namespace CryptoTickerBot.Core
 		public static List<Data.Domain.CryptoCoin> SupportedCoins =>
 			UnitOfWork.Get ( u => u.Coins.GetAll ( ).ToList ( ) );
 
-		public CryptoTickerBot (
-			[CanBeNull] GoogleSheetsService service,
-			[CanBeNull] IDictionary<CryptoExchangeId, string> sheetsRanges
-		)
-		{
-			Service      = service;
-			SheetsRanges = sheetsRanges;
-		}
-
 		public void Dispose ( )
 		{
 			Dispose ( true );
 			GC.SuppressFinalize ( this );
 		}
 
-		public static CryptoTickerBot CreateAndStart (
-			[NotNull] CancellationTokenSource cts,
-			[NotNull] string applicationName,
-			[NotNull] string sheetName,
-			[NotNull] string sheetId,
-			[NotNull] IDictionary<CryptoExchangeId, string> sheetsRanges
-		)
-		{
-			var service = GoogleSheetsService.Build (
-				cts,
-				applicationName,
-				sheetName,
-				sheetId
-			);
-			var bot = new CryptoTickerBot ( service, sheetsRanges );
-			bot.Start ( cts );
+		[UsedImplicitly]
+		public event Action<CryptoTickerBotCore> Close;
 
-			return bot;
-		}
-
-		public static CryptoTickerBot CreateAndStart ( [NotNull] CancellationTokenSource cts )
+		public static CryptoTickerBotCore CreateAndStart ( [NotNull] CancellationTokenSource cts )
 		{
-			var bot = new CryptoTickerBot ( null, null );
+			var bot = new CryptoTickerBotCore ( );
 			bot.Start ( cts );
 			return bot;
 		}
+
+		public static CryptoTickerBotCore CreateAndStart ( ) =>
+			CreateAndStart ( new CancellationTokenSource ( ) );
 
 		public void Start ( [NotNull] CancellationTokenSource cts )
 		{
@@ -105,13 +72,13 @@ namespace CryptoTickerBot.Core
 			fiatMonitor = FiatConverter.StartMonitor ( );
 
 			InitExchanges ( );
-			StartAutoSheetsUpdater ( );
 
 			Task.Run ( async ( ) =>
 			{
 				await Task.Delay ( int.MaxValue, Cts.Token );
 
 				IsRunning = false;
+				Close?.Invoke ( this );
 			}, Cts.Token );
 		}
 
@@ -130,7 +97,6 @@ namespace CryptoTickerBot.Core
 				exchange.Changed += ( e, coin ) => Logger.Debug ( $"{e.Name,-10} {e[coin.Id]}" );
 				exchange.Changed += StoreCoinValueInDb;
 				exchange.Changed += UpdateExchangeLastChangeInDb;
-				exchange.Changed += ( ex, coin ) => pendingUpdates = pendingUpdates.Add ( ex.Id );
 
 				CompareTable.AddExchange ( exchange );
 
@@ -166,78 +132,9 @@ namespace CryptoTickerBot.Core
 
 			Cts?.Dispose ( );
 			fiatMonitor?.Dispose ( );
-			Service?.Dispose ( );
 		}
 
-		private void StartAutoSheetsUpdater ( )
-		{
-			if ( Service is null )
-				return;
-
-			Task.Run ( ( ) =>
-			{
-				Thread.Sleep ( 10000 );
-				var updateTimer = new Timer ( 1500 )
-				{
-					Enabled   = true,
-					AutoReset = false
-				};
-				updateTimer.Elapsed += async ( sender, eventArgs ) =>
-				{
-					if ( Cts.IsCancellationRequested )
-						return;
-
-					try
-					{
-						var valueRanges = GetValueRangesToUpdate ( );
-						await Service.UpdateSheet ( valueRanges );
-					}
-					catch ( Exception e )
-					{
-						Logger.Error ( e );
-					}
-					finally
-					{
-						if ( !Cts.IsCancellationRequested )
-							( sender as Timer )?.Start ( );
-					}
-				};
-				updateTimer.Start ( );
-			}, Cts.Token );
-		}
-
-		private List<ValueRange> GetValueRangesToUpdate ( )
-		{
-			var valueRanges = new List<ValueRange> ( );
-			while ( pendingUpdates.Count > 0 )
-			{
-				var id = pendingUpdates.First ( );
-				pendingUpdates = pendingUpdates.Remove ( id );
-				var exchange = Exchanges[id];
-				if ( !exchange.IsComplete )
-				{
-					Logger.Warn (
-						$"Sheets not updated for {id}. Only {exchange.ExchangeData.Count} coins updated." +
-						$" {exchange.ExchangeData.Keys.Join ( ", " )}." );
-					continue;
-				}
-
-				if ( !SheetsRanges.ContainsKey ( id ) )
-					continue;
-
-				var range = SheetsRanges[id];
-				valueRanges.Add ( new ValueRange
-				{
-					Values = exchange.ToSheetRows ( ),
-					Range  = $"{Service.SheetName}!{range}"
-				} );
-				Logger.Debug ( $"Updated Sheets for {id}" );
-			}
-
-			return valueRanges;
-		}
-
-		~CryptoTickerBot ( )
+		~CryptoTickerBotCore ( )
 		{
 			Dispose ( false );
 		}

@@ -5,11 +5,11 @@ using Newtonsoft.Json;
 
 // ReSharper disable CollectionNeverUpdated.Global
 
-namespace CryptoTickerBot.Core
+namespace CryptoTickerBot.GoogleSheets
 {
 	public sealed class Settings
 	{
-		private const string SETTINGSFILE = "Settings.json";
+		private const string SETTINGSFILE = "GoogleSheetsSettings.json";
 		private static readonly object LoadLock;
 
 		public static Settings Instance { get; private set; }
@@ -43,6 +43,7 @@ namespace CryptoTickerBot.Core
 
 		#region Properties
 
+		public int SheetUpdateFrequency { get; set; }
 		public Dictionary<CryptoExchangeId, string> SheetsRanges { get; set; }
 		public string ApplicationName { get; set; }
 		public string SheetName { get; set; }

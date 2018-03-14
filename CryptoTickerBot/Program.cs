@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Threading;
-using CryptoTickerBot.Core;
 using NLog;
 
 namespace CryptoTickerBot
@@ -14,18 +12,12 @@ namespace CryptoTickerBot
 			AppDomain.CurrentDomain.UnhandledException += ( sender, args ) =>
 				Logger.Error ( args );
 
-			Console.Title = Settings.Instance.ApplicationName;
-			Logger.Info ( $"Started {Settings.Instance.ApplicationName}" );
+			Console.Title = "Crypto Ticker Bot";
+			Logger.Info ( "Started Crypto Ticker Bot" );
 
-			Core.CryptoTickerBot.CreateAndStart (
-				new CancellationTokenSource ( ),
-				Settings.Instance.ApplicationName,
-				Settings.Instance.SheetName,
-				Settings.Instance.SheetId,
-				Settings.Instance.SheetsRanges
-			);
+			CryptoTickerBotCore.CreateAndStart ( );
 
-			Thread.Sleep ( int.MaxValue );
+			Console.ReadLine ( );
 		}
 	}
 }

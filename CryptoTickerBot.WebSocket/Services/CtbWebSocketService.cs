@@ -9,7 +9,6 @@ using CryptoTickerBot.WebSocket.Messages;
 using NLog;
 using WebSocketSharp;
 using WebSocketSharp.Server;
-using CTB = CryptoTickerBot.Core.CryptoTickerBot;
 using Logger = NLog.Logger;
 
 namespace CryptoTickerBot.WebSocket.Services
@@ -24,10 +23,10 @@ namespace CryptoTickerBot.WebSocket.Services
 		protected readonly Dictionary<string, Action<string, WebSocketIncomingMessage>>
 			AvailableSubscriptions;
 
-		protected CTB Ctb { get; }
+		protected CryptoTickerBotCore Ctb { get; }
 		protected HashSet<WebSocketIncomingMessage> Subscriptions { get; }
 
-		public CtbWebSocketService ( CTB ctb )
+		public CtbWebSocketService ( CryptoTickerBotCore ctb )
 		{
 			Ctb           = ctb;
 			Subscriptions = new HashSet<WebSocketIncomingMessage> ( );
