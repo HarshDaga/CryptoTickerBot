@@ -51,18 +51,12 @@ namespace CryptoTickerBot.Data.Domain
 		{
 			get
 			{
-				lastSignificantPrice = JsonConvert
-					.DeserializeObject<ObservableConcurrentDictionary<CryptoCoinId, CryptoCoinValue>>
-						( LastSignificantPriceJson );
-				lastSignificantPrice.PropertyChanged += ( sender, args ) =>
-					LastSignificantPriceJson = JsonConvert.SerializeObject ( sender );
-				lastSignificantPrice.CollectionChanged += ( sender, args ) =>
-					LastSignificantPriceJson = JsonConvert.SerializeObject ( sender );
+				ParseJson ( );
 
 				return lastSignificantPrice;
 			}
 			set =>
-				LastSignificantPriceJson = JsonConvert.SerializeObject ( value );
+				LastSignificantPriceJson = JsonConvert.SerializeObject ( value.Values );
 		}
 
 		private TeleSubscription ( )
@@ -93,6 +87,33 @@ namespace CryptoTickerBot.Data.Domain
 			if ( lastSignificantPrice != null )
 				foreach ( var kp in lastSignificantPrice )
 					LastSignificantPrice[kp.Key] = kp.Value;
+		}
+
+		private void ParseJson ( )
+		{
+			List<CryptoCoinValue> values;
+			try
+			{
+				values = JsonConvert
+					.DeserializeObject<List<CryptoCoinValue>> ( LastSignificantPriceJson );
+			}
+			catch ( Exception )
+			{
+				values = new List<CryptoCoinValue> ( );
+			}
+
+			lastSignificantPrice = new ObservableConcurrentDictionary<CryptoCoinId, CryptoCoinValue> ( );
+			foreach ( var value in values )
+				lastSignificantPrice[value.CoinId] = value;
+
+			lastSignificantPrice.PropertyChanged += ( sender, args ) =>
+				LastSignificantPriceJson = JsonConvert.SerializeObject (
+					( (ObservableConcurrentDictionary<CryptoCoinId, CryptoCoinValue>) sender ).Values
+				);
+			lastSignificantPrice.CollectionChanged += ( sender, args ) =>
+				LastSignificantPriceJson = JsonConvert.SerializeObject (
+					( (ObservableConcurrentDictionary<CryptoCoinId, CryptoCoinValue>) sender ).Values
+				);
 		}
 	}
 }

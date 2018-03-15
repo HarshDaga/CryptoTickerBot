@@ -81,7 +81,10 @@ namespace TelegramBot
 				return;
 
 			if ( !LastSignificantPrice.ContainsKey ( coin.Id ) )
+			{
 				LastSignificantPrice[coin.Id] = coin.Clone ( );
+				Changed?.Invoke ( this, null, coin.Clone ( ) );
+			}
 
 			var change = coin - LastSignificantPrice[coin.Id];
 			var percentage = Math.Abs ( change.Percentage );

@@ -82,6 +82,9 @@ namespace TelegramBot.Core
 			CryptoCoin newValue
 		)
 		{
+			if ( oldValue is null )
+				return;
+
 			var change = newValue - oldValue;
 			var builder = new StringBuilder ( );
 			builder
