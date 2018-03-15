@@ -133,9 +133,9 @@ namespace CryptoTickerBot.GoogleSheets
 			}
 			catch ( Exception e )
 			{
-				if ( e is GoogleApiException gae && gae.Error.Code == 429 )
+				if ( e is GoogleApiException gae && gae.Error?.Code == 429 )
 				{
-					Logger.Error ( gae, "Too many Google Api requests. Cooling down." );
+					Logger.Warn ( gae, "Too many Google Api requests. Cooling down." );
 					await Task.Delay ( 5000, Cts.Token );
 				}
 				else

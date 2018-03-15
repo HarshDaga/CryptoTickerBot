@@ -69,22 +69,29 @@ namespace CryptoTickerBot.WebSocket.Services
 
 		protected override void OnMessage ( MessageEventArgs args )
 		{
-			if ( args.IsText )
+			try
 			{
-				var message = args.Data;
-				if ( message.TryDeserialize ( out WebSocketIncomingMessage im ) )
-					switch ( im.Type )
-					{
-						case WssMessageType.Subscribe:
-							HandleSubscription ( im );
-							break;
-						case WssMessageType.Command:
-							HandleCommand ( im );
-							break;
-						case WssMessageType.Unsubscribe:
-							HandleUnsubscribe ( im );
-							break;
-					}
+				if ( args.IsText )
+				{
+					var message = args.Data;
+					if ( message.TryDeserialize ( out WebSocketIncomingMessage im ) )
+						switch ( im.Type )
+						{
+							case WssMessageType.Subscribe:
+								HandleSubscription ( im );
+								break;
+							case WssMessageType.Command:
+								HandleCommand ( im );
+								break;
+							case WssMessageType.Unsubscribe:
+								HandleUnsubscribe ( im );
+								break;
+						}
+				}
+			}
+			catch ( Exception e )
+			{
+				Logger.Error ( e );
 			}
 
 			base.OnMessage ( args );
