@@ -132,7 +132,7 @@ namespace CryptoTickerBot.GoogleSheets
 			catch ( TaskCanceledException tce )
 			{
 				if ( !Cts.IsCancellationRequested )
-					Logger.Error ( tce );
+					Logger.Warn ( tce );
 			}
 			catch ( Exception e )
 			{
