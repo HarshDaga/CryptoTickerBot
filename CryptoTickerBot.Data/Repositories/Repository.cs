@@ -22,12 +22,15 @@ namespace CryptoTickerBot.Data.Repositories
 			AllEntities = Context.Set<TEntity> ( );
 		}
 
+		[Pure]
 		public virtual TEntity Get ( params object[] id ) =>
 			Context.Set<TEntity> ( ).Find ( id );
 
+		[Pure]
 		public virtual IEnumerable<TEntity> GetAll ( ) =>
 			AllEntities.ToList ( );
 
+		[Pure]
 		public virtual IEnumerable<TEntity> Find ( Expression<Func<TEntity, bool>> predicate ) =>
 			AllEntities.Where ( predicate );
 

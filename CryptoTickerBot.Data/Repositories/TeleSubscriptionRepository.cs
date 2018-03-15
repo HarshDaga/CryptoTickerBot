@@ -44,9 +44,11 @@ namespace CryptoTickerBot.Data.Repositories
 			return sub;
 		}
 
+		[Pure]
 		public IEnumerable<TeleSubscription> GetAll ( CryptoExchangeId exchangeId ) =>
 			AllEntities.Where ( x => x.ExchangeId == exchangeId ).ToList ( );
 
+		[Pure]
 		public IEnumerable<TeleSubscription> GetAll ( long chatId ) =>
 			AllEntities.Where ( x => x.ChatId == chatId ).ToList ( );
 

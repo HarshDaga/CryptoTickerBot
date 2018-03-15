@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CryptoTickerBot.Data.Domain;
 using CryptoTickerBot.Data.Enums;
 using CryptoTickerBot.Data.Persistence;
+using JetBrains.Annotations;
 
 namespace CryptoTickerBot.Data.Repositories
 {
@@ -16,9 +17,11 @@ namespace CryptoTickerBot.Data.Repositories
 		{
 		}
 
+		[Pure]
 		public CryptoCoin Single ( CryptoCoinId coinId ) =>
 			CtbContext.Coins.Single ( c => c.Id == coinId );
 
+		[Pure]
 		public CryptoCoin Single ( string symbol ) =>
 			CtbContext.Coins.Single ( c => c.Symbol == symbol );
 

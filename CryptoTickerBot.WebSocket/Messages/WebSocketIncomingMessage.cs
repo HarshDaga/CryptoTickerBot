@@ -9,8 +9,9 @@ namespace CryptoTickerBot.WebSocket.Messages
 {
 	public enum WssMessageType
 	{
-		Event,
-		Command
+		Command,
+		Subscribe,
+		Unsubscribe
 	}
 
 	public class WebSocketIncomingMessage :
@@ -18,10 +19,12 @@ namespace CryptoTickerBot.WebSocket.Messages
 		IComparable,
 		IEquatable<WebSocketIncomingMessage>
 	{
-		public const string Format = "{  \"type\": {0,1},  \"name\": \"<Command/Sub>\",  \"data\": <params>}";
+		public const string Format =
+			"{  \"type\": {0 = Command, 1 = Subscribe, 2 = Unsubscribe}," +
+			"  \"name\": \"<Command/Sub>\",  \"data\": <params>}";
 
 		[JsonProperty ( "type" )]
-		[DefaultValue ( WssMessageType.Event )]
+		[DefaultValue ( WssMessageType.Command )]
 		public WssMessageType Type { get; set; }
 
 		[JsonProperty ( "name", Required = Required.Always )]

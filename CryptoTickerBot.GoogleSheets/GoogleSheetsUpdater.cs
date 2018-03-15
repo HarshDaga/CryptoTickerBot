@@ -68,27 +68,27 @@ namespace CryptoTickerBot.GoogleSheets
 
 		private static UserCredential GetCredentials ( )
 		{
-			UserCredential credential;
-
 			using ( var stream =
 				new FileStream ( "client_secret.json", FileMode.Open, FileAccess.Read ) )
 			{
-				var credPath = Environment.GetFolderPath (
-					Environment.SpecialFolder.Personal );
-				credPath = Path.Combine ( credPath, ".credentials/sheets.googleapis.com-dotnet-quickstart.json" );
+				var credPath = Path.Combine (
+					Environment.GetFolderPath ( Environment.SpecialFolder.Personal ),
+					".credentials/sheets.googleapis.com-dotnet-quickstart.json"
+				);
 
-				credential = GoogleWebAuthorizationBroker.AuthorizeAsync (
+				var credential = GoogleWebAuthorizationBroker.AuthorizeAsync (
 					GoogleClientSecrets.Load ( stream ).Secrets,
 					Scopes,
 					"user",
 					CancellationToken.None,
 					new FileDataStore ( credPath, true ) ).Result;
 				Logger.Info ( "Credential file saved to: " + credPath );
-			}
 
-			return credential;
+				return credential;
+			}
 		}
 
+		[Pure]
 		public static GoogleSheetsUpdater Build (
 			[NotNull] CryptoTickerBotCore ctb,
 			[NotNull] string applicationName,
@@ -122,10 +122,7 @@ namespace CryptoTickerBot.GoogleSheets
 					Data             = valueRanges
 				};
 
-				var request = Service.Spreadsheets.Values.BatchUpdate (
-					requestBody,
-					SheetId
-				);
+				var request = Service.Spreadsheets.Values.BatchUpdate ( requestBody, SheetId );
 
 				await request.ExecuteAsync ( Cts.Token );
 			}
@@ -166,25 +163,17 @@ namespace CryptoTickerBot.GoogleSheets
 					if ( Cts.IsCancellationRequested )
 						return;
 
-					try
-					{
-						var valueRanges = GetValueRangesToUpdate ( );
-						await UpdateSheet ( valueRanges );
-					}
-					catch ( Exception e )
-					{
-						Logger.Error ( e );
-					}
-					finally
-					{
-						if ( !Cts.IsCancellationRequested )
-							( sender as Timer )?.Start ( );
-					}
+					var valueRanges = GetValueRangesToUpdate ( );
+					await UpdateSheet ( valueRanges );
+
+					if ( !Cts.IsCancellationRequested )
+						( sender as Timer )?.Start ( );
 				};
 				updateTimer.Start ( );
 			}, Cts.Token );
 		}
 
+		[Pure]
 		private List<ValueRange> GetValueRangesToUpdate ( )
 		{
 			var valueRanges = new List<ValueRange> ( );

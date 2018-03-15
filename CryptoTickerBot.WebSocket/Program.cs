@@ -6,6 +6,8 @@ using TelegramBot.Core;
 using WebSocketSharp.Server;
 using LogLevel = WebSocketSharp.LogLevel;
 
+// ReSharper disable UnusedVariable
+
 namespace CryptoTickerBot.WebSocket
 {
 	public class Program
@@ -27,23 +29,33 @@ namespace CryptoTickerBot.WebSocket
 			teleBot.Start ( );
 			teleBot.Restart += bot => StartGoogleSheetUpdater ( bot.Ctb );
 
+			var server = StartWebSocketServer ( teleBot );
+
+			Console.ReadLine ( );
+		}
+
+		private static WebSocketServer StartWebSocketServer ( TeleBot teleBot )
+		{
 			try
 			{
-				var sv = new WebSocketServer ( $"ws://{Settings.Instance.Ip}:{Settings.Instance.Port}" );
+				var url = $"ws://{Settings.Instance.Ip}:{Settings.Instance.Port}";
+				var sv = new WebSocketServer ( url );
 				sv.Log.Level = LogLevel.Fatal;
 				sv.AddWebSocketService (
 					"/telebot",
 					( ) => new TeleBotWebSocketService ( teleBot )
 				);
 				sv.Start ( );
+
+				Logger.Info ( $"WebSocket Server started on {url}" );
+
+				return sv;
 			}
 			catch ( Exception e )
 			{
 				Logger.Error ( e );
 				throw;
 			}
-
-			Console.ReadLine ( );
 		}
 
 		public static GoogleSheetsUpdater StartGoogleSheetUpdater ( CryptoTickerBotCore ctb ) =>

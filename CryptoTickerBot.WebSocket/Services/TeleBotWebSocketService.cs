@@ -14,16 +14,20 @@ namespace CryptoTickerBot.WebSocket.Services
 		{
 			Bot = bot;
 
-			AvailableSubscriptions["TeleSubscriptionUpdates"] = SubscribeToTeleSubscriptionUpdates;
-
 			AvailableCommands["GetExchangeStatuses"]     = GetExchangeStatusesCommand;
 			AvailableCommands["GetTeleSubscriptionList"] = GetTeleSubscriptionListCommand;
 			AvailableCommands["GetTeleSubscription"]     = GetTeleSubscriptionCommand;
+
+			AvailableSubscriptions["TeleSubscriptionUpdates"] = SubscribeToTeleSubscriptionUpdates;
 		}
 
 		#region SubscriptionHandlers
 
-		private void SubscribeToTeleSubscriptionUpdates ( string s, WebSocketIncomingMessage im )
+		private void SubscribeToTeleSubscriptionUpdates (
+			string s,
+			WebSocketIncomingMessage im,
+			bool subscribing
+		)
 		{
 			if ( !( im.Data is long id ) ) return;
 			var sub = Bot.Subscriptions.FirstOrDefault ( x => x.Id == id );
@@ -34,11 +38,19 @@ namespace CryptoTickerBot.WebSocket.Services
 				return;
 			}
 
-			Task SubOnUpdated ( TelegramSubscription _, CryptoCoin __, CryptoCoin ___ ) =>
-				Task.Run ( ( ) => Send ( s, new TeleBotSubscriptionSummary ( Bot, (int) id ) ) );
-
-			sub.Updated += SubOnUpdated;
+			if ( subscribing )
+				sub.Updated += SubOnUpdated;
+			else
+				sub.Updated -= SubOnUpdated;
 		}
+
+		public Task SubOnUpdated ( TelegramSubscription sub, CryptoCoin _, CryptoCoin __ ) =>
+			Task.Run ( ( ) =>
+				           Send (
+					           "TeleSubscriptionUpdates",
+					           new TeleBotSubscriptionSummary ( Bot, sub.Id )
+				           )
+			);
 
 		#endregion
 

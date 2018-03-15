@@ -27,6 +27,9 @@ namespace CryptoTickerBot.WebSocket.Messages
 		public static WebSocketMessage Subscribe ( string eventName ) =>
 			new WebSocketMessage ( "Subscribed", eventName );
 
+		public static WebSocketMessage Unsubscribe ( string eventName ) =>
+			new WebSocketMessage ( "Unsubscribed", eventName );
+
 		public static WebSocketMessage Error ( dynamic data ) =>
 			new WebSocketMessage ( "Error", data );
 	}

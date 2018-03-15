@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Timers;
 using CryptoTickerBot.Exchanges.Core;
 using CryptoTickerBot.WebSocket.Extensions;
 using CryptoTickerBot.WebSocket.Messages;
@@ -20,7 +18,7 @@ namespace CryptoTickerBot.WebSocket.Services
 		protected readonly Dictionary<string, Action<string, WebSocketIncomingMessage>>
 			AvailableCommands;
 
-		protected readonly Dictionary<string, Action<string, WebSocketIncomingMessage>>
+		protected readonly Dictionary<string, Action<string, WebSocketIncomingMessage, bool>>
 			AvailableSubscriptions;
 
 		protected CryptoTickerBotCore Ctb { get; }
@@ -31,14 +29,13 @@ namespace CryptoTickerBot.WebSocket.Services
 			Ctb           = ctb;
 			Subscriptions = new HashSet<WebSocketIncomingMessage> ( );
 
-			AvailableSubscriptions = new Dictionary<string, Action<string, WebSocketIncomingMessage>>
-			{
-				["CoinValueUpdates"] = SubscribeToCoinValueUpdates,
-				["BestPairUpdates"]  = SubscribeToBestPairUpdates
-			};
 			AvailableCommands = new Dictionary<string, Action<string, WebSocketIncomingMessage>>
 			{
 				["GetBestPair"] = GetBestPairCommand
+			};
+			AvailableSubscriptions = new Dictionary<string, Action<string, WebSocketIncomingMessage, bool>>
+			{
+				["CoinValueUpdates"] = SubscribeToCoinValueUpdates
 			};
 		}
 
@@ -76,10 +73,18 @@ namespace CryptoTickerBot.WebSocket.Services
 			{
 				var message = args.Data;
 				if ( message.TryDeserialize ( out WebSocketIncomingMessage im ) )
-					if ( im.Type == WssMessageType.Event )
-						HandleSubscription ( im );
-					else
-						HandleCommand ( im );
+					switch ( im.Type )
+					{
+						case WssMessageType.Subscribe:
+							HandleSubscription ( im );
+							break;
+						case WssMessageType.Command:
+							HandleCommand ( im );
+							break;
+						case WssMessageType.Unsubscribe:
+							HandleUnsubscribe ( im );
+							break;
+					}
 			}
 
 			base.OnMessage ( args );
@@ -92,11 +97,11 @@ namespace CryptoTickerBot.WebSocket.Services
 			{
 				var kp = AvailableSubscriptions.First ( x => x.Key == im );
 				Send ( WebSocketMessageBuilder.Subscribe ( kp.Key ) );
-				kp.Value?.Invoke ( kp.Key, im );
+				kp.Value?.Invoke ( kp.Key, im, true );
 			}
 			else
 			{
-				Send ( WebSocketMessageBuilder.Error ( $"{im.Name} Doesn't exist or already subscribed." ) );
+				Send ( WebSocketMessageBuilder.Error ( $"{im.Name} doesn't exist or already subscribed." ) );
 			}
 		}
 
@@ -113,6 +118,26 @@ namespace CryptoTickerBot.WebSocket.Services
 			}
 		}
 
+		protected virtual void HandleUnsubscribe ( WebSocketIncomingMessage im )
+		{
+			if ( AvailableSubscriptions.Keys.Any ( x => x == im ) &&
+			     Subscriptions.Remove ( im ) )
+			{
+				var kp = AvailableSubscriptions.First ( x => x.Key == im );
+				kp.Value?.Invoke ( kp.Key, im, false );
+				Send ( WebSocketMessageBuilder.Unsubscribe ( kp.Key ) );
+			}
+			else
+			{
+				Send ( WebSocketMessageBuilder.Error ( $"{im.Name} doesn't exist or not subscribed." ) );
+			}
+		}
+
+		protected void Send ( string @event, dynamic data )
+		{
+			SendAsync ( new WebSocketMessage ( @event, data ), null );
+		}
+
 		#region CommandHandlers
 
 		private void GetBestPairCommand ( string s, WebSocketIncomingMessage im )
@@ -124,32 +149,22 @@ namespace CryptoTickerBot.WebSocket.Services
 
 		#region SubscriptionHandlers
 
-		private void SubscribeToCoinValueUpdates ( string @event, WebSocketIncomingMessage _ )
+		private void SubscribeToCoinValueUpdates (
+			string @event,
+			WebSocketIncomingMessage _,
+			bool subscribing
+		)
 		{
 			foreach ( var exchange in Ctb.Exchanges.Values )
-				exchange.Next += CoinValueOnNextHandler;
+				if ( subscribing )
+					exchange.Next += CoinValueOnNextHandler;
+				else
+					exchange.Next -= CoinValueOnNextHandler;
 		}
 
 		private void CoinValueOnNextHandler ( CryptoExchangeBase e, CryptoCoin c )
 		{
 			Send ( "CoinValueUpdate", new CryptoCoinSummary ( e, c ) );
-		}
-
-		protected void Send ( string @event, dynamic data )
-		{
-			SendAsync ( new WebSocketMessage ( @event, data ), null );
-		}
-
-		private void SubscribeToBestPairUpdates ( string @event, WebSocketIncomingMessage _ )
-		{
-			Task.Run ( ( ) =>
-				{
-					var timer = new Timer ( 1000 );
-					timer.Elapsed += ( sender, args ) =>
-						Send ( @event, new BestPairSummary ( Ctb.CompareTable ) );
-					timer.Start ( );
-				}
-			);
 		}
 
 		#endregion

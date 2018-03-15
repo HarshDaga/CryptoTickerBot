@@ -5,6 +5,7 @@ using System.Linq;
 using CryptoTickerBot.Data.Domain;
 using CryptoTickerBot.Data.Enums;
 using CryptoTickerBot.Data.Persistence;
+using JetBrains.Annotations;
 
 namespace CryptoTickerBot.Data.Repositories
 {
@@ -23,6 +24,7 @@ namespace CryptoTickerBot.Data.Repositories
 		{
 		}
 
+		[Pure]
 		public CryptoExchange Get ( CryptoExchangeId id ) =>
 			Context.Exchanges
 				.Include ( x => x.WithdrawalFees )

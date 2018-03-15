@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Data.Repositories;
+using JetBrains.Annotations;
 
 namespace CryptoTickerBot.Data.Persistence
 {
@@ -51,6 +52,7 @@ namespace CryptoTickerBot.Data.Persistence
 			}
 		}
 
+		[Pure]
 		public static T Get<T> ( Func<IUnitOfWork, T> func )
 		{
 			T result;
