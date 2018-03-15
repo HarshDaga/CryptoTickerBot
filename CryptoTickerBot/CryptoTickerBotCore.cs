@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -18,8 +19,8 @@ namespace CryptoTickerBot
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
-		public readonly Dictionary<CryptoExchangeId, CryptoExchangeBase> Exchanges =
-			new Dictionary<CryptoExchangeId, CryptoExchangeBase>
+		public readonly IDictionary<CryptoExchangeId, CryptoExchangeBase> Exchanges =
+			new ConcurrentDictionary<CryptoExchangeId, CryptoExchangeBase>
 			{
 				[CryptoExchangeId.Binance]   = new BinanceExchange ( ),
 				[CryptoExchangeId.BitBay]    = new BitBayExchange ( ),

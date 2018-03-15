@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -27,7 +28,7 @@ namespace TelegramBot
 		public string UserName { get; }
 		public CryptoExchangeId ExchangeId { get; }
 		public decimal Threshold { get; }
-		public Dictionary<CryptoCoinId, CryptoCoin> LastSignificantPrice { get; }
+		public IDictionary<CryptoCoinId, CryptoCoin> LastSignificantPrice { get; }
 		public ISet<CryptoCoinId> Coins { get; }
 
 		public TelegramSubscription (
@@ -45,7 +46,7 @@ namespace TelegramBot
 			UserName   = userName;
 			ExchangeId = exchange.Id;
 			Threshold  = threshold;
-			LastSignificantPrice = new Dictionary<CryptoCoinId, CryptoCoin> (
+			LastSignificantPrice = new ConcurrentDictionary<CryptoCoinId, CryptoCoin> (
 				lastSignificantPrice ?? exchange.ExchangeData
 			);
 			Coins = coins.ToImmutableHashSet ( );
@@ -84,10 +85,11 @@ namespace TelegramBot
 
 			var change = coin - LastSignificantPrice[coin.Id];
 			var percentage = Math.Abs ( change.Percentage );
-			Updated?.Invoke ( this, LastSignificantPrice[coin.Id], coin );
+			Updated?.Invoke ( this, LastSignificantPrice[coin.Id].Clone ( ), coin.Clone ( ) );
+
 			if ( percentage >= Threshold )
 			{
-				Changed?.Invoke ( this, LastSignificantPrice[coin.Id], coin );
+				Changed?.Invoke ( this, LastSignificantPrice[coin.Id].Clone ( ), coin.Clone ( ) );
 				LastSignificantPrice[coin.Id] = coin.Clone ( );
 				Logger.Info (
 					$"Invoked subscription for {UserName} @ {coin.Average:C} {coin.Symbol} {Exchange.Name}"

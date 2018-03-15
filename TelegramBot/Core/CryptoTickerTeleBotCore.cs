@@ -32,7 +32,7 @@ namespace TelegramBot.Core
 
 		public CryptoTickerBotCore Ctb { get; private set; }
 
-		public Dictionary<CryptoExchangeId, CryptoExchangeBase> Exchanges => Ctb.Exchanges;
+		public IDictionary<CryptoExchangeId, CryptoExchangeBase> Exchanges => Ctb.Exchanges;
 
 		public string BotToken { get; }
 		public List<TelegramBotUser> Users { get; private set; }
