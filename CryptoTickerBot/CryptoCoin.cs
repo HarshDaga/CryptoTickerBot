@@ -25,7 +25,8 @@ namespace CryptoTickerBot
 		public CryptoCoin (
 			string symbol,
 			decimal highestBid = 0m, decimal lowestAsk = 0m,
-			decimal rate = 0m
+			decimal rate = 0m,
+			DateTime? time = null
 		)
 		{
 			Id         = symbol.ToEnum ( CryptoCoinId.NULL );
@@ -33,7 +34,7 @@ namespace CryptoTickerBot
 			HighestBid = highestBid;
 			LowestAsk  = lowestAsk;
 			Rate       = rate;
-			Time       = DateTime.UtcNow;
+			Time       = time ?? DateTime.UtcNow;
 		}
 
 		public CryptoCoin ( CryptoCoinValue coinValue )
@@ -66,7 +67,7 @@ namespace CryptoTickerBot
 		[DebuggerStepThrough]
 		[Pure]
 		public CryptoCoin Clone ( ) =>
-			new CryptoCoin ( Symbol, HighestBid, LowestAsk, Rate );
+			new CryptoCoin ( Symbol, HighestBid, LowestAsk, Rate, Time );
 
 		[DebuggerStepThrough]
 		public static bool operator == ( CryptoCoin coin1, CryptoCoin coin2 ) =>
