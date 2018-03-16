@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using CryptoTickerBot.Data.Enums;
 using Newtonsoft.Json;
 
@@ -12,7 +12,7 @@ namespace CryptoTickerBot.Data.Domain
 {
 	public class TeleSubscription
 	{
-		private ObservableConcurrentDictionary<CryptoCoinId, CryptoCoinValue> lastSignificantPrice;
+		private Dictionary<CryptoCoinId, CryptoCoinValue> lastSignificantPrice;
 
 		[Key]
 		[DatabaseGenerated ( DatabaseGeneratedOption.Identity )]
@@ -47,21 +47,15 @@ namespace CryptoTickerBot.Data.Domain
 		public bool Expired { get; set; }
 
 		[NotMapped]
-		public ObservableConcurrentDictionary<CryptoCoinId, CryptoCoinValue> LastSignificantPrice
+		public Dictionary<CryptoCoinId, CryptoCoinValue> LastSignificantPrice
 		{
-			get
-			{
-				ParseJson ( );
-
-				return lastSignificantPrice;
-			}
-			set =>
-				LastSignificantPriceJson = JsonConvert.SerializeObject ( value.Values );
+			get => ParseJson ( );
+			set => LastSignificantPriceJson = JsonConvert.SerializeObject ( value.Values );
 		}
 
 		private TeleSubscription ( )
 		{
-			LastSignificantPrice = new ObservableConcurrentDictionary<CryptoCoinId, CryptoCoinValue> ( );
+			LastSignificantPrice = new Dictionary<CryptoCoinId, CryptoCoinValue> ( );
 			Expired              = false;
 		}
 
@@ -87,9 +81,11 @@ namespace CryptoTickerBot.Data.Domain
 			if ( lastSignificantPrice != null )
 				foreach ( var kp in lastSignificantPrice )
 					LastSignificantPrice[kp.Key] = kp.Value;
+
+			UpdateJson ( );
 		}
 
-		private void ParseJson ( )
+		private Dictionary<CryptoCoinId, CryptoCoinValue> ParseJson ( )
 		{
 			List<CryptoCoinValue> values;
 			try
@@ -102,18 +98,12 @@ namespace CryptoTickerBot.Data.Domain
 				values = new List<CryptoCoinValue> ( );
 			}
 
-			lastSignificantPrice = new ObservableConcurrentDictionary<CryptoCoinId, CryptoCoinValue> ( );
-			foreach ( var value in values )
-				lastSignificantPrice[value.CoinId] = value;
+			lastSignificantPrice = values.ToDictionary ( x => x.CoinId, x => x );
 
-			lastSignificantPrice.PropertyChanged += ( sender, args ) =>
-				LastSignificantPriceJson = JsonConvert.SerializeObject (
-					( (ObservableConcurrentDictionary<CryptoCoinId, CryptoCoinValue>) sender ).Values
-				);
-			lastSignificantPrice.CollectionChanged += ( sender, args ) =>
-				LastSignificantPriceJson = JsonConvert.SerializeObject (
-					( (ObservableConcurrentDictionary<CryptoCoinId, CryptoCoinValue>) sender ).Values
-				);
+			return lastSignificantPrice;
 		}
+
+		public void UpdateJson ( ) =>
+			LastSignificantPriceJson = JsonConvert.SerializeObject ( lastSignificantPrice.Values );
 	}
 }

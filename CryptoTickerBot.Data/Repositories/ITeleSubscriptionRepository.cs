@@ -24,7 +24,7 @@ namespace CryptoTickerBot.Data.Repositories
 
 		void Remove ( long chatId );
 
-		void UpdateCoin ( TeleSubscription subscription, CryptoCoinId coinId );
+		TeleSubscription UpdateCoin ( int subscriptionId, CryptoCoinValue ccv );
 
 		void SetEndDate ( int subscriptionId, DateTime? endDate = null );
 

@@ -35,13 +35,13 @@ namespace CryptoTickerBot.Data.Repositories
 		                                                  int count,
 		                                                  CancellationToken cancellationToken );
 
-		void AddCoinValue (
+		CryptoCoinValue AddCoinValue (
 			CryptoCoinId coinId,
 			CryptoExchangeId exchangeId,
 			decimal lowestAsk,
 			decimal highestBid );
 
-		void AddCoinValue (
+		CryptoCoinValue AddCoinValue (
 			CryptoCoinId coinId,
 			CryptoExchangeId exchangeId,
 			decimal lowestAsk,

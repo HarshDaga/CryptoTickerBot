@@ -89,20 +89,19 @@ namespace CryptoTickerBot.Data.Repositories
 				.Take ( count )
 				.ToListAsync ( cancellationToken );
 
-		public void AddCoinValue (
+		public CryptoCoinValue AddCoinValue (
 			CryptoCoinId coinId,
 			CryptoExchangeId exchangeId,
 			decimal lowestAsk,
 			decimal highestBid ) =>
 			AddCoinValue ( coinId, exchangeId, lowestAsk, highestBid, DateTime.UtcNow );
 
-		public void AddCoinValue (
+		public CryptoCoinValue AddCoinValue (
 			CryptoCoinId coinId,
 			CryptoExchangeId exchangeId,
 			decimal lowestAsk,
 			decimal highestBid,
-			DateTime time )
-		{
+			DateTime time ) =>
 			Context.CoinValues.Add (
 				new CryptoCoinValue (
 					coinId,
@@ -111,6 +110,5 @@ namespace CryptoTickerBot.Data.Repositories
 					highestBid,
 					time )
 			);
-		}
 	}
 }

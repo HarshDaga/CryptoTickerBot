@@ -55,20 +55,17 @@ namespace CryptoTickerBot.Data.Repositories
 		public void Remove ( long chatId ) =>
 			Remove ( s => s.ChatId == chatId );
 
-		public void UpdateCoin ( TeleSubscription subscription, CryptoCoinId coinId )
+		public TeleSubscription UpdateCoin ( int subscriptionId, CryptoCoinValue ccv )
 		{
-			var ccv = Context.CoinValues
-				.OrderByDescending ( x => x.Id )
-				.FirstOrDefault (
-					x =>
-						x.ExchangeId == subscription.ExchangeId &&
-						x.CoinId == coinId
-				);
-			if ( ccv != null )
-			{
-				subscription.LastSignificantPrice[coinId] = ccv;
-				Context.TeleSubscriptions.AddOrUpdate ( subscription );
-			}
+			var subscription = Context.TeleSubscriptions.Find ( subscriptionId );
+			if ( subscription == null )
+				return null;
+
+			subscription.LastSignificantPrice[ccv.CoinId] = ccv;
+			subscription.UpdateJson ( );
+			Context.TeleSubscriptions.AddOrUpdate ( subscription );
+
+			return subscription;
 		}
 
 		public void SetEndDate ( int subscriptionId, DateTime? endDate )

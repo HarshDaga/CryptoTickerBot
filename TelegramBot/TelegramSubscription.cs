@@ -31,6 +31,9 @@ namespace TelegramBot
 		public IDictionary<CryptoCoinId, CryptoCoin> LastSignificantPrice { get; }
 		public ISet<CryptoCoinId> Coins { get; }
 
+		public CryptoCoin this [ CryptoCoinId coinId ] =>
+			LastSignificantPrice[coinId];
+
 		public TelegramSubscription (
 			CryptoExchangeBase exchange,
 			int id,

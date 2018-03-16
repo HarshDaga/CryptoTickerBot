@@ -45,6 +45,9 @@ namespace CryptoTickerBot
 		public static List<Data.Domain.CryptoCoin> SupportedCoins =>
 			UnitOfWork.Get ( u => u.Coins.GetAll ( ).ToList ( ) );
 
+		public CryptoExchangeBase this [ CryptoExchangeId exchangeId ] =>
+			Exchanges[exchangeId];
+
 		public void Dispose ( )
 		{
 			Dispose ( true );
@@ -116,10 +119,7 @@ namespace CryptoTickerBot
 		}
 
 		private static void StoreCoinValueInDb ( CryptoExchangeBase exchange, CryptoCoin coin ) =>
-			UnitOfWork.Do ( u => u.CoinValues.AddCoinValue (
-				                coin.Id, exchange.Id,
-				                coin.LowestAsk, coin.HighestBid, coin.Time
-			                ) );
+			UnitOfWork.Do ( u => u.CoinValues.Add ( coin.ToCryptoCoinValue ( exchange.Id ) ) );
 
 		private static void UpdateExchangeLastChangeInDb ( CryptoExchangeBase exchange, CryptoCoin coin ) =>
 			UnitOfWork.Do ( u => u.Exchanges.UpdateExchange ( exchange.Id, lastChange: DateTime.UtcNow ) );

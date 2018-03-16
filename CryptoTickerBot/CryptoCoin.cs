@@ -51,6 +51,9 @@ namespace CryptoTickerBot
 			other != null && Symbol == other.Symbol &&
 			HighestBid == other.HighestBid && LowestAsk == other.LowestAsk;
 
+		public CryptoCoinValue ToCryptoCoinValue ( CryptoExchangeId exchangeId ) =>
+			new CryptoCoinValue ( Id, exchangeId, LowestAsk, HighestBid, Time );
+
 		[DebuggerStepThrough]
 		[Pure]
 		public virtual decimal Buy ( decimal amountInUsd ) => amountInUsd / BuyPrice;

@@ -102,23 +102,23 @@ namespace TelegramBot.Core
 
 		private static async Task UpdateSubscriptionInDb (
 			TelegramSubscription subscription,
-			CryptoCoinId coinId
+			CryptoCoin coin
 		)
 		{
-			await Task.Run ( ( ) =>
-				                 UnitOfWork.Do ( u =>
-					                 {
-						                 var sub = u.Subscriptions.Get ( subscription.Id );
-						                 u.Subscriptions.UpdateCoin ( sub, coinId );
-					                 }
-				                 ) );
+			await Task.Delay ( 2000 );
+			UnitOfWork.Do ( u =>
+				{
+					var ccv = coin.ToCryptoCoinValue ( subscription.ExchangeId );
+					u.Subscriptions.UpdateCoin ( subscription.Id, ccv );
+				}
+			);
 		}
 
 		private void StartSubscription ( CryptoExchangeBase exchange, TeleSubscription sub )
 		{
 			var subscription = new TelegramSubscription ( exchange, sub );
 			subscription.Changed += SendSubscriptionReply;
-			subscription.Changed += async ( s, o, n ) => await UpdateSubscriptionInDb ( s, n.Id );
+			subscription.Changed += async ( s, o, n ) => await UpdateSubscriptionInDb ( s, n );
 			exchange.Subscribe ( subscription );
 			lock ( subscriptionLock )
 				Subscriptions.Add ( subscription );
@@ -138,8 +138,15 @@ namespace TelegramBot.Core
 					var subscription = unit.Subscriptions.Add (
 						exchange.Id, message.Chat.Id, message.From.Username, threshold, ids
 					);
-					foreach ( var coinId in coinIds )
-						unit.Subscriptions.UpdateCoin ( subscription, coinId );
+					foreach (
+						var coin
+						in
+						exchange.ExchangeData.Values.Where ( x => coinIds.Contains ( x.Id ) )
+					)
+						unit.Subscriptions.UpdateCoin (
+							subscription.Id,
+							coin.ToCryptoCoinValue ( exchange.Id )
+						);
 					return subscription;
 				}
 			);
