@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(CryptoTickerBot.Data.Persistence.CtbContext),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets9f5510769c674df5ad7cb5dfa795b6af60abf869a937f74c8cf2977610917089))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsb2f3edfc3c319faadb98628213883cb3fe54ab606a95afa89efc9f32e5838dfa))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework 6 Power Tools", "0.9.2.0")]
-    internal sealed class ViewsForBaseEntitySets9f5510769c674df5ad7cb5dfa795b6af60abf869a937f74c8cf2977610917089 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsb2f3edfc3c319faadb98628213883cb3fe54ab606a95afa89efc9f32e5838dfa : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "9f5510769c674df5ad7cb5dfa795b6af60abf869a937f74c8cf2977610917089"; }
+            get { return "b2f3edfc3c319faadb98628213883cb3fe54ab606a95afa89efc9f32e5838dfa"; }
         }
 
         /// <summary>
@@ -77,54 +77,64 @@ namespace Edm_EntityMappingGeneratedViews
                 return GetView5();
             }
 
-            if (extentName == "CodeFirstDatabase.TeleSubscriptionCryptoCoin")
+            if (extentName == "CodeFirstDatabase.CryptoExchangeCryptoCoinValue")
             {
                 return GetView6();
             }
 
-            if (extentName == "CtbContext.Coins")
+            if (extentName == "CodeFirstDatabase.TeleSubscriptionCryptoCoin")
             {
                 return GetView7();
             }
 
-            if (extentName == "CtbContext.CoinValues")
+            if (extentName == "CtbContext.Coins")
             {
                 return GetView8();
             }
 
-            if (extentName == "CtbContext.Exchanges")
+            if (extentName == "CtbContext.CoinValues")
             {
                 return GetView9();
             }
 
-            if (extentName == "CtbContext.DepositFees")
+            if (extentName == "CtbContext.Exchanges")
             {
                 return GetView10();
             }
 
-            if (extentName == "CtbContext.WithdrawalFees")
+            if (extentName == "CtbContext.DepositFees")
             {
                 return GetView11();
             }
 
-            if (extentName == "CtbContext.TeleSubscriptions")
+            if (extentName == "CtbContext.WithdrawalFees")
             {
                 return GetView12();
             }
 
-            if (extentName == "CtbContext.TeleSubscription_Coins")
+            if (extentName == "CtbContext.TeleSubscriptions")
             {
                 return GetView13();
             }
 
-            if (extentName == "CodeFirstDatabase.TeleBotUser")
+            if (extentName == "CtbContext.CryptoExchange_LatestCoinValues")
             {
                 return GetView14();
             }
 
-            if (extentName == "CtbContext.TeleBotUsers")
+            if (extentName == "CtbContext.TeleSubscription_Coins")
             {
                 return GetView15();
+            }
+
+            if (extentName == "CodeFirstDatabase.TeleBotUser")
+            {
+                return GetView16();
+            }
+
+            if (extentName == "CtbContext.TeleBotUsers")
+            {
+                return GetView17();
             }
 
             return null;
@@ -259,10 +269,28 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for CodeFirstDatabase.TeleSubscriptionCryptoCoin.
+        /// Gets the view for CodeFirstDatabase.CryptoExchangeCryptoCoinValue.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView6()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing CryptoExchangeCryptoCoinValue
+        [CodeFirstDatabaseSchema.CryptoExchangeCryptoCoinValue](T1.CryptoExchangeCryptoCoinValue_ExchangeId, T1.CryptoExchangeCryptoCoinValue_CoinValueId)
+    FROM (
+        SELECT 
+            CAST(Key(T.CryptoExchange_LatestCoinValues_Source).Id AS [Edm.Int32]) AS CryptoExchangeCryptoCoinValue_ExchangeId, 
+            Key(T.CryptoExchange_LatestCoinValues_Target).Id AS CryptoExchangeCryptoCoinValue_CoinValueId, 
+            True AS _from0
+        FROM CtbContext.CryptoExchange_LatestCoinValues AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.TeleSubscriptionCryptoCoin.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView7()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing TeleSubscriptionCryptoCoin
@@ -280,7 +308,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CtbContext.Coins.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView7()
+        private static DbMappingView GetView8()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing Coins
@@ -299,7 +327,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CtbContext.CoinValues.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView8()
+        private static DbMappingView GetView9()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing CoinValues
@@ -321,7 +349,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CtbContext.Exchanges.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView9()
+        private static DbMappingView GetView10()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing Exchanges
@@ -345,7 +373,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CtbContext.DepositFees.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView10()
+        private static DbMappingView GetView11()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing DepositFees
@@ -364,7 +392,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CtbContext.WithdrawalFees.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView11()
+        private static DbMappingView GetView12()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing WithdrawalFees
@@ -383,7 +411,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CtbContext.TeleSubscriptions.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView12()
+        private static DbMappingView GetView13()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing TeleSubscriptions
@@ -405,10 +433,38 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
+        /// Gets the view for CtbContext.CryptoExchange_LatestCoinValues.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView14()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing CryptoExchange_LatestCoinValues
+        [CryptoTickerBot.Data.Persistence.CryptoExchange_LatestCoinValues](T3.[CryptoExchange_LatestCoinValues.CryptoExchange_LatestCoinValues_Source], T3.[CryptoExchange_LatestCoinValues.CryptoExchange_LatestCoinValues_Target])
+    FROM (
+        SELECT -- Constructing CryptoExchange_LatestCoinValues_Source
+            CreateRef(CtbContext.Exchanges, row(T2.[CryptoExchange_LatestCoinValues.CryptoExchange_LatestCoinValues_Source.Id]), [CryptoTickerBot.Data.Persistence.CryptoExchange]) AS [CryptoExchange_LatestCoinValues.CryptoExchange_LatestCoinValues_Source], 
+            T2.[CryptoExchange_LatestCoinValues.CryptoExchange_LatestCoinValues_Target]
+        FROM (
+            SELECT -- Constructing CryptoExchange_LatestCoinValues_Target
+                T1.[CryptoExchange_LatestCoinValues.CryptoExchange_LatestCoinValues_Source.Id], 
+                CreateRef(CtbContext.CoinValues, row(T1.[CryptoExchange_LatestCoinValues.CryptoExchange_LatestCoinValues_Target.Id]), [CryptoTickerBot.Data.Persistence.CryptoCoinValue]) AS [CryptoExchange_LatestCoinValues.CryptoExchange_LatestCoinValues_Target]
+            FROM (
+                SELECT 
+                    CAST(T.ExchangeId AS [CryptoTickerBot.Data.Persistence.CryptoExchangeId]) AS [CryptoExchange_LatestCoinValues.CryptoExchange_LatestCoinValues_Source.Id], 
+                    T.CoinValueId AS [CryptoExchange_LatestCoinValues.CryptoExchange_LatestCoinValues_Target.Id], 
+                    True AS _from0
+                FROM CodeFirstDatabase.CryptoExchangeCryptoCoinValue AS T
+            ) AS T1
+        ) AS T2
+    ) AS T3");
+        }
+
+        /// <summary>
         /// Gets the view for CtbContext.TeleSubscription_Coins.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView13()
+        private static DbMappingView GetView15()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing TeleSubscription_Coins
@@ -436,7 +492,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.TeleBotUser.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView14()
+        private static DbMappingView GetView16()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing TeleBotUser
@@ -458,7 +514,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CtbContext.TeleBotUsers.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView15()
+        private static DbMappingView GetView17()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing TeleBotUsers

@@ -21,6 +21,14 @@ namespace CryptoTickerBot.Data.Persistence.Configurations
 				.WithRequired ( f => f.Exchange )
 				.HasForeignKey ( f => f.ExchangeId )
 				.WillCascadeOnDelete ( );
+
+			HasMany ( e => e.LatestCoinValues )
+				.WithMany ( )
+				.Map ( configuration =>
+					       configuration.ToTable ( "LatestCoinValues" )
+						       .MapLeftKey ( "ExchangeId" )
+						       .MapRightKey ( "CoinValueId" )
+				);
 		}
 	}
 }

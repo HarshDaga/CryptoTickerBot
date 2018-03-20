@@ -21,7 +21,7 @@ namespace CryptoTickerBot.Data.Repositories
 			Expression<Func<TEntity, bool>> predicate,
 			CancellationToken cancellationToken );
 
-		TEntity Add ( TEntity entity );
+		TEntity Add ( TEntity ccv );
 		IEnumerable<TEntity> AddRange ( IEnumerable<TEntity> entities );
 
 		TEntity Remove ( TEntity entity );

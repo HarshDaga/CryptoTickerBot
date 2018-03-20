@@ -102,13 +102,31 @@ namespace CryptoTickerBot.Data.Repositories
 			decimal lowestAsk,
 			decimal highestBid,
 			DateTime time ) =>
-			Context.CoinValues.Add (
-				new CryptoCoinValue (
-					coinId,
-					exchangeId,
-					lowestAsk,
-					highestBid,
-					time )
+			Add ( new CryptoCoinValue (
+				      coinId,
+				      exchangeId,
+				      lowestAsk,
+				      highestBid,
+				      time )
 			);
+
+		public override CryptoCoinValue Add ( CryptoCoinValue ccv )
+		{
+			var result = Context.CoinValues.Add ( ccv );
+			Context.SaveChanges ( );
+
+			var exchange = Context.Exchanges
+				.Include ( x => x.LatestCoinValues )
+				.FirstOrDefault ( x => x.Id == ccv.ExchangeId );
+
+			if ( exchange != null )
+			{
+				exchange.LatestCoinValues.RemoveAll ( c => c.CoinId == ccv.CoinId );
+				exchange.LatestCoinValues.Add ( result );
+				exchange.LastChange = ccv.Time;
+			}
+
+			return result;
+		}
 	}
 }

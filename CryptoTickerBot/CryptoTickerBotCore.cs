@@ -100,7 +100,6 @@ namespace CryptoTickerBot
 				exchange.Next    += UpdateExchangeLastUpdateInDb;
 				exchange.Changed += ( e, coin ) => Logger.Debug ( $"{e.Name,-10} {e[coin.Id]}" );
 				exchange.Changed += StoreCoinValueInDb;
-				exchange.Changed += UpdateExchangeLastChangeInDb;
 
 				CompareTable.AddExchange ( exchange );
 
@@ -121,11 +120,8 @@ namespace CryptoTickerBot
 		private static void StoreCoinValueInDb ( CryptoExchangeBase exchange, CryptoCoin coin ) =>
 			UnitOfWork.Do ( u => u.CoinValues.Add ( coin.ToCryptoCoinValue ( exchange.Id ) ) );
 
-		private static void UpdateExchangeLastChangeInDb ( CryptoExchangeBase exchange, CryptoCoin coin ) =>
-			UnitOfWork.Do ( u => u.Exchanges.UpdateExchange ( exchange.Id, lastChange: DateTime.UtcNow ) );
-
 		private static void UpdateExchangeLastUpdateInDb ( CryptoExchangeBase exchange, CryptoCoin coin ) =>
-			UnitOfWork.Do ( u => u.Exchanges.UpdateExchange ( exchange.Id, lastUpdate: DateTime.UtcNow ) );
+			UnitOfWork.Do ( u => u.Exchanges.UpdateExchange ( exchange.Id, lastUpdate: coin.Time.ToUniversalTime ( ) ) );
 
 		private void Dispose ( bool disposing )
 		{

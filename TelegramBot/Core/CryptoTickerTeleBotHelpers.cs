@@ -202,7 +202,7 @@ namespace TelegramBot.Core
 				var objects = new List<IDictionary<string, object>> ( );
 				table.AppendLine ( $"{from.Key}" );
 
-				var coinIds = ExtractSymbols ( from );
+				var coinIds = ExtractSymbols ( from.Value.Values );
 
 				foreach ( var value in from.Value )
 				{
@@ -229,9 +229,9 @@ namespace TelegramBot.Core
 				.FirstOrDefault ( x => x.Name.Equals ( name, StringComparison.CurrentCultureIgnoreCase ) );
 
 		private static IList<CryptoCoinId> ExtractSymbols (
-			KeyValuePair<CryptoExchangeId, Dictionary<CryptoExchangeId, Dictionary<CryptoCoinId, decimal>>> from
+			IEnumerable<Dictionary<CryptoCoinId, decimal>> from
 		) =>
-			from.Value.Values.Aggregate (
+			from.Aggregate (
 				new List<CryptoCoinId> ( ),
 				( current, to ) =>
 					current.Union ( to.Keys )

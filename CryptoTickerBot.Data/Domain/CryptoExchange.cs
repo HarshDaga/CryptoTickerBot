@@ -33,6 +33,7 @@ namespace CryptoTickerBot.Data.Domain
 		public DateTime? LastUpdate { get; set; }
 		public DateTime? LastChange { get; set; }
 		public virtual List<CryptoCoinValue> CoinValues { get; set; }
+		public virtual List<CryptoCoinValue> LatestCoinValues { get; set; }
 
 		public CryptoExchange (
 			CryptoExchangeId id,

@@ -45,19 +45,19 @@ namespace CryptoTickerBot.Data.Repositories
 			CancellationToken cancellationToken ) =>
 			await AllEntities.Where ( predicate ).ToListAsync ( cancellationToken );
 
-		public TEntity Add ( TEntity entity ) =>
-			Context.Set<TEntity> ( ).Add ( entity );
+		public virtual TEntity Add ( TEntity ccv ) =>
+			Context.Set<TEntity> ( ).Add ( ccv );
 
-		public IEnumerable<TEntity> AddRange ( IEnumerable<TEntity> entities ) =>
+		public virtual IEnumerable<TEntity> AddRange ( IEnumerable<TEntity> entities ) =>
 			Context.Set<TEntity> ( ).AddRange ( entities );
 
-		public TEntity Remove ( TEntity entity ) =>
+		public virtual TEntity Remove ( TEntity entity ) =>
 			Context.Set<TEntity> ( ).Remove ( entity );
 
-		public void Remove ( Expression<Func<TEntity, bool>> predicate ) =>
+		public virtual void Remove ( Expression<Func<TEntity, bool>> predicate ) =>
 			RemoveRange ( Context.Set<TEntity> ( ).Where ( predicate ) );
 
-		public IEnumerable<TEntity> RemoveRange ( IEnumerable<TEntity> entities ) =>
+		public virtual IEnumerable<TEntity> RemoveRange ( IEnumerable<TEntity> entities ) =>
 			Context.Set<TEntity> ( ).RemoveRange ( entities );
 	}
 }
