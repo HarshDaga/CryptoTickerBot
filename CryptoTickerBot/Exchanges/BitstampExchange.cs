@@ -33,11 +33,11 @@ namespace CryptoTickerBot.Exchanges
 
 			using ( var ws = new WebSocket ( TickerUrl ) )
 			{
-				await ConnectAndSubscribe ( ws, ct );
+				await ConnectAndSubscribe ( ws, ct ).ConfigureAwait ( false );
 
 				ws.OnMessage += Ws_OnMessage;
 
-				await Task.Delay ( int.MaxValue, ct );
+				await Task.Delay ( int.MaxValue, ct ).ConfigureAwait ( false );
 			}
 		}
 
@@ -94,12 +94,12 @@ namespace CryptoTickerBot.Exchanges
 		{
 			ws.ConnectAsync ( );
 			while ( ws.ReadyState == WebSocketState.Connecting )
-				await Task.Delay ( 1, ct );
+				await Task.Delay ( 1, ct ).ConfigureAwait ( false );
 
 			foreach ( var channel in ToSymBol.Keys )
 				await ws.SendStringAsync (
 					$"{{\"event\":\"pusher:subscribe\",\"data\":{{\"channel\":\"{channel}\"}}}}"
-				);
+				).ConfigureAwait ( false );
 		}
 	}
 }

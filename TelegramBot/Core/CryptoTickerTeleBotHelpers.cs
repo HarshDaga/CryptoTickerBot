@@ -48,13 +48,13 @@ namespace TelegramBot.Core
 
 			if ( Settings.Instance.WhitelistMode && Users.Get ( from.Id )?.Role < UserRole.Registered )
 			{
-				await RequestPurchase ( message );
+				await RequestPurchase ( message ).ConfigureAwait ( false );
 				return true;
 			}
 
 			if ( Users.Get ( from.Id )?.Role < commands[command].role )
 			{
-				await SendBlockText ( message, $"You do not have access to {command}" );
+				await SendBlockText ( message, $"You do not have access to {command}" ).ConfigureAwait ( false );
 				return true;
 			}
 
@@ -64,19 +64,21 @@ namespace TelegramBot.Core
 		[DebuggerStepThrough]
 		private async Task SendBlockText ( Message message, string str )
 		{
-			await bot.SendTextMessageAsync ( message.Chat.Id, $"```\n{str}\n```", ParseMode.Markdown );
+			await bot.SendTextMessageAsync ( message.Chat.Id, $"```\n{str}\n```", ParseMode.Markdown )
+				.ConfigureAwait ( false );
 		}
 
 		private async Task RequestPurchase ( Message message )
 		{
-			await SendBlockText ( message, "You need to purchase before you can use this command." );
+			await SendBlockText ( message, "You need to purchase before you can use this command." )
+				.ConfigureAwait ( false );
 			await bot.SendTextMessageAsync (
 				message.Chat.Id,
 				$"{Settings.Instance.PurchaseMessageText}"
-			);
+			).ConfigureAwait ( false );
 		}
 
-		private async Task SendSubscriptionReply (
+		private void SendSubscriptionReply (
 			TelegramSubscription subscription,
 			CryptoCoin oldValue,
 			CryptoCoin newValue
@@ -94,31 +96,32 @@ namespace TelegramBot.Core
 				.AppendLine ( $"Change %:      {change.Percentage:P}" )
 				.AppendLine ( $"in {change.TimeDiff:dd\\:hh\\:mm\\:ss}" );
 
-			await bot.SendTextMessageAsync (
+			bot.SendTextMessageAsync (
 				subscription.ChatId,
 				$"```\n{builder}\n```", ParseMode.Markdown
 			);
 		}
 
-		private static async Task UpdateSubscriptionInDb (
+		private static Task UpdateSubscriptionInDb (
 			TelegramSubscription subscription,
 			CryptoCoin coin
 		)
 		{
-			await Task.Delay ( 2000 );
 			UnitOfWork.Do ( u =>
 				{
 					var ccv = coin.ToCryptoCoinValue ( subscription.ExchangeId );
 					u.Subscriptions.UpdateCoin ( subscription.Id, ccv );
 				}
 			);
+
+			return Task.CompletedTask;
 		}
 
 		private void StartSubscription ( CryptoExchangeBase exchange, TeleSubscription sub )
 		{
 			var subscription = new TelegramSubscription ( exchange, sub );
 			subscription.Changed += SendSubscriptionReply;
-			subscription.Changed += async ( s, o, n ) => await UpdateSubscriptionInDb ( s, n );
+			subscription.Changed += async ( s, o, n ) => await UpdateSubscriptionInDb ( s, n ).ConfigureAwait ( false );
 			exchange.Subscribe ( subscription );
 			lock ( subscriptionLock )
 				Subscriptions.Add ( subscription );
@@ -157,7 +160,7 @@ namespace TelegramBot.Core
 				message,
 				$"Subscribed to {exchange.Name} at a threshold of {threshold:P}\n" +
 				$"For coins: {ids.Join ( ", " )}"
-			);
+			).ConfigureAwait ( false );
 		}
 
 		private void LoadSubscriptions ( )

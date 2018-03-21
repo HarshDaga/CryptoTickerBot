@@ -22,11 +22,11 @@ namespace CryptoTickerBot.Exchanges
 
 			using ( var ws = new WebSocket ( TickerUrl ) )
 			{
-				await ConnectAndSubscribe ( ws, ct );
+				await ConnectAndSubscribe ( ws, ct ).ConfigureAwait ( false );
 
 				ws.OnMessage += Ws_OnMessage;
 
-				await Task.Delay ( int.MaxValue, ct );
+				await Task.Delay ( int.MaxValue, ct ).ConfigureAwait ( false );
 			}
 		}
 
@@ -51,11 +51,12 @@ namespace CryptoTickerBot.Exchanges
 
 		private static async Task ConnectAndSubscribe ( WebSocket ws, CancellationToken ct )
 		{
-			await Task.Run ( ( ) => ws.Connect ( ), ct );
+			await Task.Run ( ( ) => ws.Connect ( ), ct ).ConfigureAwait ( false );
 
 			var productIds = string.Join ( ",", KnownSymbols.Select ( x => $"\"{x}-USD\"" ) );
 			await ws.SendStringAsync (
-				$"{{\"type\":\"subscribe\",\"product_ids\":[{productIds}],\"channels\":[\"ticker\"]}}" );
+					$"{{\"type\":\"subscribe\",\"product_ids\":[{productIds}],\"channels\":[\"ticker\"]}}" )
+				.ConfigureAwait ( false );
 		}
 	}
 }

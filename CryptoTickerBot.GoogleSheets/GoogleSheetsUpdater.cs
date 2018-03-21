@@ -124,7 +124,7 @@ namespace CryptoTickerBot.GoogleSheets
 
 				var request = Service.Spreadsheets.Values.BatchUpdate ( requestBody, SheetId );
 
-				await request.ExecuteAsync ( Cts.Token );
+				await request.ExecuteAsync ( Cts.Token ).ConfigureAwait ( false );
 			}
 			catch ( TaskCanceledException tce )
 			{
@@ -136,7 +136,7 @@ namespace CryptoTickerBot.GoogleSheets
 				if ( e is GoogleApiException gae && gae.Error?.Code == 429 )
 				{
 					Logger.Warn ( gae, "Too many Google Api requests. Cooling down." );
-					await Task.Delay ( 5000, Cts.Token );
+					await Task.Delay ( 5000, Cts.Token ).ConfigureAwait ( false );
 				}
 				else
 				{
@@ -164,7 +164,7 @@ namespace CryptoTickerBot.GoogleSheets
 						return;
 
 					var valueRanges = GetValueRangesToUpdate ( );
-					await UpdateSheet ( valueRanges );
+					await UpdateSheet ( valueRanges ).ConfigureAwait ( false );
 
 					if ( !Cts.IsCancellationRequested )
 						( sender as Timer )?.Start ( );

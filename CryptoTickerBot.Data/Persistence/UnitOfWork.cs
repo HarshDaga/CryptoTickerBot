@@ -4,12 +4,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Data.Repositories;
 using JetBrains.Annotations;
+using NLog;
 
 namespace CryptoTickerBot.Data.Persistence
 {
 	public class UnitOfWork : IUnitOfWork
 	{
 		private static readonly object Lock = new object ( );
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 		private readonly CtbContext context;
 
 		public UnitOfWork ( CtbContext context )
@@ -38,7 +40,7 @@ namespace CryptoTickerBot.Data.Persistence
 
 		[DebuggerStepThrough]
 		public async Task<int> CompleteAsync ( CancellationToken cancellationToken ) =>
-			await context.SaveChangesAsync ( cancellationToken );
+			await context.SaveChangesAsync ( cancellationToken ).ConfigureAwait ( false );
 
 		public static void Do ( Action<IUnitOfWork> action )
 		{
@@ -70,10 +72,17 @@ namespace CryptoTickerBot.Data.Persistence
 
 		public static async void DoAsync ( Func<IUnitOfWork, Task> action )
 		{
-			using ( var unit = new UnitOfWork ( new CtbContext ( ) ) )
+			try
 			{
-				await action ( unit );
-				await unit.CompleteAsync ( CancellationToken.None );
+				using ( var unit = new UnitOfWork ( new CtbContext ( ) ) )
+				{
+					await action ( unit ).ConfigureAwait ( false );
+					await unit.CompleteAsync ( CancellationToken.None ).ConfigureAwait ( false );
+				}
+			}
+			catch ( Exception ex )
+			{
+				Logger.Error ( ex );
 			}
 		}
 
@@ -81,10 +90,17 @@ namespace CryptoTickerBot.Data.Persistence
 			Func<IUnitOfWork, CancellationToken, Task> action,
 			CancellationToken cancellationToken )
 		{
-			using ( var unit = new UnitOfWork ( new CtbContext ( ) ) )
+			try
 			{
-				await action ( unit, cancellationToken );
-				await unit.CompleteAsync ( cancellationToken );
+				using ( var unit = new UnitOfWork ( new CtbContext ( ) ) )
+				{
+					await action ( unit, cancellationToken ).ConfigureAwait ( false );
+					await unit.CompleteAsync ( cancellationToken ).ConfigureAwait ( false );
+				}
+			}
+			catch ( Exception ex )
+			{
+				Logger.Error ( ex );
 			}
 		}
 	}

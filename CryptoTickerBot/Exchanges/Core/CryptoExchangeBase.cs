@@ -113,7 +113,7 @@ namespace CryptoTickerBot.Exchanges.Core
 					StartTime = DateTime.UtcNow;
 					IsStarted = true;
 					Logger.Debug ( $"Starting {Name,-12} receiver." );
-					await GetExchangeData ( ct );
+					await GetExchangeData ( ct ).ConfigureAwait ( false );
 					IsStarted = false;
 					Logger.Debug ( $"{Name,-12} receiver terminated." );
 				}
@@ -124,7 +124,7 @@ namespace CryptoTickerBot.Exchanges.Core
 				catch ( Exception e )
 				{
 					Logger.Error ( e );
-					await Task.Delay ( 60000, ct );
+					await Task.Delay ( 60000, ct ).ConfigureAwait ( false );
 				}
 		}
 

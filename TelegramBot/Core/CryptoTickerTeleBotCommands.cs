@@ -33,11 +33,11 @@ namespace TelegramBot.Core
 
 			if ( chosen == null )
 			{
-				await SendBlockText ( message, "No exchanges provided." );
+				await SendBlockText ( message, "No exchanges provided." ).ConfigureAwait ( false );
 				await SendBlockText ( message,
 				                      "Supported Exchanges:\n" +
 				                      $"{Exchanges.Select ( e => e.Value.Name ).Join ( "\n" )}"
-				);
+				).ConfigureAwait ( false );
 				return;
 			}
 
@@ -48,7 +48,8 @@ namespace TelegramBot.Core
 			if ( !string.IsNullOrEmpty ( thresholdString ) )
 				threshold = decimal.Parse ( thresholdString ) / 100m;
 			else
-				await SendBlockText ( message, $"No threshold provided, setting to default {threshold:P}" );
+				await SendBlockText ( message, $"No threshold provided, setting to default {threshold:P}" )
+					.ConfigureAwait ( false );
 
 			// Check coin symbols
 			var supported = CryptoTickerBotCore.SupportedCoins;
@@ -64,11 +65,11 @@ namespace TelegramBot.Core
 				await SendBlockText (
 					message,
 					"No coin symbols provided. Subscribing to all coin notifications."
-				);
+				).ConfigureAwait ( false );
 				coinIds = supported.Select ( x => x.Id ).ToList ( );
 			}
 
-			await AddSubscription ( message, chosen, threshold, coinIds );
+			await AddSubscription ( message, chosen, threshold, coinIds ).ConfigureAwait ( false );
 		}
 
 		private async Task HandleUnsubscribe ( Message message, IList<string> _ )
@@ -83,7 +84,7 @@ namespace TelegramBot.Core
 
 			UnitOfWork.Do ( u => u.Subscriptions.Remove ( message.Chat.Id ) );
 
-			await SendBlockText ( message, "Unsubscribed from all exchanges." );
+			await SendBlockText ( message, "Unsubscribed from all exchanges." ).ConfigureAwait ( false );
 		}
 
 		private async Task HandleFetch ( Message message, IList<string> @params )
@@ -96,7 +97,7 @@ namespace TelegramBot.Core
 			Logger.Info ( $"Sending ticker data to {message.From.Username}" );
 
 			foreach ( var table in tables )
-				await SendBlockText ( message, table );
+				await SendBlockText ( message, table ).ConfigureAwait ( false );
 		}
 
 		private async Task HandleCompare ( Message message, IList<string> @params )
@@ -117,7 +118,7 @@ namespace TelegramBot.Core
 			Logger.Info ( $"Sending compare data to {message.From.Username}" );
 
 			foreach ( var table in tables )
-				await SendBlockText ( message, table );
+				await SendBlockText ( message, table ).ConfigureAwait ( false );
 		}
 
 		private async Task HandleBestAll ( Message message )
@@ -126,7 +127,7 @@ namespace TelegramBot.Core
 
 			if ( first == CryptoCoinId.NULL || second == CryptoCoinId.NULL )
 			{
-				await SendBlockText ( message, "ERROR: Not enough data received." );
+				await SendBlockText ( message, "ERROR: Not enough data received." ).ConfigureAwait ( false );
 				return;
 			}
 
@@ -144,14 +145,14 @@ namespace TelegramBot.Core
 				$"Minimum Investment: {minInvestment:C}";
 
 			Logger.Info ( $"Sending best pair data to {message.From.Username}" );
-			await SendBlockText ( message, reply );
+			await SendBlockText ( message, reply ).ConfigureAwait ( false );
 		}
 
 		private async Task HandleBest ( Message message, IList<string> @params )
 		{
 			if ( @params == null || @params.Count < 2 )
 			{
-				await HandleBestAll ( message );
+				await HandleBestAll ( message ).ConfigureAwait ( false );
 				return;
 			}
 
@@ -160,19 +161,19 @@ namespace TelegramBot.Core
 
 			if ( from == null )
 			{
-				await SendBlockText ( message, $"ERROR: {@params[0]} not found." );
+				await SendBlockText ( message, $"ERROR: {@params[0]} not found." ).ConfigureAwait ( false );
 				return;
 			}
 
 			if ( to == null )
 			{
-				await SendBlockText ( message, $"ERROR: {@params[1]} not found." );
+				await SendBlockText ( message, $"ERROR: {@params[1]} not found." ).ConfigureAwait ( false );
 				return;
 			}
 
 			if ( from.Count == 0 || to.Count == 0 )
 			{
-				await SendBlockText ( message, "ERROR: Not enough data received." );
+				await SendBlockText ( message, "ERROR: Not enough data received." ).ConfigureAwait ( false );
 				return;
 			}
 
@@ -189,7 +190,7 @@ namespace TelegramBot.Core
 				$"Minimum Investment: {minInvestment:C}";
 
 			Logger.Info ( $"Sending best pair data to {message.From.Username}" );
-			await SendBlockText ( message, reply );
+			await SendBlockText ( message, reply ).ConfigureAwait ( false );
 		}
 
 		private async Task HandleStatus ( Message message, IList<string> _ )
@@ -211,7 +212,7 @@ namespace TelegramBot.Core
 				.AppendLine ( "" )
 				.AppendLine ( formatter.FormatDictionaries ( objects ) );
 
-			await SendBlockText ( message, builder.ToString ( ) );
+			await SendBlockText ( message, builder.ToString ( ) ).ConfigureAwait ( false );
 		}
 
 		private async Task HandlePutGroup ( Message message, IList<string> @params )
@@ -221,7 +222,8 @@ namespace TelegramBot.Core
 				await SendBlockText (
 					message,
 					"Not enough arguments.\n" +
-					"Syntax: /putgroup <Role Name> <User ID> <Username>" );
+					"Syntax: /putgroup <Role Name> <User ID> <Username>"
+				).ConfigureAwait ( false );
 				return;
 			}
 
@@ -236,7 +238,7 @@ namespace TelegramBot.Core
 					message,
 					$"Unknown role {@params[0]}.\n" +
 					$"Roles: {Enum.GetNames ( typeof ( UserRole ) ).Join ( ", " )}"
-				);
+				).ConfigureAwait ( false );
 				return;
 			}
 
@@ -246,7 +248,7 @@ namespace TelegramBot.Core
 					message,
 					$"Invalid ID {@params[1]}.\n" +
 					"ID must be an integer."
-				);
+				).ConfigureAwait ( false );
 				return;
 			}
 
@@ -258,7 +260,7 @@ namespace TelegramBot.Core
 			UnitOfWork.Do ( unit => unit.Users.AddOrUpdate ( user ) );
 
 			Logger.Info ( $"Registered {user}" );
-			await SendBlockText ( message, $"Registered {user}." );
+			await SendBlockText ( message, $"Registered {user}." ).ConfigureAwait ( false );
 		}
 
 		private async Task HandleRestart ( Message message, IList<string> _ )
@@ -269,10 +271,10 @@ namespace TelegramBot.Core
 			Ctb.Stop ( );
 			Ctb = CryptoTickerBotCore.CreateAndStart ( new CancellationTokenSource ( ) );
 
-			await SendBlockText ( message, "Restarted all exchange monitors." );
+			await SendBlockText ( message, "Restarted all exchange monitors." ).ConfigureAwait ( false );
 
 			while ( !Ctb.IsInitialized )
-				await Task.Delay ( 10 );
+				await Task.Delay ( 10 ).ConfigureAwait ( false );
 
 			LoadSubscriptions ( );
 			SendResumeNotifications ( );
@@ -293,7 +295,7 @@ namespace TelegramBot.Core
 					await SendBlockText (
 						message,
 						$"{value} List:\n{query.Join ( "\n" )}"
-					);
+					).ConfigureAwait ( false );
 				}
 
 				return;
@@ -304,7 +306,7 @@ namespace TelegramBot.Core
 				await SendBlockText (
 					message,
 					$"{@params[0]} is not a known role.\nRoles: {Enum.GetNames ( typeof ( UserRole ) )}"
-				);
+				).ConfigureAwait ( false );
 				return;
 			}
 
@@ -316,14 +318,14 @@ namespace TelegramBot.Core
 			await SendBlockText (
 				message,
 				$"{role} List:\n{list.Join ( "\n" )}"
-			);
+			).ConfigureAwait ( false );
 		}
 
 		private async Task HandleKill ( Message message, IList<string> @params )
 		{
 			Logger.Info ( $"Shutting down per {message.From.Username}'s request." );
-			await SendBlockText ( message, "Bye Bye 👋🏻👋🏻" );
-			await Task.Delay ( 100 );
+			await SendBlockText ( message, "Bye Bye 👋🏻👋🏻" ).ConfigureAwait ( false );
+			await Task.Delay ( 100 ).ConfigureAwait ( false );
 			Environment.Exit ( 0 );
 		}
 	}

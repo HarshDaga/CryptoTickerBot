@@ -25,7 +25,7 @@ namespace CryptoTickerBot.Exchanges
 			{
 				try
 				{
-					var data = await TickerUrl.GetJsonAsync<Root> ( ct );
+					var data = await TickerUrl.GetJsonAsync<Root> ( ct ).ConfigureAwait ( false );
 
 					Update ( data.Result.Btc, "BTC" );
 					Update ( data.Result.Bch, "BCH" );
@@ -38,7 +38,7 @@ namespace CryptoTickerBot.Exchanges
 						throw e.InnerException;
 				}
 
-				await Task.Delay ( 2000, ct );
+				await Task.Delay ( 2000, ct ).ConfigureAwait ( false );
 			}
 		}
 

@@ -27,12 +27,12 @@ namespace CryptoTickerBot.Exchanges
 
 			using ( var ws = new WebSocket ( TickerUrl ) )
 			{
-				await Task.Run ( ( ) => ws.Connect ( ), ct );
+				await Task.Run ( ( ) => ws.Connect ( ), ct ).ConfigureAwait ( false );
 
 				ws.OnMessage += WsOnMessage;
 
 				while ( ws.IsAlive )
-					await Task.Delay ( 100, ct );
+					await Task.Delay ( 100, ct ).ConfigureAwait ( false );
 			}
 		}
 

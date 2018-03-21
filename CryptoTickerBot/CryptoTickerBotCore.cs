@@ -79,7 +79,7 @@ namespace CryptoTickerBot
 
 			Task.Run ( async ( ) =>
 			{
-				await Task.Delay ( int.MaxValue, Cts.Token );
+				await Task.Delay ( int.MaxValue, Cts.Token ).ConfigureAwait ( false );
 
 				IsRunning = false;
 				Close?.Invoke ( this );

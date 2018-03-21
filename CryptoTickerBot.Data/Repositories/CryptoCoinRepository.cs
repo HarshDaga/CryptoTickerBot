@@ -29,12 +29,12 @@ namespace CryptoTickerBot.Data.Repositories
 			CryptoCoinId coinId,
 			CancellationToken cancellation
 		) =>
-			await CtbContext.Coins.SingleAsync ( c => c.Id == coinId, cancellation );
+			await CtbContext.Coins.SingleAsync ( c => c.Id == coinId, cancellation ).ConfigureAwait ( false );
 
 		public async Task<CryptoCoin> SingleAsync (
 			string symbol,
 			CancellationToken cancellation
 		) =>
-			await CtbContext.Coins.SingleAsync ( c => c.Symbol == symbol, cancellation );
+			await CtbContext.Coins.SingleAsync ( c => c.Symbol == symbol, cancellation ).ConfigureAwait ( false );
 	}
 }

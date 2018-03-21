@@ -133,7 +133,7 @@ namespace TelegramBot.Core
 					eventArgs.InlineQuery.Id,
 					inlineQueryResults.ToArray ( ),
 					0
-				);
+				).ConfigureAwait ( false );
 			}
 			catch ( Exception e )
 			{
@@ -172,10 +172,10 @@ namespace TelegramBot.Core
 				ParseMessage ( message, out var command, out var parameters );
 				TeleMessageLogger.Info ( $"{from.Id,-10} {from.FirstName}: {message.Text}" );
 
-				if ( await ValidateUserCommand ( from, command, message ) )
+				if ( await ValidateUserCommand ( from, command, message ).ConfigureAwait ( false ) )
 					return;
 
-				await commands[command].handler ( message, parameters );
+				await commands[command].handler ( message, parameters ).ConfigureAwait ( false );
 			}
 			catch ( Exception e )
 			{

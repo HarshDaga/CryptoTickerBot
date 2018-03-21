@@ -23,25 +23,32 @@ namespace CryptoTickerBot.Data.Repositories
 		}
 
 		public override async Task<IEnumerable<CryptoCoinValue>> GetAllAsync ( CancellationToken cancellationToken ) =>
-			await AllEntities.ToListAsync ( cancellationToken );
+			await AllEntities
+				.ToListAsync ( cancellationToken )
+				.ConfigureAwait ( false );
 
 		public override async Task<IEnumerable<CryptoCoinValue>> FindAsync (
 			Expression<Func<CryptoCoinValue, bool>> predicate, CancellationToken cancellationToken ) =>
-			await AllEntities.Where ( predicate ).ToListAsync ( cancellationToken );
+			await AllEntities
+				.Where ( predicate )
+				.ToListAsync ( cancellationToken )
+				.ConfigureAwait ( false );
 
 		public async Task<IEnumerable<CryptoCoinValue>> GetAllAsync (
 			CryptoCoinId coinId,
 			CancellationToken cancellationToken ) =>
 			await AllEntities
 				.Where ( x => x.CoinId == coinId )
-				.ToListAsync ( cancellationToken );
+				.ToListAsync ( cancellationToken )
+				.ConfigureAwait ( false );
 
 		public async Task<IEnumerable<CryptoCoinValue>> GetAllAsync (
 			CryptoExchangeId exchangeId,
 			CancellationToken cancellationToken ) =>
 			await AllEntities
 				.Where ( x => x.ExchangeId == exchangeId )
-				.ToListAsync ( cancellationToken );
+				.ToListAsync ( cancellationToken )
+				.ConfigureAwait ( false );
 
 		public async Task<IEnumerable<CryptoCoinValue>> GetAllAsync (
 			CryptoCoinId coinId,
@@ -49,7 +56,8 @@ namespace CryptoTickerBot.Data.Repositories
 			CancellationToken cancellationToken ) =>
 			await AllEntities
 				.Where ( x => x.CoinId == coinId && x.ExchangeId == exchangeId )
-				.ToListAsync ( cancellationToken );
+				.ToListAsync ( cancellationToken )
+				.ConfigureAwait ( false );
 
 		public async Task<IEnumerable<CryptoCoinValue>> GetAllAsync (
 			int count,
@@ -57,7 +65,8 @@ namespace CryptoTickerBot.Data.Repositories
 			await AllEntities
 				.OrderByDescending ( x => x.Time )
 				.Take ( count )
-				.ToListAsync ( cancellationToken );
+				.ToListAsync ( cancellationToken )
+				.ConfigureAwait ( false );
 
 		public async Task<IEnumerable<CryptoCoinValue>> GetLastAsync (
 			CryptoCoinId coinId,
@@ -67,7 +76,8 @@ namespace CryptoTickerBot.Data.Repositories
 				.Where ( x => x.CoinId == coinId )
 				.OrderByDescending ( x => x.Time )
 				.Take ( count )
-				.ToListAsync ( cancellationToken );
+				.ToListAsync ( cancellationToken )
+				.ConfigureAwait ( false );
 
 		public async Task<IEnumerable<CryptoCoinValue>> GetLastAsync (
 			CryptoExchangeId exchangeId,
@@ -77,7 +87,8 @@ namespace CryptoTickerBot.Data.Repositories
 				.Where ( x => x.ExchangeId == exchangeId )
 				.OrderByDescending ( x => x.Time )
 				.Take ( count )
-				.ToListAsync ( cancellationToken );
+				.ToListAsync ( cancellationToken )
+				.ConfigureAwait ( false );
 
 		public async Task<IEnumerable<CryptoCoinValue>> GetLastAsync (
 			CryptoCoinId coinId,
@@ -87,7 +98,8 @@ namespace CryptoTickerBot.Data.Repositories
 				.Where ( x => x.CoinId == coinId && x.ExchangeId == exchangeId )
 				.OrderByDescending ( x => x.Time )
 				.Take ( count )
-				.ToListAsync ( cancellationToken );
+				.ToListAsync ( cancellationToken )
+				.ConfigureAwait ( false );
 
 		public CryptoCoinValue AddCoinValue (
 			CryptoCoinId coinId,

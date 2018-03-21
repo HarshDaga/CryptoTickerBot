@@ -31,7 +31,7 @@ namespace CryptoTickerBot.Exchanges
 					var symbol = ticker.symbol;
 					try
 					{
-						var data = await ticker.url.GetJsonAsync ( ct );
+						var data = await ticker.url.GetJsonAsync ( ct ).ConfigureAwait ( false );
 
 						Update ( data, symbol );
 					}
@@ -41,7 +41,7 @@ namespace CryptoTickerBot.Exchanges
 							throw e.InnerException;
 					}
 
-					await Task.Delay ( 2000, ct );
+					await Task.Delay ( 2000, ct ).ConfigureAwait ( false );
 				}
 		}
 

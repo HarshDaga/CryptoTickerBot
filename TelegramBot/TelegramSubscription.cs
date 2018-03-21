@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading.Tasks;
 using CryptoTickerBot.Data.Domain;
 using CryptoTickerBot.Data.Enums;
 using CryptoTickerBot.Exchanges.Core;
@@ -15,7 +14,7 @@ namespace TelegramBot
 {
 	public class TelegramSubscription : CryptoExchangeSubscription
 	{
-		public delegate Task TelegramSubscriptionValueChangeNotificationDelegate (
+		public delegate void TelegramSubscriptionValueChangeNotificationDelegate (
 			TelegramSubscription subscription,
 			CryptoCoin prevPrice,
 			CryptoCoin newPrice

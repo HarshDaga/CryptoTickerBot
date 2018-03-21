@@ -21,7 +21,7 @@ namespace CryptoTickerBot.Exchanges
 
 			while ( !ct.IsCancellationRequested )
 			{
-				var data = await TickerUrl.GetJsonAsync<List<CoinDeltaCoin>> ( ct );
+				var data = await TickerUrl.GetJsonAsync<List<CoinDeltaCoin>> ( ct ).ConfigureAwait ( false );
 
 				foreach ( var datum in data )
 				{
@@ -30,7 +30,7 @@ namespace CryptoTickerBot.Exchanges
 						Update ( datum, marketname[0].ToUpper ( ) );
 				}
 
-				await Task.Delay ( 60000, ct );
+				await Task.Delay ( 60000, ct ).ConfigureAwait ( false );
 			}
 		}
 

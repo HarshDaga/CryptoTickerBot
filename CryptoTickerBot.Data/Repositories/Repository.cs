@@ -35,15 +35,15 @@ namespace CryptoTickerBot.Data.Repositories
 			AllEntities.Where ( predicate );
 
 		public virtual async Task<TEntity> GetAsync ( object id, CancellationToken cancellationToken ) =>
-			await Context.Set<TEntity> ( ).FindAsync ( cancellationToken, id );
+			await Context.Set<TEntity> ( ).FindAsync ( cancellationToken, id ).ConfigureAwait ( false );
 
 		public virtual async Task<IEnumerable<TEntity>> GetAllAsync ( CancellationToken cancellationToken ) =>
-			await AllEntities.ToListAsync ( cancellationToken );
+			await AllEntities.ToListAsync ( cancellationToken ).ConfigureAwait ( false );
 
 		public virtual async Task<IEnumerable<TEntity>> FindAsync (
 			Expression<Func<TEntity, bool>> predicate,
 			CancellationToken cancellationToken ) =>
-			await AllEntities.Where ( predicate ).ToListAsync ( cancellationToken );
+			await AllEntities.Where ( predicate ).ToListAsync ( cancellationToken ).ConfigureAwait ( false );
 
 		public virtual TEntity Add ( TEntity ccv ) =>
 			Context.Set<TEntity> ( ).Add ( ccv );

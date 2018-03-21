@@ -18,8 +18,9 @@ namespace TelegramBot.Extensions
 			int replyToMessageId = 0, IReplyMarkup replyMarkup = null,
 			CancellationToken cancellationToken = default ) =>
 			await bot.SendTextMessageAsync (
-				message.Chat.Id, text, parseMode,
-				disableWebPagePreview, disableNotification,
-				replyToMessageId, replyMarkup, cancellationToken );
+					message.Chat.Id, text, parseMode,
+					disableWebPagePreview, disableNotification,
+					replyToMessageId, replyMarkup, cancellationToken )
+				.ConfigureAwait ( false );
 	}
 }

@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Threading.Tasks;
 using CryptoTickerBot.WebSocket.Messages;
 using TelegramBot;
 using TelegramBot.Core;
@@ -44,13 +43,8 @@ namespace CryptoTickerBot.WebSocket.Services
 				sub.Updated -= SubOnUpdated;
 		}
 
-		public Task SubOnUpdated ( TelegramSubscription sub, CryptoCoin _, CryptoCoin __ ) =>
-			Task.Run ( ( ) =>
-				           Send (
-					           "TeleSubscriptionUpdates",
-					           new TeleBotSubscriptionSummary ( Bot, sub.Id )
-				           )
-			);
+		public void SubOnUpdated ( TelegramSubscription sub, CryptoCoin _, CryptoCoin __ ) =>
+			Send ( "TeleSubscriptionUpdates", new TeleBotSubscriptionSummary ( Bot, sub.Id ) );
 
 		#endregion
 
