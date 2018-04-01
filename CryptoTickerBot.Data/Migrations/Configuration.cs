@@ -41,7 +41,8 @@ namespace CryptoTickerBot.Data.Migrations
 				new CryptoCoin ( CryptoCoinId.BCD, "Bitcoin Diamond" ),
 				new CryptoCoin ( CryptoCoinId.IOT, "IOTA" ),
 				new CryptoCoin ( CryptoCoinId.DOGE, "Dogecoin" ),
-				new CryptoCoin ( CryptoCoinId.STEEM, "Steem" )
+				new CryptoCoin ( CryptoCoinId.STEEM, "Steem" ),
+				new CryptoCoin ( CryptoCoinId.QTUM, "Qtum" )
 			);
 
 			context.Exchanges.AddIfNotExists (

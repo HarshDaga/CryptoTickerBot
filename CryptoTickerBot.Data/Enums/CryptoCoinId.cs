@@ -23,6 +23,7 @@ namespace CryptoTickerBot.Data.Enums
 		BCD,
 		IOT,
 		DOGE,
-		STEEM
+		STEEM,
+		QTUM
 	}
 }
