@@ -104,8 +104,8 @@ namespace CryptoTickerBot.Exchanges
 
 				ws.OnMessage += WsOnMessage;
 
-				while ( ws.IsAlive )
-					await Task.Delay ( 100, ct ).ConfigureAwait ( false );
+				while ( ws.Ping ( ) )
+					await Task.Delay ( 60000, ct ).ConfigureAwait ( false );
 			}
 		}
 
