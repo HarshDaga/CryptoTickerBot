@@ -103,7 +103,10 @@ namespace CryptoTickerBot.Data.Domain
 			return lastSignificantPrice;
 		}
 
-		public void UpdateJson ( ) =>
-			LastSignificantPriceJson = JsonConvert.SerializeObject ( lastSignificantPrice.Values );
+		public void UpdateJson ( )
+		{
+			if ( lastSignificantPrice != null )
+				LastSignificantPriceJson = JsonConvert.SerializeObject ( lastSignificantPrice.Values );
+		}
 	}
 }
