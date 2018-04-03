@@ -5,6 +5,7 @@ using CryptoTickerBot.Data.Enums;
 using CryptoTickerBot.Exchanges.Core;
 using CryptoTickerBot.Extensions;
 using CryptoTickerBot.Helpers;
+using Newtonsoft.Json;
 using WebSocketSharp;
 using static Newtonsoft.Json.JsonConvert;
 
@@ -43,28 +44,27 @@ namespace CryptoTickerBot.Exchanges
 
 		private void Ws_OnMessage ( object sender, MessageEventArgs e )
 		{
-			var json = e.Data;
-			var data = DeserializeObject<dynamic> ( json );
+			var data = DeserializeObject<KoinexTickerDatum> ( e.Data );
 
-			var eventName = (string) data.@event;
-			if ( !eventName.EndsWith ( "_market_data" ) )
+			if ( !data.Event.EndsWith ( "_market_data" ) )
 				return;
 
-			var prefix = eventName.Substring ( 0, eventName.IndexOf ( "_market_data" ) );
+			var prefix = data.Event.Substring ( 0, data.Event.IndexOf ( "_market_data" ) );
 			if ( !ToSymBol.ContainsKey ( prefix ) )
 				return;
 			var symbol = ToSymBol[prefix];
 
-			Update ( DeserializeObject<dynamic> ( (string) data.data ).message.data, symbol );
+			Update ( DeserializeObject<MessageWrapper> ( data.Data ).Message.Data, symbol );
 		}
 
 		protected override void DeserializeData ( dynamic data, CryptoCoinId id )
 		{
+			var tikerData = (TickerData) data;
 			decimal InrToUsd ( decimal amount ) => FiatConverter.Convert ( amount, FiatCurrency.INR, FiatCurrency.USD );
 
-			ExchangeData[id].LowestAsk  = InrToUsd ( data.lowest_ask );
-			ExchangeData[id].HighestBid = InrToUsd ( data.highest_bid );
-			ExchangeData[id].Rate       = InrToUsd ( data.last_traded_price );
+			ExchangeData[id].LowestAsk  = InrToUsd ( tikerData.LowestAsk );
+			ExchangeData[id].HighestBid = InrToUsd ( tikerData.HighestBid );
+			ExchangeData[id].Rate       = InrToUsd ( tikerData.LastTradedPrice );
 		}
 
 		public static async Task ConnectAndSubscribe ( WebSocket ws, CancellationToken ct )
@@ -76,6 +76,51 @@ namespace CryptoTickerBot.Exchanges
 			foreach ( var name in ToSymBol.Keys )
 				await ws.SendStringAsync ( $"{{\"event\":\"pusher:subscribe\",\"data\":{{\"channel\":\"my-channel-{name}\"}}}}" )
 					.ConfigureAwait ( false );
+		}
+
+		private class KoinexTickerDatum
+		{
+			[JsonProperty ( "event" )]
+			public string Event { get; set; }
+
+			[JsonProperty ( "data" )]
+			public string Data { get; set; }
+
+			[JsonProperty ( "channel" )]
+			public string Channel { get; set; }
+		}
+
+		private class MessageWrapper
+		{
+			[JsonProperty ( "message" )]
+			public Message Message { get; set; }
+		}
+
+		private class Message
+		{
+			[JsonProperty ( "data" )]
+			public TickerData Data { get; set; }
+		}
+
+		private class TickerData
+		{
+			[JsonProperty ( "last_traded_price" )]
+			public decimal LastTradedPrice { get; set; }
+
+			[JsonProperty ( "lowest_ask" )]
+			public decimal LowestAsk { get; set; }
+
+			[JsonProperty ( "highest_bid" )]
+			public decimal HighestBid { get; set; }
+
+			[JsonProperty ( "min" )]
+			public decimal Min { get; set; }
+
+			[JsonProperty ( "max" )]
+			public decimal Max { get; set; }
+
+			[JsonProperty ( "vol" )]
+			public long Vol { get; set; }
 		}
 	}
 }

@@ -44,8 +44,7 @@ namespace CryptoTickerBot.Exchanges
 
 		private void Ws_OnMessage ( object sender, MessageEventArgs e )
 		{
-			var json = e.Data;
-			var data = DeserializeObject<dynamic> ( json );
+			var data = DeserializeObject<dynamic> ( e.Data );
 
 			var eventName = (string) data.@event;
 			if ( eventName != "trade" )

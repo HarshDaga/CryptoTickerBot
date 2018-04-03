@@ -22,6 +22,52 @@ namespace CryptoTickerBot.Exchanges
 		{
 		}
 
+		public override async Task GetExchangeData ( CancellationToken ct )
+		{
+			ExchangeData = new Dictionary<CryptoCoinId, CryptoCoin> ( );
+
+			using ( var ws = new WebSocket ( TickerUrl ) )
+			{
+				await Task.Run ( ( ) => ws.Connect ( ), ct ).ConfigureAwait ( false );
+
+				ws.OnMessage += WsOnMessage;
+
+				while ( ws.Ping ( ) )
+					await Task.Delay ( 60000, ct ).ConfigureAwait ( false );
+			}
+		}
+
+		private void WsOnMessage ( object sender, MessageEventArgs args )
+		{
+			try
+			{
+				var json = args.Data;
+				var data = JsonConvert.DeserializeObject<List<BinanceTickerDatum>> ( json );
+
+				foreach ( var datum in data )
+				{
+					var s = datum.Symbol;
+					if ( !s.EndsWith ( "USDT" ) ) continue;
+					var symbol = s.Replace ( "USDT", "" );
+					if ( symbol == "BCC" ) symbol = "BCH";
+					if ( !AllowedSymbols.Contains ( symbol ) ) continue;
+					Update ( datum, symbol );
+				}
+			}
+			catch ( Exception e )
+			{
+				Logger.Error ( e );
+			}
+		}
+
+		protected override void DeserializeData ( dynamic datum, CryptoCoinId id )
+		{
+			var d = (BinanceTickerDatum) datum;
+			ExchangeData[id].LowestAsk  = d.BestAskPrice;
+			ExchangeData[id].HighestBid = d.BestBidPrice;
+			ExchangeData[id].Rate       = d.WeightedAveragePrice;
+		}
+
 		private class BinanceTickerDatum
 		{
 			[JsonProperty ( "e" )]
@@ -92,52 +138,6 @@ namespace CryptoTickerBot.Exchanges
 
 			[JsonProperty ( "n" )]
 			public long NumberOfTrades { get; set; }
-		}
-
-		public override async Task GetExchangeData ( CancellationToken ct )
-		{
-			ExchangeData = new Dictionary<CryptoCoinId, CryptoCoin> ( );
-
-			using ( var ws = new WebSocket ( TickerUrl ) )
-			{
-				await Task.Run ( ( ) => ws.Connect ( ), ct ).ConfigureAwait ( false );
-
-				ws.OnMessage += WsOnMessage;
-
-				while ( ws.Ping ( ) )
-					await Task.Delay ( 60000, ct ).ConfigureAwait ( false );
-			}
-		}
-
-		private void WsOnMessage ( object sender, MessageEventArgs args )
-		{
-			try
-			{
-				var json = args.Data;
-				var data = JsonConvert.DeserializeObject<List<BinanceTickerDatum>> ( json );
-
-				foreach ( var datum in data )
-				{
-					var s = datum.Symbol;
-					if ( !s.EndsWith ( "USDT" ) ) continue;
-					var symbol = s.Replace ( "USDT", "" );
-					if ( symbol == "BCC" ) symbol = "BCH";
-					if ( !AllowedSymbols.Contains ( symbol ) ) continue;
-					Update ( datum, symbol );
-				}
-			}
-			catch ( Exception e )
-			{
-				Logger.Error ( e );
-			}
-		}
-
-		protected override void DeserializeData ( dynamic datum, CryptoCoinId id )
-		{
-			var d = (BinanceTickerDatum) datum;
-			ExchangeData[id].LowestAsk  = d.BestAskPrice;
-			ExchangeData[id].HighestBid = d.BestBidPrice;
-			ExchangeData[id].Rate       = d.WeightedAveragePrice;
 		}
 	}
 }
