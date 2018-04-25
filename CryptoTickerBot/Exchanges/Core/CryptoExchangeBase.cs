@@ -45,8 +45,8 @@ namespace CryptoTickerBot.Exchanges.Core
 		public bool IsStarted { get; protected set; }
 
 		public virtual bool IsComplete =>
-			KnownSymbols.Count == ExchangeData.Values
-				.Select ( x => $"{x.Id}" )
+			KnownSymbols.Count == ExchangeData.Keys
+				.Select ( x => $"{x}" )
 				.Intersect ( KnownSymbols )
 				.Count ( );
 
