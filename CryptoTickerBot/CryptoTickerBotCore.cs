@@ -29,7 +29,7 @@ namespace CryptoTickerBot
 				[CryptoExchangeId.CoinDelta] = new CoinDeltaExchange ( ),
 				[CryptoExchangeId.Koinex]    = new KoinexExchange ( ),
 				[CryptoExchangeId.Kraken]    = new KrakenExchange ( ),
-				[CryptoExchangeId.Zebpay]    = new ZebpayExchange ( )
+				//[CryptoExchangeId.Zebpay]    = new ZebpayExchange ( )
 			};
 
 		private Timer fiatMonitor;
