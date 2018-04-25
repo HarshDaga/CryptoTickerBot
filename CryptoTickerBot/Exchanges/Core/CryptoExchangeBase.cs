@@ -43,7 +43,13 @@ namespace CryptoTickerBot.Exchanges.Core
 		public decimal BuyFees { get; }
 		public decimal SellFees { get; }
 		public bool IsStarted { get; protected set; }
-		public virtual bool IsComplete => ExchangeData.Count == KnownSymbols.Count;
+
+		public virtual bool IsComplete =>
+			KnownSymbols.Count == ExchangeData.Values
+				.Select ( x => $"{x.Id}" )
+				.Intersect ( KnownSymbols )
+				.Count ( );
+
 		public DateTime StartTime { get; private set; }
 		public TimeSpan UpTime => DateTime.UtcNow - StartTime;
 		public DateTime LastUpdate { get; protected set; }
@@ -159,6 +165,7 @@ namespace CryptoTickerBot.Exchanges.Core
 		[Pure]
 		public List<IList<object>> ToSheetRows ( ) =>
 			ExchangeData.Values
+				.Where ( coin => KnownSymbols.Contains ( coin.Id.ToString ( ) ) )
 				.OrderBy ( coin => coin.Id )
 				.Select ( coin => coin.ToSheetsRow ( ) )
 				.ToList ( );
