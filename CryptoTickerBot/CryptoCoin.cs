@@ -19,7 +19,7 @@ namespace CryptoTickerBot
 		public decimal Average => ( BuyPrice + SellPrice ) / 2;
 		public decimal Rate { get; set; }
 		public decimal Spread => BuyPrice - SellPrice;
-		public decimal SpreadPercentange => Spread / ( BuyPrice + SellPrice ) * 2;
+		public decimal SpreadPercentange => Average != 0 ? Spread / Average : 0;
 		public DateTime Time { get; set; }
 
 		public CryptoCoin (
