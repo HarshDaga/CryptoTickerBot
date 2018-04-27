@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Data.Enums;
@@ -15,7 +16,7 @@ namespace CryptoTickerBot.Exchanges
 
 		public override async Task GetExchangeData ( CancellationToken ct )
 		{
-			ExchangeData = new Dictionary<CryptoCoinId, CryptoCoin> ( );
+			ExchangeData = new ConcurrentDictionary<CryptoCoinId, CryptoCoin> ( );
 
 			var tickers = new List<(string symbol, string url)>
 			{

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -18,7 +19,7 @@ namespace CryptoTickerBot.Exchanges
 
 		public override async Task GetExchangeData ( CancellationToken ct )
 		{
-			ExchangeData = new Dictionary<CryptoCoinId, CryptoCoin> ( );
+			ExchangeData = new ConcurrentDictionary<CryptoCoinId, CryptoCoin> ( );
 
 			using ( var ws = new WebSocket ( TickerUrl ) )
 			{

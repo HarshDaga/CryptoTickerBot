@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -36,7 +37,7 @@ namespace CryptoTickerBot.Exchanges.Core
 		public string Url { get; }
 		public string TickerUrl { get; }
 		public CryptoExchangeId Id { get; }
-		public Dictionary<CryptoCoinId, CryptoCoin> ExchangeData { get; protected set; }
+		public IDictionary<CryptoCoinId, CryptoCoin> ExchangeData { get; protected set; }
 		protected ImmutableHashSet<IObserver<CryptoCoin>> Observers { get; set; }
 		public Dictionary<CryptoCoinId, decimal> DepositFees { get; }
 		public Dictionary<CryptoCoinId, decimal> WithdrawalFees { get; }
@@ -46,6 +47,7 @@ namespace CryptoTickerBot.Exchanges.Core
 
 		public virtual bool IsComplete =>
 			KnownSymbols.Count == ExchangeData.Keys
+				.ToList ( )
 				.Select ( x => $"{x}" )
 				.Intersect ( KnownSymbols )
 				.Count ( );
@@ -67,7 +69,7 @@ namespace CryptoTickerBot.Exchanges.Core
 
 		protected CryptoExchangeBase ( CryptoExchangeId id )
 		{
-			ExchangeData = new Dictionary<CryptoCoinId, CryptoCoin> ( );
+			ExchangeData = new ConcurrentDictionary<CryptoCoinId, CryptoCoin> ( );
 			Observers    = ImmutableHashSet<IObserver<CryptoCoin>>.Empty;
 			Id           = id;
 
