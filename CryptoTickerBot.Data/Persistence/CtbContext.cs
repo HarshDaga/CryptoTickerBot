@@ -19,7 +19,9 @@ namespace CryptoTickerBot.Data.Persistence
 		public DbSet<TeleSubscription> TeleSubscriptions { get; set; }
 
 		public CtbContext ( )
-			: base ( "name=DefaultConnection" )
+			: base (
+				$"data source=.\\{Settings.Instance.DataSource}; initial catalog={Settings.Instance.InitialCatalog}; integrated security={Settings.Instance.IntegratedSecurity}"
+			)
 		{
 			Database.Log = Logger.Trace;
 			Database.SetInitializer (

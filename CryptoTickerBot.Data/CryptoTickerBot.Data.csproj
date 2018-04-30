@@ -113,6 +113,7 @@
     <Compile Include="Repositories\TeleBotUserRepository.cs" />
     <Compile Include="Repositories\TeleSubscriptionRepository.cs" />
     <Compile Include="Persistence\UnitOfWork.cs" />
+    <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
