@@ -159,7 +159,7 @@ namespace CryptoTickerBot.Data.Migrations
 					CryptoExchangeId.Koinex,
 					"Koinex",
 					"https://koinex.in/",
-					"wss://ws-ap2.pusher.com/app/9197b0bfdf3f71a4064e?protocol=7&client=js&version=4.1.0&flash=false",
+					"https://koinex.in/api/ticker",
 					0.25m,
 					withdrawalFees: new Dictionary<CryptoCoinId, decimal>
 					{

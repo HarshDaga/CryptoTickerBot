@@ -1,28 +1,21 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Data.Enums;
 using CryptoTickerBot.Exchanges.Core;
-using CryptoTickerBot.Extensions;
 using CryptoTickerBot.Helpers;
 using Newtonsoft.Json;
-using WebSocketSharp;
+using NLog;
 using static Newtonsoft.Json.JsonConvert;
-
-// ReSharper disable StringIndexOfIsCultureSpecific.1
+using static CryptoTickerBot.Helpers.Utility;
 
 namespace CryptoTickerBot.Exchanges
 {
 	public class KoinexExchange : CryptoExchangeBase
 	{
-		private static readonly Dictionary<string, string> ToSymBol = new Dictionary<string, string>
-		{
-			["bitcoin"]      = "BTC",
-			["bitcoin_cash"] = "BCH",
-			["ether"]        = "ETH",
-			["litecoin"]     = "LTC"
-		};
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
 		public KoinexExchange ( ) : base ( CryptoExchangeId.Koinex )
 		{
@@ -32,96 +25,171 @@ namespace CryptoTickerBot.Exchanges
 		{
 			ExchangeData = new ConcurrentDictionary<CryptoCoinId, CryptoCoin> ( );
 
-			using ( var ws = new WebSocket ( TickerUrl ) )
+			while ( !ct.IsCancellationRequested )
 			{
-				await ConnectAndSubscribe ( ws, ct ).ConfigureAwait ( false );
+				try
+				{
+					var json = DownloadWebPage ( TickerUrl );
+					var data = DeserializeObject<Root> ( json );
 
-				ws.OnMessage += Ws_OnMessage;
+					Update ( data.Stats.Inr.Btc, "BTC" );
+					Update ( data.Stats.Inr.Bch, "BCH" );
+					Update ( data.Stats.Inr.Eth, "ETH" );
+					Update ( data.Stats.Inr.Ltc, "LTC" );
+				}
+				catch ( Exception e )
+				{
+					Logger.Error ( e );
+				}
 
-				while ( ws.Ping ( ) )
-					await Task.Delay ( 60000, ct ).ConfigureAwait ( false );
+				await Task.Delay ( 2000, ct ).ConfigureAwait ( false );
 			}
-		}
-
-		private void Ws_OnMessage ( object sender, MessageEventArgs e )
-		{
-			var data = DeserializeObject<KoinexTickerDatum> ( e.Data );
-
-			if ( !data.Event.EndsWith ( "_market_data" ) )
-				return;
-
-			var prefix = data.Event.Substring ( 0, data.Event.IndexOf ( "_market_data" ) );
-			if ( !ToSymBol.ContainsKey ( prefix ) )
-				return;
-			var symbol = ToSymBol[prefix];
-
-			Update ( DeserializeObject<MessageWrapper> ( data.Data ).Message.Data, symbol );
 		}
 
 		protected override void DeserializeData ( dynamic data, CryptoCoinId id )
 		{
-			var tikerData = (TickerData) data;
+			var stats = (CoinStats) data;
 			decimal InrToUsd ( decimal amount ) => FiatConverter.Convert ( amount, FiatCurrency.INR, FiatCurrency.USD );
 
-			ExchangeData[id].LowestAsk  = InrToUsd ( tikerData.LowestAsk );
-			ExchangeData[id].HighestBid = InrToUsd ( tikerData.HighestBid );
-			ExchangeData[id].Rate       = InrToUsd ( tikerData.LastTradedPrice );
+			ExchangeData[id].LowestAsk  = InrToUsd ( stats.LowestAsk ?? 0 );
+			ExchangeData[id].HighestBid = InrToUsd ( stats.HighestBid ?? 0 );
+			ExchangeData[id].Rate       = InrToUsd ( stats.LastTradedPrice ?? 0 );
 		}
 
-		public static async Task ConnectAndSubscribe ( WebSocket ws, CancellationToken ct )
-		{
-			ws.ConnectAsync ( );
-			while ( ws.ReadyState == WebSocketState.Connecting )
-				await Task.Delay ( 1, ct ).ConfigureAwait ( false );
+		#region JSON Structure
 
-			foreach ( var name in ToSymBol.Keys )
-				await ws.SendStringAsync ( $"{{\"event\":\"pusher:subscribe\",\"data\":{{\"channel\":\"my-channel-{name}\"}}}}" )
-					.ConfigureAwait ( false );
+		public class Root
+		{
+			[JsonProperty ( "prices" )]
+			public Prices Prices { get; set; }
+
+			[JsonProperty ( "stats" )]
+			public Stats Stats { get; set; }
 		}
 
-		private class KoinexTickerDatum
+		public class Prices
 		{
-			[JsonProperty ( "event" )]
-			public string Event { get; set; }
+			[JsonProperty ( "inr" )]
+			public Dictionary<string, decimal> Inr { get; set; }
 
-			[JsonProperty ( "data" )]
-			public string Data { get; set; }
+			[JsonProperty ( "bitcoin" )]
+			public Dictionary<string, decimal> Bitcoin { get; set; }
 
-			[JsonProperty ( "channel" )]
-			public string Channel { get; set; }
+			[JsonProperty ( "ether" )]
+			public Dictionary<string, decimal> Ether { get; set; }
+
+			[JsonProperty ( "ripple" )]
+			public Dictionary<string, decimal> Ripple { get; set; }
 		}
 
-		private class MessageWrapper
+		public class Stats
 		{
-			[JsonProperty ( "message" )]
-			public Message Message { get; set; }
+			[JsonProperty ( "inr" )]
+			public AllCoinStats Inr { get; set; }
+
+			[JsonProperty ( "bitcoin" )]
+			public AllCoinStats Bitcoin { get; set; }
+
+			[JsonProperty ( "ether" )]
+			public AllCoinStats Ether { get; set; }
+
+			[JsonProperty ( "ripple" )]
+			public AllCoinStats Ripple { get; set; }
 		}
 
-		private class Message
+		public class CoinStats
 		{
-			[JsonProperty ( "data" )]
-			public TickerData Data { get; set; }
-		}
+			[JsonProperty ( "currency_full_form" )]
+			public string CurrencyFullForm { get; set; }
 
-		private class TickerData
-		{
+			[JsonProperty ( "currency_short_form" )]
+			public string CurrencyShortForm { get; set; }
+
+			[JsonProperty ( "per_change" )]
+			public decimal? PerChange { get; set; }
+
 			[JsonProperty ( "last_traded_price" )]
-			public decimal LastTradedPrice { get; set; }
+			public decimal? LastTradedPrice { get; set; }
 
 			[JsonProperty ( "lowest_ask" )]
-			public decimal LowestAsk { get; set; }
+			public decimal? LowestAsk { get; set; }
 
 			[JsonProperty ( "highest_bid" )]
-			public decimal HighestBid { get; set; }
+			public decimal? HighestBid { get; set; }
 
-			[JsonProperty ( "min" )]
-			public decimal Min { get; set; }
+			[JsonProperty ( "min_24hrs" )]
+			public decimal? Min24Hrs { get; set; }
 
-			[JsonProperty ( "max" )]
-			public decimal Max { get; set; }
+			[JsonProperty ( "max_24hrs" )]
+			public decimal? Max24Hrs { get; set; }
 
-			[JsonProperty ( "vol" )]
-			public long Vol { get; set; }
+			[JsonProperty ( "vol_24hrs" )]
+			public decimal? Vol24Hrs { get; set; }
 		}
+
+		public class AllCoinStats
+		{
+			[JsonProperty ( "ETH" )]
+			public CoinStats Eth { get; set; }
+
+			[JsonProperty ( "BTC" )]
+			public CoinStats Btc { get; set; }
+
+			[JsonProperty ( "LTC" )]
+			public CoinStats Ltc { get; set; }
+
+			[JsonProperty ( "XRP" )]
+			public CoinStats Xrp { get; set; }
+
+			[JsonProperty ( "BCH" )]
+			public CoinStats Bch { get; set; }
+
+			[JsonProperty ( "OMG" )]
+			public CoinStats Omg { get; set; }
+
+			[JsonProperty ( "REQ" )]
+			public CoinStats Req { get; set; }
+
+			[JsonProperty ( "ZRX" )]
+			public CoinStats Zrx { get; set; }
+
+			[JsonProperty ( "GNT" )]
+			public CoinStats Gnt { get; set; }
+
+			[JsonProperty ( "BAT" )]
+			public CoinStats Bat { get; set; }
+
+			[JsonProperty ( "AE" )]
+			public CoinStats Ae { get; set; }
+
+			[JsonProperty ( "TRX" )]
+			public CoinStats Trx { get; set; }
+
+			[JsonProperty ( "XLM" )]
+			public CoinStats Xlm { get; set; }
+
+			[JsonProperty ( "NEO" )]
+			public CoinStats Neo { get; set; }
+
+			[JsonProperty ( "GAS" )]
+			public CoinStats Gas { get; set; }
+
+			[JsonProperty ( "XRB" )]
+			public CoinStats Xrb { get; set; }
+
+			[JsonProperty ( "NCASH" )]
+			public CoinStats Ncash { get; set; }
+
+			[JsonProperty ( "AION" )]
+			public CoinStats Aion { get; set; }
+
+			[JsonProperty ( "EOS" )]
+			public CoinStats Eos { get; set; }
+
+			[JsonProperty ( "ONT" )]
+			public CoinStats Ont { get; set; }
+		}
+
+		#endregion
 	}
 }

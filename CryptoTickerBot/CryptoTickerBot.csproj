@@ -102,6 +102,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CryptoTickerBotCore.cs" />
+    <Compile Include="Helpers\Utility.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Exchanges\BinanceExchange.cs" />
     <Compile Include="Exchanges\ZebpayExchange.cs" />

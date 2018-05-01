@@ -22,13 +22,13 @@ namespace CryptoTickerBot
 		public readonly IDictionary<CryptoExchangeId, CryptoExchangeBase> Exchanges =
 			new ConcurrentDictionary<CryptoExchangeId, CryptoExchangeBase>
 			{
-				[CryptoExchangeId.Binance]   = new BinanceExchange ( ),
-				[CryptoExchangeId.BitBay]    = new BitBayExchange ( ),
-				[CryptoExchangeId.Bitstamp]  = new BitstampExchange ( ),
-				[CryptoExchangeId.Coinbase]  = new CoinbaseExchange ( ),
-				[CryptoExchangeId.CoinDelta] = new CoinDeltaExchange ( ),
-				[CryptoExchangeId.Koinex]    = new KoinexExchange ( ),
-				[CryptoExchangeId.Kraken]    = new KrakenExchange ( ),
+				//[CryptoExchangeId.Binance]   = new BinanceExchange ( ),
+				//[CryptoExchangeId.BitBay]    = new BitBayExchange ( ),
+				//[CryptoExchangeId.Bitstamp]  = new BitstampExchange ( ),
+				//[CryptoExchangeId.Coinbase]  = new CoinbaseExchange ( ),
+				//[CryptoExchangeId.CoinDelta] = new CoinDeltaExchange ( ),
+				[CryptoExchangeId.Koinex] = new KoinexExchange(),
+				//[CryptoExchangeId.Kraken]    = new KrakenExchange ( ),
 				//[CryptoExchangeId.Zebpay]    = new ZebpayExchange ( )
 			};
 
