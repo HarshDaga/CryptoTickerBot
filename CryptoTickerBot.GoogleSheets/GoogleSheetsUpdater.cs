@@ -182,7 +182,7 @@ namespace CryptoTickerBot.GoogleSheets
 				var id = pendingUpdates.First ( );
 				pendingUpdates = pendingUpdates.Remove ( id );
 				var exchange = Ctb.Exchanges[id];
-				if ( !exchange.IsComplete )
+				if ( !exchange.IsComplete && SheetsRanges.ContainsKey ( exchange.Id ) )
 				{
 					Logger.Warn (
 						$"Sheets not updated for {id}. Only {exchange.ExchangeData.Count} coins updated." +
