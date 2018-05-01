@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Newtonsoft.Json;
+using NLog;
 
 // ReSharper disable CollectionNeverUpdated.Global
 
@@ -18,6 +19,8 @@ namespace CryptoTickerBot
 			Instance = new Settings ( );
 			Load ( );
 			Save ( );
+
+			LogManager.Configuration.Variables["DataSource"] = Data.Settings.Instance.DataSource;
 		}
 
 		private Settings ( )

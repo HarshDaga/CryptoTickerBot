@@ -12,6 +12,8 @@ namespace CryptoTickerBot
 			AppDomain.CurrentDomain.UnhandledException += ( sender, args ) =>
 				Logger.Error ( args );
 
+			LogManager.Configuration.Variables["DataSource"] = Data.Settings.Instance.DataSource;
+
 			Console.Title = "Crypto Ticker Bot";
 			Logger.Info ( "Started Crypto Ticker Bot" );
 

@@ -2,6 +2,7 @@
 using System.IO;
 using CryptoTickerBot.Data.Enums;
 using Newtonsoft.Json;
+using NLog;
 
 // ReSharper disable CollectionNeverUpdated.Global
 
@@ -20,6 +21,8 @@ namespace CryptoTickerBot.GoogleSheets
 			Instance = new Settings ( );
 			Load ( );
 			Save ( );
+
+			LogManager.Configuration.Variables["DataSource"] = Data.Settings.Instance.DataSource;
 		}
 
 		private Settings ( )

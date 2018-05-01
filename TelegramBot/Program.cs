@@ -15,6 +15,9 @@ namespace TelegramBot
 			AppDomain.CurrentDomain.UnhandledException += ( sender, args ) =>
 				Logger.Error ( args );
 
+			LogManager.Configuration.Variables["DataSource"] =
+				CryptoTickerBot.Data.Settings.Instance.DataSource;
+
 			Console.Title = "Crypto Ticker Telegram Bot";
 
 			var ctb = CryptoTickerBotCore.CreateAndStart ( );

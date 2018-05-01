@@ -19,6 +19,8 @@ namespace CryptoTickerBot.WebSocket
 			AppDomain.CurrentDomain.UnhandledException += ( sender, args ) =>
 				Logger.Error ( args );
 
+			LogManager.Configuration.Variables["DataSource"] = Data.Settings.Instance.DataSource;
+
 			Console.Title = "Crypto Ticker Bot";
 
 			var ctb = CryptoTickerBotCore.CreateAndStart ( );

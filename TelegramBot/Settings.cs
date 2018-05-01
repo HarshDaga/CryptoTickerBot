@@ -2,6 +2,7 @@
 using System.IO;
 using CryptoTickerBot.Data.Enums;
 using Newtonsoft.Json;
+using NLog;
 
 namespace TelegramBot
 {
@@ -18,6 +19,8 @@ namespace TelegramBot
 			Instance = new Settings ( );
 			Load ( );
 			Save ( );
+
+			LogManager.Configuration.Variables["DataSource"] = CryptoTickerBot.Data.Settings.Instance.DataSource;
 		}
 
 		private Settings ( )

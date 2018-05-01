@@ -2,6 +2,7 @@
 using System.IO;
 using CryptoTickerBot.Data.Enums;
 using Newtonsoft.Json;
+using NLog;
 
 namespace CryptoTickerBot.WebSocket
 {
@@ -18,6 +19,8 @@ namespace CryptoTickerBot.WebSocket
 			Instance = new Settings ( );
 			Load ( );
 			Save ( );
+
+			LogManager.Configuration.Variables["DataSource"] = Data.Settings.Instance.DataSource;
 		}
 
 		private Settings ( )
