@@ -67,7 +67,7 @@ namespace CryptoTickerBot.Helpers
 
 		public static Timer StartMonitor ( )
 		{
-			var timer = new Timer ( 60 * 60 * 100 );
+			var timer = new Timer ( TimeSpan.FromDays ( 1 ).TotalMilliseconds );
 			FetchRates ( );
 			timer.Elapsed += ( sender,
 			                   args ) => Task.Run ( ( ) =>
