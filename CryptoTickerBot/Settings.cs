@@ -43,7 +43,7 @@ namespace CryptoTickerBot
 		}
 
 		#region Properties
-
+		public string FixerApiKey { get; set; }
 		#endregion Properties
 	}
 }
