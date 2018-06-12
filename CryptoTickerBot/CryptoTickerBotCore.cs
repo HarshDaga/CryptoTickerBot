@@ -97,9 +97,9 @@ namespace CryptoTickerBot
 		{
 			foreach ( var exchange in Exchanges.Values )
 			{
-				exchange.Next    += UpdateExchangeLastUpdateInDb;
+				//exchange.Next    += UpdateExchangeLastUpdateInDb;
 				exchange.Changed += ( e, coin ) => Logger.Debug ( $"{e.Name,-10} {e[coin.Id]}" );
-				exchange.Changed += StoreCoinValueInDb;
+				//exchange.Changed += StoreCoinValueInDb;
 
 				CompareTable.AddExchange ( exchange );
 
