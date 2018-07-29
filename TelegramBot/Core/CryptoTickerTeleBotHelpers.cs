@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Data.Domain;
 using CryptoTickerBot.Data.Enums;
@@ -148,11 +149,21 @@ namespace TelegramBot.Core
 			);
 		}
 
-		private void AddAlert ( Message message,
-		                        CryptoExchangeBase exchange,
-		                        CryptoCoinId coinId,
-		                        decimal price )
+		private async Task AddAlert ( Message message,
+		                              CryptoExchangeBase exchange,
+		                              CryptoCoinId coinId,
+		                              decimal price )
 		{
+			await Task.Run ( ( ) => SpinWait.SpinUntil ( ( ) => exchange.ExchangeData.ContainsKey ( coinId ),
+			                                             TimeSpan.FromSeconds ( 30 ) ) );
+			if ( !exchange.ExchangeData.ContainsKey ( coinId ) )
+			{
+				await SendBlockText (
+					message,
+					$"ERROR: {exchange.Name} does not have any data for {coinId}"
+				).ConfigureAwait ( false );
+			}
+
 			var alert = new TelegramPriceAlert ( exchange, message.Chat.Id,
 			                                     message.From.Username, price, coinId );
 			alert.Triggered += SendPriceAlertReply;
