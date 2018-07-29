@@ -93,7 +93,7 @@ namespace TelegramBot.Core
 				return;
 			}
 
-			AddAlert ( message, exchange, coinIds.First ( ), price );
+			await AddAlert ( message, exchange, coinIds.First ( ), price );
 
 			await SendBlockText (
 				message,
@@ -357,7 +357,7 @@ namespace TelegramBot.Core
 					var query = Users
 						.OfRole ( value )
 						.OrderBy ( x => x.Created )
-						.Select ( x => $"{x.Id,-10} {x.UserName}" );
+						.Select ( x => $"{x.Id,-10} {x.UserName,-20} {x.FirstName} {x.LastName}" );
 					await SendBlockText (
 						message,
 						$"{value} List:\n{query.Join ( "\n" )}"
@@ -379,12 +379,28 @@ namespace TelegramBot.Core
 			var list = Users
 				.OfRole ( role )
 				.OrderBy ( x => x.Created )
-				.Select ( x => $"{x.Id,-10} {x.UserName}" );
+				.Select ( x => $"{x.Id,-10} {x.UserName,-20} {x.FirstName} {x.LastName}" );
 
 			await SendBlockText (
 				message,
 				$"{role} List:\n{list.Join ( "\n" )}"
 			).ConfigureAwait ( false );
+		}
+
+		private async Task HandleWhoAmI ( Message message,
+		                                  IList<string> @params )
+		{
+			var x = message.From;
+			var current = $"{x.Id,-10} {x.Username,-20} {x.FirstName} {x.LastName}";
+
+			var tbu = UnitOfWork.Get ( unit => unit.Users.Get ( x.Id ) );
+			TelegramBotUser user = tbu ?? new TelegramBotUser ( x );
+			Users.AddOrUpdate ( user );
+			UnitOfWork.Do ( unit => unit.Users.AddOrUpdate ( user ) );
+
+			Logger.Info ( $"whoami requested by {current}" );
+
+			await SendBlockText ( message, $"{user.Role} {current}" ).ConfigureAwait ( false );
 		}
 
 		private async Task HandleKill ( Message message,

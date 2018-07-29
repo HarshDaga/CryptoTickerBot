@@ -64,6 +64,7 @@ namespace TelegramBot.Core
 					["/subscribe"]   = ( UserRole.Registered, HandleSubscribe ),
 					["/unsubscribe"] = ( UserRole.Registered, HandleUnsubscribe ),
 					["/alert"]       = ( UserRole.Registered, HandleAlert ),
+					["/whoami"]       = ( UserRole.Registered, HandleWhoAmI ),
 					["/restart"]     = ( UserRole.Admin, HandleRestart ),
 					["/users"]       = ( UserRole.Admin, HandleUsers ),
 					["/kill"]        = ( UserRole.Admin, HandleKill ),
