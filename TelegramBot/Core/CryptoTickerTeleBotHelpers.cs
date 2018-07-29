@@ -20,9 +20,13 @@ namespace TelegramBot.Core
 	public partial class TeleBot
 	{
 		private readonly object subscriptionLock = new object ( );
+		private readonly object alertLock = new object ( );
 		public List<TelegramSubscription> Subscriptions { get; private set; }
+		public List<TelegramPriceAlert> Alerts { get; private set; }
 
-		private void ParseMessage ( Message message, out string command, out List<string> parameters )
+		private void ParseMessage ( Message message,
+		                            out string command,
+		                            out List<string> parameters )
 		{
 			var text = message.Text;
 			command = text.Split ( ' ' ).First ( );
@@ -34,7 +38,9 @@ namespace TelegramBot.Core
 				.ToList ( );
 		}
 
-		private async Task<bool> ValidateUserCommand ( User from, string command, Message message )
+		private async Task<bool> ValidateUserCommand ( User from,
+		                                               string command,
+		                                               Message message )
 		{
 			if ( !Users.Contains ( from.Id ) )
 			{
@@ -62,7 +68,8 @@ namespace TelegramBot.Core
 		}
 
 		[DebuggerStepThrough]
-		private async Task SendBlockText ( Message message, string str )
+		private async Task SendBlockText ( Message message,
+		                                   string str )
 		{
 			await bot.SendTextMessageAsync ( message.Chat.Id, $"```\n{str}\n```", ParseMode.Markdown )
 				.ConfigureAwait ( false );
@@ -117,11 +124,62 @@ namespace TelegramBot.Core
 			return Task.CompletedTask;
 		}
 
-		private void StartSubscription ( CryptoExchangeBase exchange, TeleSubscription sub )
+		private void SendPriceAlertReply (
+			TelegramPriceAlert subscription,
+			CryptoCoin oldValue,
+			CryptoCoin newValue
+		)
+		{
+			if ( oldValue is null )
+				return;
+
+			var change = newValue - oldValue;
+			var builder = new StringBuilder ( );
+			builder
+				.AppendLine ( $"{subscription.Exchange.Name,-14} {newValue.Symbol}" )
+				.AppendLine ( $"Current Price: {subscription.Exchange[newValue.Id].Average:C}" )
+				.AppendLine ( $"Change:        {change.Value.ToCurrency ( )}" )
+				.AppendLine ( $"Change %:      {change.Percentage:P}" )
+				.AppendLine ( $"in {change.TimeDiff:dd\\:hh\\:mm\\:ss}" );
+
+			bot.SendTextMessageAsync (
+				subscription.ChatId,
+				$"```\n{builder}\n```", ParseMode.Markdown
+			);
+		}
+
+		private void AddAlert ( Message message,
+		                        CryptoExchangeBase exchange,
+		                        CryptoCoinId coinId,
+		                        decimal price )
+		{
+			var alert = new TelegramPriceAlert ( exchange, message.Chat.Id,
+			                                     message.From.Username, price, coinId );
+			alert.Triggered += SendPriceAlertReply;
+			alert.Triggered += ( priceAlert,
+			                     prevPrice,
+			                     newPrice ) =>
+			{
+				priceAlert.Dispose ( );
+				Alerts.Remove ( priceAlert );
+			};
+			exchange.Subscribe ( alert );
+			lock ( alertLock )
+			{
+				if ( Alerts is null )
+					Alerts = new List<TelegramPriceAlert> ( );
+				Alerts.Add ( alert );
+			}
+		}
+
+		private void StartSubscription ( CryptoExchangeBase exchange,
+		                                 TeleSubscription sub )
 		{
 			var subscription = new TelegramSubscription ( exchange, sub );
 			subscription.Changed += SendSubscriptionReply;
-			subscription.Changed += async ( s, o, n ) => await UpdateSubscriptionInDb ( s, n ).ConfigureAwait ( false );
+			subscription.Changed += async ( s,
+			                                o,
+			                                n ) => await UpdateSubscriptionInDb ( s, n ).ConfigureAwait ( false );
 			exchange.Subscribe ( subscription );
 			lock ( subscriptionLock )
 				Subscriptions.Add ( subscription );
@@ -236,7 +294,8 @@ namespace TelegramBot.Core
 		) =>
 			from.Aggregate (
 				new List<CryptoCoinId> ( ),
-				( current, to ) =>
+				( current,
+				  to ) =>
 					current.Union ( to.Keys )
 						.OrderBy ( x => x )
 						.ToList ( )

@@ -76,6 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\CryptoTickerTeleBotCommands.cs" />
+    <Compile Include="TelegramPriceAlert.cs" />
     <Compile Include="TelegramSubscription.cs" />
     <Compile Include="Core\CryptoTickerTeleBotHelpers.cs" />
     <Compile Include="Core\CryptoTickerTeleBotCore.cs" />

@@ -66,7 +66,7 @@ namespace CryptoTickerBot.Exchanges
 			var d = (BinanceTickerDatum) datum;
 			ExchangeData[id].LowestAsk  = d.BestAskPrice;
 			ExchangeData[id].HighestBid = d.BestBidPrice;
-			ExchangeData[id].Rate       = d.WeightedAveragePrice;
+			ExchangeData[id].Rate       = d.TodaysClosePrice;
 		}
 
 		private class BinanceTickerDatum

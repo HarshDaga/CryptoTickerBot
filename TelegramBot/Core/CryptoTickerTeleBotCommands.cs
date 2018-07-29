@@ -8,11 +8,14 @@ using CryptoTickerBot;
 using CryptoTickerBot.Data.Enums;
 using CryptoTickerBot.Data.Extensions;
 using CryptoTickerBot.Data.Persistence;
+using CryptoTickerBot.Exchanges.Core;
 using CryptoTickerBot.Extensions;
 using CryptoTickerBot.Helpers;
 using Tababular;
 using Telegram.Bot.Types;
 using TelegramBot.Extensions;
+
+// ReSharper disable AssignNullToNotNullAttribute
 
 // ReSharper disable UnusedParameter.Local
 
@@ -23,33 +26,25 @@ namespace TelegramBot.Core
 		public DateTime StartTime { get; } = DateTime.UtcNow;
 		public TimeSpan UpTime => DateTime.UtcNow - StartTime;
 
-		private async Task HandleSubscribe ( Message message, IList<string> @params )
+		private async Task<(CryptoExchangeBase exchange, List<CryptoCoinId> coinIds)> GetExchangeAndCoins (
+			Message message,
+			IList<string> @params )
 		{
 			// Check exchange name
-			var chosen = @params
+			var exchange = @params
 				.Where ( x => GetExchangeBase ( x ) != null )
 				.Select ( GetExchangeBase )
 				.FirstOrDefault ( );
 
-			if ( chosen == null )
+			if ( exchange == null )
 			{
 				await SendBlockText ( message, "No exchanges provided." ).ConfigureAwait ( false );
 				await SendBlockText ( message,
 				                      "Supported Exchanges:\n" +
 				                      $"{Exchanges.Select ( e => e.Value.Name ).Join ( "\n" )}"
 				).ConfigureAwait ( false );
-				return;
+				return default;
 			}
-
-			// Check threshold value
-			var threshold = 0.05m;
-			var thresholdString = @params
-				.FirstOrDefault ( x => decimal.TryParse ( x.Trim ( '%' ), out var _ ) );
-			if ( !string.IsNullOrEmpty ( thresholdString ) )
-				threshold = decimal.Parse ( thresholdString ) / 100m;
-			else
-				await SendBlockText ( message, $"No threshold provided, setting to default {threshold:P}" )
-					.ConfigureAwait ( false );
 
 			// Check coin symbols
 			var supported = CryptoTickerBotCore.SupportedCoins;
@@ -60,19 +55,83 @@ namespace TelegramBot.Core
 				)
 				.Select ( x => x.Id )
 				.ToList ( );
+
+			return ( exchange, coinIds );
+		}
+
+		private async Task HandleAlert ( Message message,
+		                                 IList<string> @params )
+		{
+			var (exchange, coinIds) = await GetExchangeAndCoins ( message, @params );
+
+			if ( coinIds.Count > 1 )
+			{
+				await SendBlockText ( message, "ERROR: Multiple coins provided." )
+					.ConfigureAwait ( false );
+				return;
+			}
+
+			if ( coinIds.Count == 0 )
+			{
+				await SendBlockText ( message, "ERROR: No coin provided." )
+					.ConfigureAwait ( false );
+				return;
+			}
+
+			// Check threshold value
+			decimal price;
+			var priceString = @params
+				.FirstOrDefault ( x => decimal.TryParse ( x.Trim ( '$' ), out _ ) );
+			if ( !string.IsNullOrEmpty ( priceString ) )
+			{
+				price = decimal.Parse ( priceString );
+			}
+			else
+			{
+				await SendBlockText ( message, "ERROR: No price provided." )
+					.ConfigureAwait ( false );
+				return;
+			}
+
+			AddAlert ( message, exchange, coinIds.First ( ), price );
+
+			await SendBlockText (
+				message,
+				$"Created price alert for {exchange.Name} at {price:C}\n" +
+				$"For {coinIds.First ( )}"
+			).ConfigureAwait ( false );
+		}
+
+		private async Task HandleSubscribe ( Message message,
+		                                     IList<string> @params )
+		{
+			var (chosen, coinIds) = await GetExchangeAndCoins ( message, @params );
+
+			// Check threshold value
+			var threshold = 0.05m;
+			var thresholdString = @params
+				.FirstOrDefault ( x => decimal.TryParse ( x.Trim ( '%' ), out _ ) );
+			if ( !string.IsNullOrEmpty ( thresholdString ) )
+				threshold = decimal.Parse ( thresholdString ) / 100m;
+			else
+				await SendBlockText ( message, $"No threshold provided, setting to default {threshold:P}" )
+					.ConfigureAwait ( false );
+
 			if ( coinIds.Count == 0 )
 			{
 				await SendBlockText (
 					message,
 					"No coin symbols provided. Subscribing to all coin notifications."
 				).ConfigureAwait ( false );
+				var supported = CryptoTickerBotCore.SupportedCoins;
 				coinIds = supported.Select ( x => x.Id ).ToList ( );
 			}
 
 			await AddSubscription ( message, chosen, threshold, coinIds ).ConfigureAwait ( false );
 		}
 
-		private async Task HandleUnsubscribe ( Message message, IList<string> _ )
+		private async Task HandleUnsubscribe ( Message message,
+		                                       IList<string> _ )
 		{
 			lock ( subscriptionLock )
 			{
@@ -87,7 +146,8 @@ namespace TelegramBot.Core
 			await SendBlockText ( message, "Unsubscribed from all exchanges." ).ConfigureAwait ( false );
 		}
 
-		private async Task HandleFetch ( Message message, IList<string> @params )
+		private async Task HandleFetch ( Message message,
+		                                 IList<string> @params )
 		{
 			var fiat = FiatCurrency.USD;
 			if ( @params.Count >= 1 )
@@ -100,7 +160,8 @@ namespace TelegramBot.Core
 				await SendBlockText ( message, table ).ConfigureAwait ( false );
 		}
 
-		private async Task HandleCompare ( Message message, IList<string> @params )
+		private async Task HandleCompare ( Message message,
+		                                   IList<string> @params )
 		{
 			Dictionary<CryptoExchangeId, Dictionary<CryptoExchangeId, Dictionary<CryptoCoinId, decimal>>> compare;
 			if ( @params?.Count >= 2 )
@@ -148,7 +209,8 @@ namespace TelegramBot.Core
 			await SendBlockText ( message, reply ).ConfigureAwait ( false );
 		}
 
-		private async Task HandleBest ( Message message, IList<string> @params )
+		private async Task HandleBest ( Message message,
+		                                IList<string> @params )
 		{
 			if ( @params == null || @params.Count < 2 )
 			{
@@ -193,7 +255,8 @@ namespace TelegramBot.Core
 			await SendBlockText ( message, reply ).ConfigureAwait ( false );
 		}
 
-		private async Task HandleStatus ( Message message, IList<string> _ )
+		private async Task HandleStatus ( Message message,
+		                                  IList<string> _ )
 		{
 			var formatter = new TableFormatter ( );
 			var objects = new List<IDictionary<string, string>> ( );
@@ -215,7 +278,8 @@ namespace TelegramBot.Core
 			await SendBlockText ( message, builder.ToString ( ) ).ConfigureAwait ( false );
 		}
 
-		private async Task HandlePutGroup ( Message message, IList<string> @params )
+		private async Task HandlePutGroup ( Message message,
+		                                    IList<string> @params )
 		{
 			if ( @params.Count < 2 )
 			{
@@ -263,7 +327,8 @@ namespace TelegramBot.Core
 			await SendBlockText ( message, $"Registered {user}." ).ConfigureAwait ( false );
 		}
 
-		private async Task HandleRestart ( Message message, IList<string> _ )
+		private async Task HandleRestart ( Message message,
+		                                   IList<string> _ )
 		{
 			Settings.Load ( );
 			FetchUserList ( );
@@ -282,7 +347,8 @@ namespace TelegramBot.Core
 			Restart?.Invoke ( this );
 		}
 
-		private async Task HandleUsers ( Message message, IList<string> @params )
+		private async Task HandleUsers ( Message message,
+		                                 IList<string> @params )
 		{
 			if ( @params.Count == 0 )
 			{
@@ -321,7 +387,8 @@ namespace TelegramBot.Core
 			).ConfigureAwait ( false );
 		}
 
-		private async Task HandleKill ( Message message, IList<string> @params )
+		private async Task HandleKill ( Message message,
+		                                IList<string> @params )
 		{
 			Logger.Info ( $"Shutting down per {message.From.Username}'s request." );
 			await SendBlockText ( message, "Bye Bye 👋🏻👋🏻" ).ConfigureAwait ( false );

@@ -37,7 +37,8 @@ namespace TelegramBot.Core
 		public string BotToken { get; }
 		public List<TelegramBotUser> Users { get; private set; }
 
-		public TeleBot ( string botToken, CryptoTickerBotCore ctb )
+		public TeleBot ( string botToken,
+		                 CryptoTickerBotCore ctb )
 		{
 			BotToken      = botToken;
 			Subscriptions = new List<TelegramSubscription> ( );
@@ -62,6 +63,7 @@ namespace TelegramBot.Core
 					["/best"]        = ( UserRole.Registered, HandleBest ),
 					["/subscribe"]   = ( UserRole.Registered, HandleSubscribe ),
 					["/unsubscribe"] = ( UserRole.Registered, HandleUnsubscribe ),
+					["/alert"]       = ( UserRole.Registered, HandleAlert ),
 					["/restart"]     = ( UserRole.Admin, HandleRestart ),
 					["/users"]       = ( UserRole.Admin, HandleUsers ),
 					["/kill"]        = ( UserRole.Admin, HandleKill ),
@@ -103,7 +105,8 @@ namespace TelegramBot.Core
 			}
 		}
 
-		private static void BotClientOnReceiveError ( object sender, ReceiveErrorEventArgs receiveErrorEventArgs )
+		private static void BotClientOnReceiveError ( object sender,
+		                                              ReceiveErrorEventArgs receiveErrorEventArgs )
 		{
 			Logger.Error (
 				receiveErrorEventArgs.ApiRequestException,
@@ -111,7 +114,8 @@ namespace TelegramBot.Core
 			);
 		}
 
-		private async void BotClientOnInlineQuery ( object sender, InlineQueryEventArgs eventArgs )
+		private async void BotClientOnInlineQuery ( object sender,
+		                                            InlineQueryEventArgs eventArgs )
 		{
 			var from = eventArgs.InlineQuery.From;
 			Logger.Info ( $"Received inline query from: {from.Id,-10} {from.FirstName}" );
@@ -159,7 +163,8 @@ namespace TelegramBot.Core
 				}
 			};
 
-		private async void BotClientOnMessage ( object sender, MessageEventArgs messageEventArgs )
+		private async void BotClientOnMessage ( object sender,
+		                                        MessageEventArgs messageEventArgs )
 		{
 			try
 			{
@@ -183,6 +188,7 @@ namespace TelegramBot.Core
 			}
 		}
 
-		private delegate Task MessageHandlerDelegate ( Message message, IList<string> @params );
+		private delegate Task MessageHandlerDelegate ( Message message,
+		                                               IList<string> @params );
 	}
 }
