@@ -7,7 +7,8 @@ namespace TelegramBot.Extensions
 	public static class StringExtensions
 	{
 		[DebuggerStepThrough]
-		public static CryptoCoinId ToCryptoCoinId ( this string str, bool ignoreCase = true ) =>
+		public static CryptoCoinId ToCryptoCoinId ( this string str,
+		                                            bool ignoreCase = true ) =>
 			(CryptoCoinId) Enum.Parse ( typeof ( CryptoCoinId ), str, ignoreCase );
 	}
 }

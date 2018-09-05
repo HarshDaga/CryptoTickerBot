@@ -46,7 +46,8 @@ namespace CryptoTickerBot.Exchanges
 				}
 		}
 
-		protected override void DeserializeData ( dynamic data, CryptoCoinId id )
+		protected override void DeserializeData ( dynamic data,
+		                                          CryptoCoinId id )
 		{
 			ExchangeData[id].LowestAsk  = (decimal) data.ask;
 			ExchangeData[id].HighestBid = (decimal) data.bid;

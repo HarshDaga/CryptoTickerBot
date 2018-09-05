@@ -38,7 +38,8 @@ namespace CryptoTickerBot.Exchanges
 			}
 		}
 
-		private void WsOnMessage ( object sender, MessageEventArgs args )
+		private void WsOnMessage ( object sender,
+		                           MessageEventArgs args )
 		{
 			try
 			{
@@ -61,7 +62,8 @@ namespace CryptoTickerBot.Exchanges
 			}
 		}
 
-		protected override void DeserializeData ( dynamic datum, CryptoCoinId id )
+		protected override void DeserializeData ( dynamic datum,
+		                                          CryptoCoinId id )
 		{
 			var d = (BinanceTickerDatum) datum;
 			ExchangeData[id].LowestAsk  = d.BestAskPrice;

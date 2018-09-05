@@ -43,12 +43,15 @@ namespace CryptoTickerBot.Data.Extensions
 		#region Int to Enum
 
 		[Pure]
-		public static T ParseEnum<T> ( int input, bool throwException = true )
+		public static T ParseEnum<T> ( int input,
+		                               bool throwException = true )
 			where T : struct =>
 			ParseEnum ( input, default ( T ), throwException );
 
 		[Pure]
-		public static T ParseEnum<T> ( int input, T defaultValue, bool throwException = false )
+		public static T ParseEnum<T> ( int input,
+		                               T defaultValue,
+		                               bool throwException = false )
 			where T : struct
 		{
 			var returnEnum = defaultValue;
@@ -72,12 +75,16 @@ namespace CryptoTickerBot.Data.Extensions
 		#region String Extension Methods for Enum Parsing
 
 		[Pure]
-		public static T ToEnum<T> ( this string str, bool ignoreCase = true, bool throwException = true )
+		public static T ToEnum<T> ( this string str,
+		                            bool ignoreCase = true,
+		                            bool throwException = true )
 			where T : struct =>
 			ParseEnum<T> ( str, ignoreCase, throwException );
 
 		[Pure]
-		public static T ToEnum<T> ( this string str, T defaultValue, bool ignoreCase = true,
+		public static T ToEnum<T> ( this string str,
+		                            T defaultValue,
+		                            bool ignoreCase = true,
 		                            bool throwException = false )
 			where T : struct =>
 			ParseEnum ( str, defaultValue, ignoreCase, throwException );
@@ -87,12 +94,15 @@ namespace CryptoTickerBot.Data.Extensions
 		#region Int Extension Methods for Enum Parsing
 
 		[Pure]
-		public static T ToEnum<T> ( this int input, bool throwException = true )
+		public static T ToEnum<T> ( this int input,
+		                            bool throwException = true )
 			where T : struct =>
 			ParseEnum ( input, default ( T ), throwException );
 
 		[Pure]
-		public static T ToEnum<T> ( this int input, T defaultValue, bool throwException = false )
+		public static T ToEnum<T> ( this int input,
+		                            T defaultValue,
+		                            bool throwException = false )
 			where T : struct =>
 			ParseEnum ( input, defaultValue, throwException );
 

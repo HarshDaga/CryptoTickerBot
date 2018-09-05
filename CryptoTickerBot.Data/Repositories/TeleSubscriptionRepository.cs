@@ -55,7 +55,8 @@ namespace CryptoTickerBot.Data.Repositories
 		public void Remove ( long chatId ) =>
 			Remove ( s => s.ChatId == chatId );
 
-		public TeleSubscription UpdateCoin ( int subscriptionId, CryptoCoinValue ccv )
+		public TeleSubscription UpdateCoin ( int subscriptionId,
+		                                     CryptoCoinValue ccv )
 		{
 			var subscription = Context.TeleSubscriptions.Find ( subscriptionId );
 			if ( subscription == null )
@@ -68,7 +69,8 @@ namespace CryptoTickerBot.Data.Repositories
 			return subscription;
 		}
 
-		public void SetEndDate ( int subscriptionId, DateTime? endDate )
+		public void SetEndDate ( int subscriptionId,
+		                         DateTime? endDate )
 		{
 			var subscription = Get ( subscriptionId );
 			subscription.EndDate = endDate;

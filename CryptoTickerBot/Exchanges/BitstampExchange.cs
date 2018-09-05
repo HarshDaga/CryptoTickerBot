@@ -43,7 +43,8 @@ namespace CryptoTickerBot.Exchanges
 			}
 		}
 
-		private void Ws_OnMessage ( object sender, MessageEventArgs e )
+		private void Ws_OnMessage ( object sender,
+		                            MessageEventArgs e )
 		{
 			var data = DeserializeObject<dynamic> ( e.Data );
 
@@ -59,7 +60,8 @@ namespace CryptoTickerBot.Exchanges
 			Update ( DeserializeObject<dynamic> ( (string) data.data ), symbol );
 		}
 
-		protected override void DeserializeData ( dynamic data, CryptoCoinId id )
+		protected override void DeserializeData ( dynamic data,
+		                                          CryptoCoinId id )
 		{
 			if ( data.type == 1 )
 				ExchangeData[id].HighestBid = data.price;
@@ -71,7 +73,8 @@ namespace CryptoTickerBot.Exchanges
 				.UtcDateTime;
 		}
 
-		protected override void Update ( dynamic data, string symbol )
+		protected override void Update ( dynamic data,
+		                                 string symbol )
 		{
 			CryptoCoin old = null;
 			var id = symbol.ToEnum ( CryptoCoinId.NULL );
@@ -91,7 +94,8 @@ namespace CryptoTickerBot.Exchanges
 				OnChanged ( ExchangeData[id] );
 		}
 
-		public static async Task ConnectAndSubscribe ( WebSocket ws, CancellationToken ct )
+		public static async Task ConnectAndSubscribe ( WebSocket ws,
+		                                               CancellationToken ct )
 		{
 			ws.ConnectAsync ( );
 			while ( ws.ReadyState == WebSocketState.Connecting )

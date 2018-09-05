@@ -34,7 +34,8 @@ namespace TelegramBot
 			Created   = created ?? DateTime.UtcNow;
 		}
 
-		public TelegramBotUser ( User user, UserRole role = UserRole.Guest,
+		public TelegramBotUser ( User user,
+		                         UserRole role = UserRole.Guest,
 		                         DateTime? created = null )
 			: this ( user.Id, role, user.Username, user.FirstName, user.LastName, created )
 		{
@@ -70,8 +71,10 @@ namespace TelegramBot
 
 		public override int GetHashCode ( ) => UserName?.GetHashCode ( ) ?? 0;
 
-		public static bool operator == ( TelegramBotUser left, TelegramBotUser right ) => Equals ( left, right );
+		public static bool operator == ( TelegramBotUser left,
+		                                 TelegramBotUser right ) => Equals ( left, right );
 
-		public static bool operator != ( TelegramBotUser left, TelegramBotUser right ) => !Equals ( left, right );
+		public static bool operator != ( TelegramBotUser left,
+		                                 TelegramBotUser right ) => !Equals ( left, right );
 	}
 }

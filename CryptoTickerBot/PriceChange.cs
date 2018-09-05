@@ -9,7 +9,8 @@ namespace CryptoTickerBot
 		public TimeSpan TimeDiff { get; private set; }
 		public DateTime AbsoluteTime { get; private set; }
 
-		public static PriceChange From ( CryptoCoin newCoin, CryptoCoin oldCoin )
+		public static PriceChange From ( CryptoCoin newCoin,
+		                                 CryptoCoin oldCoin )
 			=> new PriceChange
 			{
 				Value = newCoin.Average - oldCoin.Average,

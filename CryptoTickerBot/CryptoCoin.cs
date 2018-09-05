@@ -19,12 +19,13 @@ namespace CryptoTickerBot
 		public decimal Average => ( BuyPrice + SellPrice ) / 2;
 		public decimal Rate { get; set; }
 		public decimal Spread => BuyPrice - SellPrice;
-		public decimal SpreadPercentange => Average != 0 ? Spread / Average : 0;
+		public decimal SpreadPercentage => Average != 0 ? Spread / Average : 0;
 		public DateTime Time { get; set; }
 
 		public CryptoCoin (
 			string symbol,
-			decimal highestBid = 0m, decimal lowestAsk = 0m,
+			decimal highestBid = 0m,
+			decimal lowestAsk = 0m,
 			decimal rate = 0m,
 			DateTime? time = null
 		)
@@ -73,14 +74,17 @@ namespace CryptoTickerBot
 			new CryptoCoin ( Symbol, HighestBid, LowestAsk, Rate, Time );
 
 		[DebuggerStepThrough]
-		public static bool operator == ( CryptoCoin coin1, CryptoCoin coin2 ) =>
+		public static bool operator == ( CryptoCoin coin1,
+		                                 CryptoCoin coin2 ) =>
 			EqualityComparer<CryptoCoin>.Default.Equals ( coin1, coin2 );
 
 		[DebuggerStepThrough]
-		public static bool operator != ( CryptoCoin coin1, CryptoCoin coin2 ) =>
+		public static bool operator != ( CryptoCoin coin1,
+		                                 CryptoCoin coin2 ) =>
 			!( coin1 == coin2 );
 
-		public static PriceChange operator - ( CryptoCoin coin1, CryptoCoin coin2 ) =>
+		public static PriceChange operator - ( CryptoCoin coin1,
+		                                       CryptoCoin coin2 ) =>
 			PriceChange.From ( coin1, coin2 );
 
 		[Pure]

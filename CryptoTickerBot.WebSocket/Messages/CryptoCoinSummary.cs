@@ -9,7 +9,8 @@ namespace CryptoTickerBot.WebSocket.Messages
 		public decimal HighestBid { get; }
 		public decimal LowestAsk { get; }
 
-		public CryptoCoinSummary ( CryptoExchangeBase exchange, CryptoCoin coin )
+		public CryptoCoinSummary ( CryptoExchangeBase exchange,
+		                           CryptoCoin coin )
 		{
 			Symbol       = coin.Symbol;
 			ExchangeName = exchange.Name;

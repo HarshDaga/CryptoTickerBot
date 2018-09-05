@@ -10,7 +10,8 @@ namespace CryptoTickerBot.WebSocket.Messages
 		[JsonProperty ( "data" )]
 		public dynamic Data { get; set; }
 
-		public WebSocketMessage ( string @event = null, dynamic data = default ( dynamic ) )
+		public WebSocketMessage ( string @event = null,
+		                          dynamic data = default ( dynamic ) )
 		{
 			Event = @event;
 			Data  = data;

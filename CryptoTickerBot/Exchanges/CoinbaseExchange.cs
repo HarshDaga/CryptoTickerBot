@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,7 +31,8 @@ namespace CryptoTickerBot.Exchanges
 			}
 		}
 
-		private void Ws_OnMessage ( object sender, MessageEventArgs e )
+		private void Ws_OnMessage ( object sender,
+		                            MessageEventArgs e )
 		{
 			var data = JsonConvert.DeserializeObject<CoinbaseTickerDatum> ( e.Data );
 			if ( data.Type != "ticker" )
@@ -43,7 +43,8 @@ namespace CryptoTickerBot.Exchanges
 			Update ( data, symbol );
 		}
 
-		protected override void DeserializeData ( dynamic data, CryptoCoinId id )
+		protected override void DeserializeData ( dynamic data,
+		                                          CryptoCoinId id )
 		{
 			var tickerData = (CoinbaseTickerDatum) data;
 
@@ -52,7 +53,8 @@ namespace CryptoTickerBot.Exchanges
 			ExchangeData[id].Rate       = tickerData.Price;
 		}
 
-		private static async Task ConnectAndSubscribe ( WebSocket ws, CancellationToken ct )
+		private static async Task ConnectAndSubscribe ( WebSocket ws,
+		                                                CancellationToken ct )
 		{
 			await Task.Run ( ( ) => ws.Connect ( ), ct ).ConfigureAwait ( false );
 

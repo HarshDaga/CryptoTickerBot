@@ -4,7 +4,8 @@ namespace CryptoTickerBot.WebSocket.Extensions
 {
 	public static class StringExtensions
 	{
-		public static bool TryDeserialize<T> ( this string str, out T result )
+		public static bool TryDeserialize<T> ( this string str,
+		                                       out T result )
 		{
 			try
 			{

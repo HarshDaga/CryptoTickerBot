@@ -21,8 +21,6 @@ namespace CryptoTickerBot.Exchanges.Core
 {
 	public abstract class CryptoExchangeBase : IObservable<CryptoCoin>
 	{
-		public delegate void OnUpdateDelegate ( CryptoExchangeBase exchange, CryptoCoin coin );
-
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
 		protected static readonly List<string> KnownSymbols = new List<string>
@@ -90,6 +88,9 @@ namespace CryptoTickerBot.Exchanges.Core
 			DepositFees    = exchange.DepositFees.ToDictionary ( x => x.CoinId, x => x.Value );
 		}
 
+		public delegate void OnUpdateDelegate ( CryptoExchangeBase exchange,
+		                                        CryptoCoin coin );
+
 		public IDisposable Subscribe ( IObserver<CryptoCoin> observer )
 		{
 			Observers = Observers.Add ( observer );
@@ -136,7 +137,8 @@ namespace CryptoTickerBot.Exchanges.Core
 				}
 		}
 
-		protected virtual void Update ( dynamic data, string symbol )
+		protected virtual void Update ( dynamic data,
+		                                string symbol )
 		{
 			CryptoCoin old = null;
 			var id = symbol.ToEnum ( CryptoCoinId.NULL );
@@ -154,7 +156,8 @@ namespace CryptoTickerBot.Exchanges.Core
 			if ( ExchangeData[id] != old ) OnChanged ( ExchangeData[id] );
 		}
 
-		protected abstract void DeserializeData ( dynamic data, CryptoCoinId id );
+		protected abstract void DeserializeData ( dynamic data,
+		                                          CryptoCoinId id );
 
 		protected void ApplyFees ( CryptoCoinId id )
 		{
@@ -205,7 +208,7 @@ namespace CryptoTickerBot.Exchanges.Core
 					coin.Symbol,
 					Bid    = $"{FiatConverter.ToString ( coin.HighestBid, FiatCurrency.USD, fiat )}",
 					Ask    = $"{FiatConverter.ToString ( coin.LowestAsk, FiatCurrency.USD, fiat )}",
-					Spread = $"{coin.SpreadPercentange:P}"
+					Spread = $"{coin.SpreadPercentage:P}"
 				} );
 
 			return formatter.FormatObjects ( objects );

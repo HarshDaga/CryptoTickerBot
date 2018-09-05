@@ -43,14 +43,17 @@ namespace CryptoTickerBot.WebSocket.Services
 				sub.Updated -= SubOnUpdated;
 		}
 
-		public void SubOnUpdated ( TelegramSubscription sub, CryptoCoin _, CryptoCoin __ ) =>
+		public void SubOnUpdated ( TelegramSubscription sub,
+		                           CryptoCoin _,
+		                           CryptoCoin __ ) =>
 			Send ( "TeleSubscriptionUpdates", new TeleBotSubscriptionSummary ( Bot, sub.Id ) );
 
 		#endregion
 
 		#region CommandHandlers
 
-		private void GetExchangeStatusesCommand ( string s, WebSocketIncomingMessage im )
+		private void GetExchangeStatusesCommand ( string s,
+		                                          WebSocketIncomingMessage im )
 		{
 			var list = Bot.Exchanges.Values.Select ( x => new
 				{
@@ -64,7 +67,8 @@ namespace CryptoTickerBot.WebSocket.Services
 			Send ( s, list );
 		}
 
-		private void GetTeleSubscriptionListCommand ( string s, WebSocketIncomingMessage im )
+		private void GetTeleSubscriptionListCommand ( string s,
+		                                              WebSocketIncomingMessage im )
 		{
 			var list = Bot.Subscriptions
 				.Select ( x => new TeleBotSubscriptionSummary ( Bot, x.Id ) )
@@ -73,7 +77,8 @@ namespace CryptoTickerBot.WebSocket.Services
 			Send ( s, list );
 		}
 
-		private void GetTeleSubscriptionCommand ( string s, WebSocketIncomingMessage im )
+		private void GetTeleSubscriptionCommand ( string s,
+		                                          WebSocketIncomingMessage im )
 		{
 			Send (
 				s,

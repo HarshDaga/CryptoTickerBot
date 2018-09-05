@@ -4,10 +4,10 @@ namespace CryptoTickerBot.Exchanges.Core
 {
 	public abstract class CryptoExchangeSubscription : IDisposable, IObserver<CryptoCoin>
 	{
-		public IDisposable Disposable;
 		public CryptoExchangeBase Exchange { get; }
 		public DateTime CreationTime { get; }
 		public TimeSpan ActiveSince => DateTime.UtcNow - CreationTime;
+		public IDisposable Disposable;
 
 		protected CryptoExchangeSubscription ( CryptoExchangeBase exchange )
 		{

@@ -16,14 +16,17 @@ namespace CryptoTickerBot.Data.Domain
 
 		public string Name { get; set; }
 
-		public CryptoCoin ( CryptoCoinId id, string symbol, string name )
+		public CryptoCoin ( CryptoCoinId id,
+		                    string symbol,
+		                    string name )
 		{
 			Id     = id;
 			Symbol = symbol;
 			Name   = name;
 		}
 
-		public CryptoCoin ( CryptoCoinId id, string name )
+		public CryptoCoin ( CryptoCoinId id,
+		                    string name )
 		{
 			Id     = id;
 			Symbol = id.ToString ( );

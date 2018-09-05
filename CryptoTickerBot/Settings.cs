@@ -13,6 +13,12 @@ namespace CryptoTickerBot
 
 		public static Settings Instance { get; private set; }
 
+		#region Properties
+
+		public string FixerApiKey { get; set; }
+
+		#endregion Properties
+
 		static Settings ( )
 		{
 			LoadLock = new object ( );
@@ -41,9 +47,5 @@ namespace CryptoTickerBot
 					Instance = JsonConvert.DeserializeObject<Settings> ( File.ReadAllText ( SETTINGSFILE ) );
 			}
 		}
-
-		#region Properties
-		public string FixerApiKey { get; set; }
-		#endregion Properties
 	}
 }

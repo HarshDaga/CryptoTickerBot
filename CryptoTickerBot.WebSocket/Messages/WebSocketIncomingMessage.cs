@@ -56,16 +56,20 @@ namespace CryptoTickerBot.WebSocket.Messages
 			return string.Equals ( Name, other.Name, StringComparison.OrdinalIgnoreCase );
 		}
 
-		public static bool operator < ( WebSocketIncomingMessage left, WebSocketIncomingMessage right ) =>
+		public static bool operator < ( WebSocketIncomingMessage left,
+		                                WebSocketIncomingMessage right ) =>
 			Comparer<WebSocketIncomingMessage>.Default.Compare ( left, right ) < 0;
 
-		public static bool operator > ( WebSocketIncomingMessage left, WebSocketIncomingMessage right ) =>
+		public static bool operator > ( WebSocketIncomingMessage left,
+		                                WebSocketIncomingMessage right ) =>
 			Comparer<WebSocketIncomingMessage>.Default.Compare ( left, right ) > 0;
 
-		public static bool operator <= ( WebSocketIncomingMessage left, WebSocketIncomingMessage right ) =>
+		public static bool operator <= ( WebSocketIncomingMessage left,
+		                                 WebSocketIncomingMessage right ) =>
 			Comparer<WebSocketIncomingMessage>.Default.Compare ( left, right ) <= 0;
 
-		public static bool operator >= ( WebSocketIncomingMessage left, WebSocketIncomingMessage right ) =>
+		public static bool operator >= ( WebSocketIncomingMessage left,
+		                                 WebSocketIncomingMessage right ) =>
 			Comparer<WebSocketIncomingMessage>.Default.Compare ( left, right ) >= 0;
 
 		public override bool Equals ( object obj )
@@ -78,22 +82,28 @@ namespace CryptoTickerBot.WebSocket.Messages
 
 		public override int GetHashCode ( ) => Name != null ? Name.GetHashCode ( ) : 0;
 
-		public static bool operator == ( WebSocketIncomingMessage left, WebSocketIncomingMessage right ) =>
+		public static bool operator == ( WebSocketIncomingMessage left,
+		                                 WebSocketIncomingMessage right ) =>
 			Equals ( left, right );
 
-		public static bool operator != ( WebSocketIncomingMessage left, WebSocketIncomingMessage right ) =>
+		public static bool operator != ( WebSocketIncomingMessage left,
+		                                 WebSocketIncomingMessage right ) =>
 			!Equals ( left, right );
 
-		public static bool operator == ( WebSocketIncomingMessage left, string right ) =>
+		public static bool operator == ( WebSocketIncomingMessage left,
+		                                 string right ) =>
 			left?.Name?.Equals ( right, StringComparison.OrdinalIgnoreCase ) ?? false;
 
-		public static bool operator != ( WebSocketIncomingMessage left, string right ) =>
+		public static bool operator != ( WebSocketIncomingMessage left,
+		                                 string right ) =>
 			!( left == right );
 
-		public static bool operator == ( string left, WebSocketIncomingMessage right ) =>
+		public static bool operator == ( string left,
+		                                 WebSocketIncomingMessage right ) =>
 			right == left;
 
-		public static bool operator != ( string left, WebSocketIncomingMessage right ) =>
+		public static bool operator != ( string left,
+		                                 WebSocketIncomingMessage right ) =>
 			!( right == left );
 	}
 
@@ -134,16 +144,20 @@ namespace CryptoTickerBot.WebSocket.Messages
 			return string.Equals ( Event, other.Event, StringComparison.OrdinalIgnoreCase );
 		}
 
-		public static bool operator < ( WebSocketCommand left, WebSocketCommand right ) =>
+		public static bool operator < ( WebSocketCommand left,
+		                                WebSocketCommand right ) =>
 			Comparer<WebSocketCommand>.Default.Compare ( left, right ) < 0;
 
-		public static bool operator > ( WebSocketCommand left, WebSocketCommand right ) =>
+		public static bool operator > ( WebSocketCommand left,
+		                                WebSocketCommand right ) =>
 			Comparer<WebSocketCommand>.Default.Compare ( left, right ) > 0;
 
-		public static bool operator <= ( WebSocketCommand left, WebSocketCommand right ) =>
+		public static bool operator <= ( WebSocketCommand left,
+		                                 WebSocketCommand right ) =>
 			Comparer<WebSocketCommand>.Default.Compare ( left, right ) <= 0;
 
-		public static bool operator >= ( WebSocketCommand left, WebSocketCommand right ) =>
+		public static bool operator >= ( WebSocketCommand left,
+		                                 WebSocketCommand right ) =>
 			Comparer<WebSocketCommand>.Default.Compare ( left, right ) >= 0;
 
 		public override bool Equals ( object obj )
@@ -159,22 +173,28 @@ namespace CryptoTickerBot.WebSocket.Messages
 
 		public override int GetHashCode ( ) => Event != null ? Event.GetHashCode ( ) : 0;
 
-		public static bool operator == ( WebSocketCommand left, WebSocketCommand right ) =>
+		public static bool operator == ( WebSocketCommand left,
+		                                 WebSocketCommand right ) =>
 			Equals ( left, right );
 
-		public static bool operator != ( WebSocketCommand left, WebSocketCommand right ) =>
+		public static bool operator != ( WebSocketCommand left,
+		                                 WebSocketCommand right ) =>
 			!Equals ( left, right );
 
-		public static bool operator == ( WebSocketCommand left, string right ) =>
+		public static bool operator == ( WebSocketCommand left,
+		                                 string right ) =>
 			left?.Event?.Equals ( right, StringComparison.OrdinalIgnoreCase ) ?? false;
 
-		public static bool operator != ( WebSocketCommand left, string right ) =>
+		public static bool operator != ( WebSocketCommand left,
+		                                 string right ) =>
 			!( left == right );
 
-		public static bool operator == ( string left, WebSocketCommand right ) =>
+		public static bool operator == ( string left,
+		                                 WebSocketCommand right ) =>
 			right == left;
 
-		public static bool operator != ( string left, WebSocketCommand right ) =>
+		public static bool operator != ( string left,
+		                                 WebSocketCommand right ) =>
 			!( right == left );
 	}
 }

@@ -12,7 +12,8 @@ namespace TelegramBot
 
 		public static void Main ( )
 		{
-			AppDomain.CurrentDomain.UnhandledException += ( sender, args ) =>
+			AppDomain.CurrentDomain.UnhandledException += ( sender,
+			                                                args ) =>
 				Logger.Error ( args );
 
 			LogManager.Configuration.Variables["DataSource"] =

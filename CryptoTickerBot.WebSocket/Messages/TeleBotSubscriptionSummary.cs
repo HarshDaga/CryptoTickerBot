@@ -26,7 +26,8 @@ namespace CryptoTickerBot.WebSocket.Messages
 		[UsedImplicitly]
 		public Dictionary<string, PriceChange?> PriceChanges { get; }
 
-		public TeleBotSubscriptionSummary ( TeleBot bot, int subscriptionId )
+		public TeleBotSubscriptionSummary ( TeleBot bot,
+		                                    int subscriptionId )
 		{
 			var subscription = bot.Subscriptions.FirstOrDefault ( x => x.Id == subscriptionId );
 			if ( subscription == null )
@@ -46,7 +47,8 @@ namespace CryptoTickerBot.WebSocket.Messages
 			UpdateLatest ( bot, subscription );
 		}
 
-		private void UpdateLatest ( TeleBot bot, TelegramSubscription subscription )
+		private void UpdateLatest ( TeleBot bot,
+		                            TelegramSubscription subscription )
 		{
 			try
 			{

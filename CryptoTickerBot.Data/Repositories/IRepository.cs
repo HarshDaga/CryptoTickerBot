@@ -14,7 +14,9 @@ namespace CryptoTickerBot.Data.Repositories
 		IEnumerable<TEntity> GetAll ( );
 		IEnumerable<TEntity> Find ( Expression<Func<TEntity, bool>> predicate );
 
-		Task<TEntity> GetAsync ( object id, CancellationToken cancellationToken );
+		Task<TEntity> GetAsync ( object id,
+		                         CancellationToken cancellationToken );
+
 		Task<IEnumerable<TEntity>> GetAllAsync ( CancellationToken cancellationToken );
 
 		Task<IEnumerable<TEntity>> FindAsync (

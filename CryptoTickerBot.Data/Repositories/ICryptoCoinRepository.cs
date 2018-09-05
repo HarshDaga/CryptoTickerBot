@@ -10,7 +10,10 @@ namespace CryptoTickerBot.Data.Repositories
 		CryptoCoin Single ( CryptoCoinId coinId );
 		CryptoCoin Single ( string symbol );
 
-		Task<CryptoCoin> SingleAsync ( CryptoCoinId coinId, CancellationToken cancellation );
-		Task<CryptoCoin> SingleAsync ( string symbol, CancellationToken cancellationToken );
+		Task<CryptoCoin> SingleAsync ( CryptoCoinId coinId,
+		                               CancellationToken cancellation );
+
+		Task<CryptoCoin> SingleAsync ( string symbol,
+		                               CancellationToken cancellationToken );
 	}
 }

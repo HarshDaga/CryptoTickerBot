@@ -14,12 +14,6 @@ namespace TelegramBot
 {
 	public class TelegramSubscription : CryptoExchangeSubscription
 	{
-		public delegate void TelegramSubscriptionValueChangeNotificationDelegate (
-			TelegramSubscription subscription,
-			CryptoCoin prevPrice,
-			CryptoCoin newPrice
-		);
-
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
 		public int Id { get; }
@@ -70,6 +64,12 @@ namespace TelegramBot
 			);
 			Coins = subscription.Coins.Select ( c => c.Id ).ToImmutableHashSet ( );
 		}
+
+		public delegate void TelegramSubscriptionValueChangeNotificationDelegate (
+			TelegramSubscription subscription,
+			CryptoCoin prevPrice,
+			CryptoCoin newPrice
+		);
 
 		[UsedImplicitly]
 		public event TelegramSubscriptionValueChangeNotificationDelegate Changed;

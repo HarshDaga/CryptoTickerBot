@@ -19,21 +19,6 @@ namespace CryptoTickerBot
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
-		public readonly IDictionary<CryptoExchangeId, CryptoExchangeBase> Exchanges =
-			new ConcurrentDictionary<CryptoExchangeId, CryptoExchangeBase>
-			{
-				[CryptoExchangeId.Binance] = new BinanceExchange(),
-				[CryptoExchangeId.BitBay] = new BitBayExchange(),
-				[CryptoExchangeId.Bitstamp] = new BitstampExchange(),
-				[CryptoExchangeId.Coinbase] = new CoinbaseExchange(),
-				[CryptoExchangeId.CoinDelta] = new CoinDeltaExchange(),
-				[CryptoExchangeId.Koinex] = new KoinexExchange(),
-				[CryptoExchangeId.Kraken] = new KrakenExchange(),
-				//[CryptoExchangeId.Zebpay]    = new ZebpayExchange ( )
-			};
-
-		private Timer fiatMonitor;
-
 		public CancellationTokenSource Cts { get; private set; }
 
 		public CryptoCompareTable CompareTable { get; } =
@@ -47,6 +32,21 @@ namespace CryptoTickerBot
 
 		public CryptoExchangeBase this [ CryptoExchangeId exchangeId ] =>
 			Exchanges[exchangeId];
+
+		public readonly IDictionary<CryptoExchangeId, CryptoExchangeBase> Exchanges =
+			new ConcurrentDictionary<CryptoExchangeId, CryptoExchangeBase>
+			{
+				[CryptoExchangeId.Binance]   = new BinanceExchange ( ),
+				[CryptoExchangeId.BitBay]    = new BitBayExchange ( ),
+				[CryptoExchangeId.Bitstamp]  = new BitstampExchange ( ),
+				[CryptoExchangeId.Coinbase]  = new CoinbaseExchange ( ),
+				[CryptoExchangeId.CoinDelta] = new CoinDeltaExchange ( ),
+				[CryptoExchangeId.Koinex]    = new KoinexExchange ( ),
+				[CryptoExchangeId.Kraken]    = new KrakenExchange ( )
+				//[CryptoExchangeId.Zebpay]    = new ZebpayExchange ( )
+			};
+
+		private Timer fiatMonitor;
 
 		public void Dispose ( )
 		{
@@ -98,7 +98,8 @@ namespace CryptoTickerBot
 			foreach ( var exchange in Exchanges.Values )
 			{
 				//exchange.Next    += UpdateExchangeLastUpdateInDb;
-				exchange.Changed += ( e, coin ) => Logger.Debug ( $"{e.Name,-10} {e[coin.Id]}" );
+				exchange.Changed += ( e,
+				                      coin ) => Logger.Debug ( $"{e.Name,-10} {e[coin.Id]}" );
 				//exchange.Changed += StoreCoinValueInDb;
 
 				CompareTable.AddExchange ( exchange );
@@ -117,11 +118,14 @@ namespace CryptoTickerBot
 			IsInitialized = true;
 		}
 
-		private static void StoreCoinValueInDb ( CryptoExchangeBase exchange, CryptoCoin coin ) =>
+		private static void StoreCoinValueInDb ( CryptoExchangeBase exchange,
+		                                         CryptoCoin coin ) =>
 			UnitOfWork.Do ( u => u.CoinValues.Add ( coin.ToCryptoCoinValue ( exchange.Id ) ) );
 
-		private static void UpdateExchangeLastUpdateInDb ( CryptoExchangeBase exchange, CryptoCoin coin ) =>
-			UnitOfWork.Do ( u => u.Exchanges.UpdateExchange ( exchange.Id, lastUpdate: coin.Time.ToUniversalTime ( ) ) );
+		private static void UpdateExchangeLastUpdateInDb ( CryptoExchangeBase exchange,
+		                                                   CryptoCoin coin ) =>
+			UnitOfWork.Do (
+				u => u.Exchanges.UpdateExchange ( exchange.Id, lastUpdate: coin.Time.ToUniversalTime ( ) ) );
 
 		private void Dispose ( bool disposing )
 		{

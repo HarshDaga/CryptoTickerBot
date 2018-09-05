@@ -12,9 +12,8 @@ namespace CryptoTickerBot.Data.Repositories
 {
 	public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
 	{
-		protected readonly CtbContext Context;
-
 		protected virtual IQueryable<TEntity> AllEntities { get; }
+		protected readonly CtbContext Context;
 
 		public Repository ( [NotNull] CtbContext context )
 		{
@@ -34,7 +33,8 @@ namespace CryptoTickerBot.Data.Repositories
 		public virtual IEnumerable<TEntity> Find ( Expression<Func<TEntity, bool>> predicate ) =>
 			AllEntities.Where ( predicate );
 
-		public virtual async Task<TEntity> GetAsync ( object id, CancellationToken cancellationToken ) =>
+		public virtual async Task<TEntity> GetAsync ( object id,
+		                                              CancellationToken cancellationToken ) =>
 			await Context.Set<TEntity> ( ).FindAsync ( cancellationToken, id ).ConfigureAwait ( false );
 
 		public virtual async Task<IEnumerable<TEntity>> GetAllAsync ( CancellationToken cancellationToken ) =>

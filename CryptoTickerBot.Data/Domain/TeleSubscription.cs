@@ -12,8 +12,6 @@ namespace CryptoTickerBot.Data.Domain
 {
 	public class TeleSubscription
 	{
-		private Dictionary<CryptoCoinId, CryptoCoinValue> lastSignificantPrice;
-
 		[Key]
 		[DatabaseGenerated ( DatabaseGeneratedOption.Identity )]
 		public int Id { get; set; }
@@ -52,6 +50,8 @@ namespace CryptoTickerBot.Data.Domain
 			get => ParseJson ( );
 			set => LastSignificantPriceJson = JsonConvert.SerializeObject ( value.Values );
 		}
+
+		private Dictionary<CryptoCoinId, CryptoCoinValue> lastSignificantPrice;
 
 		private TeleSubscription ( )
 		{

@@ -15,14 +15,14 @@ namespace CryptoTickerBot.WebSocket.Services
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
+		protected CryptoTickerBotCore Ctb { get; }
+		protected HashSet<WebSocketIncomingMessage> Subscriptions { get; }
+
 		protected readonly Dictionary<string, Action<string, WebSocketIncomingMessage>>
 			AvailableCommands;
 
 		protected readonly Dictionary<string, Action<string, WebSocketIncomingMessage, bool>>
 			AvailableSubscriptions;
-
-		protected CryptoTickerBotCore Ctb { get; }
-		protected HashSet<WebSocketIncomingMessage> Subscriptions { get; }
 
 		public CtbWebSocketService ( CryptoTickerBotCore ctb )
 		{
@@ -140,14 +140,16 @@ namespace CryptoTickerBot.WebSocket.Services
 			}
 		}
 
-		protected void Send ( string @event, dynamic data )
+		protected void Send ( string @event,
+		                      dynamic data )
 		{
 			SendAsync ( new WebSocketMessage ( @event, data ), null );
 		}
 
 		#region CommandHandlers
 
-		private void GetBestPairCommand ( string s, WebSocketIncomingMessage im )
+		private void GetBestPairCommand ( string s,
+		                                  WebSocketIncomingMessage im )
 		{
 			Send ( s, new BestPairSummary ( Ctb.CompareTable ) );
 		}
@@ -169,7 +171,8 @@ namespace CryptoTickerBot.WebSocket.Services
 					exchange.Next -= CoinValueOnNextHandler;
 		}
 
-		private void CoinValueOnNextHandler ( CryptoExchangeBase e, CryptoCoin c )
+		private void CoinValueOnNextHandler ( CryptoExchangeBase e,
+		                                      CryptoCoin c )
 		{
 			Send ( "CoinValueUpdate", new CryptoCoinSummary ( e, c ) );
 		}

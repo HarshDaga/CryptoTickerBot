@@ -25,7 +25,9 @@ namespace CryptoTickerBot.Data.Domain
 		public CryptoExchange Exchange { get; set; }
 		public CryptoCoin Coin { get; set; }
 
-		public DepositFees ( CryptoCoinId coinId, CryptoExchangeId exchangeId, decimal value )
+		public DepositFees ( CryptoCoinId coinId,
+		                     CryptoExchangeId exchangeId,
+		                     decimal value )
 		{
 			CoinId     = coinId;
 			ExchangeId = exchangeId;

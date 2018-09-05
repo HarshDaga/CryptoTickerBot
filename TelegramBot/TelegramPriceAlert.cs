@@ -1,20 +1,14 @@
 ﻿using System;
+using CryptoTickerBot;
 using CryptoTickerBot.Data.Enums;
 using CryptoTickerBot.Exchanges.Core;
 using JetBrains.Annotations;
 using NLog;
-using CryptoCoin = CryptoTickerBot.CryptoCoin;
 
 namespace TelegramBot
 {
 	public class TelegramPriceAlert : CryptoExchangeSubscription
 	{
-		public delegate void TelegramPriceAlertTriggeredDelegate (
-			TelegramPriceAlert alert,
-			CryptoCoin prevPrice,
-			CryptoCoin newPrice
-		);
-
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
 		public Guid Id { get; }
@@ -43,6 +37,12 @@ namespace TelegramBot
 			CoinId       = coinId;
 			InitialPrice = ( initialPrice ?? exchange.ExchangeData[coinId] ).Clone ( );
 		}
+
+		public delegate void TelegramPriceAlertTriggeredDelegate (
+			TelegramPriceAlert alert,
+			CryptoCoin prevPrice,
+			CryptoCoin newPrice
+		);
 
 		[UsedImplicitly]
 		public event TelegramPriceAlertTriggeredDelegate Triggered;

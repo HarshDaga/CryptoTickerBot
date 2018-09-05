@@ -8,11 +8,13 @@ namespace TelegramBot.Extensions
 	public static class ListExtensions
 	{
 		[DebuggerStepThrough]
-		public static bool Contains ( this IEnumerable<TelegramBotUser> users, int id ) =>
+		public static bool Contains ( this IEnumerable<TelegramBotUser> users,
+		                              int id ) =>
 			users.Any ( x => x.Id == id );
 
 		[DebuggerStepThrough]
-		public static TelegramBotUser Get ( this IEnumerable<TelegramBotUser> users, int id ) =>
+		public static TelegramBotUser Get ( this IEnumerable<TelegramBotUser> users,
+		                                    int id ) =>
 			users.FirstOrDefault ( x => x.Id == id );
 
 		public static TelegramBotUser AddOrUpdate (

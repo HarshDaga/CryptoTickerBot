@@ -46,7 +46,8 @@ namespace CryptoTickerBot.Exchanges
 			}
 		}
 
-		protected override void DeserializeData ( dynamic data, CryptoCoinId id )
+		protected override void DeserializeData ( dynamic data,
+		                                          CryptoCoinId id )
 		{
 			var stats = (CoinStats) data;
 			decimal InrToUsd ( decimal amount ) => FiatConverter.Convert ( amount, FiatCurrency.INR, FiatCurrency.USD );

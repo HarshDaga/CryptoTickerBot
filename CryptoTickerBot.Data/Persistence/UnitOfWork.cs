@@ -12,6 +12,12 @@ namespace CryptoTickerBot.Data.Persistence
 	{
 		private static readonly object Lock = new object ( );
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
+
+		public ICryptoCoinRepository Coins { get; }
+		public ICryptoCoinValueRepository CoinValues { get; }
+		public ICryptoExchangeRepository Exchanges { get; }
+		public ITeleBotUserRepository Users { get; }
+		public ITeleSubscriptionRepository Subscriptions { get; }
 		private readonly CtbContext context;
 
 		public UnitOfWork ( CtbContext context )
@@ -28,12 +34,6 @@ namespace CryptoTickerBot.Data.Persistence
 		{
 			context.Dispose ( );
 		}
-
-		public ICryptoCoinRepository Coins { get; }
-		public ICryptoCoinValueRepository CoinValues { get; }
-		public ICryptoExchangeRepository Exchanges { get; }
-		public ITeleBotUserRepository Users { get; }
-		public ITeleSubscriptionRepository Subscriptions { get; }
 
 		[DebuggerStepThrough]
 		public int Complete ( ) => context.SaveChanges ( );

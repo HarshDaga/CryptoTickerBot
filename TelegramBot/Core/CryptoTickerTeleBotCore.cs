@@ -25,17 +25,17 @@ namespace TelegramBot.Core
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 		private static readonly Logger TeleMessageLogger = LogManager.GetLogger ( "TeleMessageReceived" );
 
-		private TelegramBotClient bot;
-
-		private Dictionary<string, (UserRole role, MessageHandlerDelegate handler)> commands;
-		private User me;
-
 		public CryptoTickerBotCore Ctb { get; private set; }
 
 		public IDictionary<CryptoExchangeId, CryptoExchangeBase> Exchanges => Ctb.Exchanges;
 
 		public string BotToken { get; }
 		public List<TelegramBotUser> Users { get; private set; }
+
+		private TelegramBotClient bot;
+
+		private Dictionary<string, (UserRole role, MessageHandlerDelegate handler)> commands;
+		private User me;
 
 		public TeleBot ( string botToken,
 		                 CryptoTickerBotCore ctb )

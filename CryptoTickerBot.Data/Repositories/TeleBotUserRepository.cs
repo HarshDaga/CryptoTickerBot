@@ -15,7 +15,8 @@ namespace CryptoTickerBot.Data.Repositories
 		public void AddOrUpdate ( [NotNull] TeleBotUser user ) =>
 			Context.TeleBotUsers.AddOrUpdate ( user );
 
-		public void UpdateRole ( int id, UserRole role )
+		public void UpdateRole ( int id,
+		                         UserRole role )
 		{
 			var user = Context.TeleBotUsers.Find ( id );
 			if ( user != null )

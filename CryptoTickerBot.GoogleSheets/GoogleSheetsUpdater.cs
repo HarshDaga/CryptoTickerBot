@@ -26,9 +26,6 @@ namespace CryptoTickerBot.GoogleSheets
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 		private static readonly string[] Scopes = {SheetsService.Scope.Spreadsheets};
 
-		private ImmutableHashSet<CryptoExchangeId> pendingUpdates =
-			ImmutableHashSet<CryptoExchangeId>.Empty;
-
 		public SheetsService Service { get; }
 		public CryptoTickerBotCore Ctb { get; }
 		public CancellationTokenSource Cts { get; }
@@ -38,6 +35,9 @@ namespace CryptoTickerBot.GoogleSheets
 		public string SheetName { get; }
 		public string SheetId { get; }
 		public IDictionary<CryptoExchangeId, string> SheetsRanges { get; }
+
+		private ImmutableHashSet<CryptoExchangeId> pendingUpdates =
+			ImmutableHashSet<CryptoExchangeId>.Empty;
 
 		private GoogleSheetsUpdater (
 			[NotNull] SheetsService service,
@@ -59,7 +59,8 @@ namespace CryptoTickerBot.GoogleSheets
 			UpdateFrequency = updateFrequency;
 
 			foreach ( var exchange in Ctb.Exchanges.Values )
-				exchange.Changed += ( ex, coin ) => pendingUpdates = pendingUpdates.Add ( ex.Id );
+				exchange.Changed += ( ex,
+				                      coin ) => pendingUpdates = pendingUpdates.Add ( ex.Id );
 
 			Start ( );
 		}
@@ -158,7 +159,8 @@ namespace CryptoTickerBot.GoogleSheets
 					Enabled   = true,
 					AutoReset = false
 				};
-				updateTimer.Elapsed += async ( sender, eventArgs ) =>
+				updateTimer.Elapsed += async ( sender,
+				                               eventArgs ) =>
 				{
 					if ( Cts.IsCancellationRequested )
 						return;

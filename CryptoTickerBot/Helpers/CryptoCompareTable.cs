@@ -27,7 +27,8 @@ namespace CryptoTickerBot.Helpers
 			Exchanges[exchange.Id] = exchange;
 
 		[Pure]
-		public CoinMap GetPair ( CryptoExchangeId from, CryptoExchangeId to )
+		public CoinMap GetPair ( CryptoExchangeId from,
+		                         CryptoExchangeId to )
 		{
 			if ( !Exchanges.ContainsKey ( from ) || !Exchanges.ContainsKey ( to ) )
 				return null;
@@ -115,8 +116,8 @@ namespace CryptoTickerBot.Helpers
 			CryptoExchangeId to
 		)
 		{
-			var best = compare[from][to].MaxBy ( x => x.Value ).Key;
-			var leastWorst = compare[to][from].MaxBy ( x => x.Value ).Key;
+			var best = compare[from][to].MaxBy ( x => x.Value ).Last ( ).Key;
+			var leastWorst = compare[to][from].MaxBy ( x => x.Value ).Last ( ).Key;
 			var profit =
 				( 1m + compare[from][to][best] )
 				* ( 1m + compare[to][from][leastWorst] )
@@ -127,7 +128,8 @@ namespace CryptoTickerBot.Helpers
 
 		[Pure]
 		public (CryptoCoinId best, CryptoCoinId leastWorst, decimal profit, decimal fees) GetBestPair (
-			CryptoExchangeId from, CryptoExchangeId to
+			CryptoExchangeId from,
+			CryptoExchangeId to
 		)
 		{
 			var compare = GetAll ( );
@@ -159,7 +161,8 @@ namespace CryptoTickerBot.Helpers
 			var all = GetAll ( );
 			var exchanges = Exchanges.Keys.ToList ( );
 			var bestGain = decimal.MinValue;
-			( CryptoExchangeId from, CryptoExchangeId to, CryptoCoinId first, CryptoCoinId second, decimal profit, decimal fees )
+			( CryptoExchangeId from, CryptoExchangeId to, CryptoCoinId first, CryptoCoinId second, decimal profit,
+				decimal fees )
 				result = default;
 
 			foreach ( var from in exchanges )

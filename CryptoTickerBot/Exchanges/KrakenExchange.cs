@@ -43,7 +43,8 @@ namespace CryptoTickerBot.Exchanges
 			}
 		}
 
-		protected override void DeserializeData ( dynamic data, CryptoCoinId id )
+		protected override void DeserializeData ( dynamic data,
+		                                          CryptoCoinId id )
 		{
 			KrakenCoinInfo coinInfo = data;
 

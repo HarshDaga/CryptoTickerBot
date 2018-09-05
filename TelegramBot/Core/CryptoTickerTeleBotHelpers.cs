@@ -20,10 +20,10 @@ namespace TelegramBot.Core
 {
 	public partial class TeleBot
 	{
-		private readonly object subscriptionLock = new object ( );
-		private readonly object alertLock = new object ( );
 		public List<TelegramSubscription> Subscriptions { get; private set; }
 		public List<TelegramPriceAlert> Alerts { get; private set; }
+		private readonly object subscriptionLock = new object ( );
+		private readonly object alertLock = new object ( );
 
 		private void ParseMessage ( Message message,
 		                            out string command,
@@ -157,12 +157,10 @@ namespace TelegramBot.Core
 			await Task.Run ( ( ) => SpinWait.SpinUntil ( ( ) => exchange.ExchangeData.ContainsKey ( coinId ),
 			                                             TimeSpan.FromSeconds ( 30 ) ) );
 			if ( !exchange.ExchangeData.ContainsKey ( coinId ) )
-			{
 				await SendBlockText (
 					message,
 					$"ERROR: {exchange.Name} does not have any data for {coinId}"
 				).ConfigureAwait ( false );
-			}
 
 			var alert = new TelegramPriceAlert ( exchange, message.Chat.Id,
 			                                     message.From.Username, price, coinId );

@@ -28,7 +28,8 @@ namespace CryptoTickerBot.Data.Repositories
 				.ConfigureAwait ( false );
 
 		public override async Task<IEnumerable<CryptoCoinValue>> FindAsync (
-			Expression<Func<CryptoCoinValue, bool>> predicate, CancellationToken cancellationToken ) =>
+			Expression<Func<CryptoCoinValue, bool>> predicate,
+			CancellationToken cancellationToken ) =>
 			await AllEntities
 				.Where ( predicate )
 				.ToListAsync ( cancellationToken )
@@ -93,7 +94,8 @@ namespace CryptoTickerBot.Data.Repositories
 		public async Task<IEnumerable<CryptoCoinValue>> GetLastAsync (
 			CryptoCoinId coinId,
 			CryptoExchangeId exchangeId,
-			int count, CancellationToken cancellationToken ) =>
+			int count,
+			CancellationToken cancellationToken ) =>
 			await AllEntities
 				.Where ( x => x.CoinId == coinId && x.ExchangeId == exchangeId )
 				.OrderByDescending ( x => x.Time )
