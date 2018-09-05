@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using CryptoTickerBot.Core.Exchanges.Base;
+using CryptoTickerBot.Core.Abstractions;
 using CryptoTickerBot.Enums;
 using Flurl.Http;
 using Newtonsoft.Json;

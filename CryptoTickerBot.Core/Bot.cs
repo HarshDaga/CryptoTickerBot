@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -15,17 +14,19 @@ using static CryptoTickerBot.Enums.CryptoExchangeId;
 
 namespace CryptoTickerBot.Core
 {
-	public class Bot : IDisposable
+	public class Bot : IBot
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
-		public static readonly IDictionary<CryptoExchangeId, ICryptoExchange> AllExchanges;
-		public IDictionary<CryptoExchangeId, ICryptoExchange> Exchanges { get; private set; }
+		public static readonly ImmutableDictionary<CryptoExchangeId, ICryptoExchange> AllExchanges;
+		public ImmutableDictionary<CryptoExchangeId, ICryptoExchange> Exchanges { get; private set; }
 
 		public CancellationTokenSource Cts { get; private set; }
 
 		public bool IsRunning { get; private set; }
 		public bool IsInitialized { get; private set; }
+
+		public ImmutableHashSet<IBotService> Services { get; private set; } = ImmutableHashSet<IBotService>.Empty;
 
 		public ICryptoExchange this [ CryptoExchangeId index ]
 		{
@@ -87,21 +88,6 @@ namespace CryptoTickerBot.Core
 		public async Task StartAsync ( CancellationTokenSource cts = null ) =>
 			await StartAsync ( cts, AllExchanges.Keys.ToArray ( ) );
 
-		private void InitExchanges ( )
-		{
-			foreach ( var exchange in Exchanges.Values )
-			{
-				exchange.Next    += Next;
-				exchange.Changed += Changed;
-
-				//CompareTable.AddExchange ( exchange );
-
-				exchange.StartReceivingAsync ( Cts );
-			}
-
-			IsInitialized = true;
-		}
-
 		public void Stop ( )
 		{
 			if ( !IsRunning )
@@ -115,6 +101,66 @@ namespace CryptoTickerBot.Core
 				Cts.Cancel ( false );
 
 			Terminate?.Invoke ( this );
+		}
+
+		public bool ContainsService ( IBotService service ) =>
+			Services.Contains ( service );
+
+		public async Task Attach ( IBotService service )
+		{
+			if ( ContainsService ( service ) )
+				return;
+
+			Services = Services.Add ( service );
+			await service.AttachTo ( this );
+		}
+
+		public async Task Detach ( IBotService service )
+		{
+			if ( !ContainsService ( service ) )
+				return;
+
+			Services = Services.Remove ( service );
+			await service.Detach ( );
+		}
+
+		public async Task DetachAll<T> ( ) where T : IBotService
+		{
+			var services = Services.OfType<T> ( ).ToList ( );
+
+			foreach ( var service in services )
+				await Detach ( service );
+		}
+
+		private void InitExchanges ( )
+		{
+			foreach ( var exchange in Exchanges.Values )
+			{
+				exchange.Next    += OnNext;
+				exchange.Changed += OnChanged;
+
+				//CompareTable.AddExchange ( exchange );
+
+				exchange.StartReceivingAsync ( Cts );
+			}
+
+			IsInitialized = true;
+		}
+
+		private async Task OnNext ( ICryptoExchange exchange,
+		                            CryptoCoin coin )
+		{
+			foreach ( var service in Services )
+				await service.OnNext ( exchange, coin );
+			Next?.Invoke ( exchange, coin );
+		}
+
+		private async Task OnChanged ( ICryptoExchange exchange,
+		                               CryptoCoin coin )
+		{
+			foreach ( var service in Services )
+				await service.OnChanged ( exchange, coin );
+			Changed?.Invoke ( exchange, coin );
 		}
 	}
 

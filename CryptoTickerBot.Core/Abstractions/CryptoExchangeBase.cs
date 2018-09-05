@@ -15,7 +15,7 @@ using Tababular;
 
 // ReSharper disable StaticMemberInGenericType
 
-namespace CryptoTickerBot.Core.Exchanges.Base
+namespace CryptoTickerBot.Core.Abstractions
 {
 	public abstract class CryptoExchangeBase<T> : ICryptoExchange
 	{

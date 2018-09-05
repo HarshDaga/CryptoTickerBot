@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
-using CryptoTickerBot.Core.Exchanges.Base;
+using CryptoTickerBot.Core.Abstractions;
 using CryptoTickerBot.Enums;
 using Newtonsoft.Json;
 using NLog;

@@ -37,4 +37,8 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Exchanges\Base\" />
+  </ItemGroup>
+
 </Project>

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CryptoTickerBot.Core
+namespace CryptoTickerBot.Core.Helpers
 {
 	public struct PriceChange
 	{

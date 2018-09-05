@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using CryptoTickerBot.Core.Exchanges.Base;
+using CryptoTickerBot.Core.Abstractions;
 using CryptoTickerBot.Core.Helpers;
 using CryptoTickerBot.Enums;
 using Flurl.Http;

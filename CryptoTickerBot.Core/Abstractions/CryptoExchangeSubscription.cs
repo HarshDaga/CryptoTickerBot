@@ -1,7 +1,7 @@
 ﻿using System;
 using CryptoTickerBot.Core.Interfaces;
 
-namespace CryptoTickerBot.Core.Exchanges.Base
+namespace CryptoTickerBot.Core.Abstractions
 {
 	public abstract class CryptoExchangeSubscription : IDisposable, IObserver<CryptoCoin>
 	{

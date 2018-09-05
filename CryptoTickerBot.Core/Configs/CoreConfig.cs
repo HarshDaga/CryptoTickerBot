@@ -12,7 +12,7 @@ namespace CryptoTickerBot.Core.Configs
 	{
 		public string ConfigFileName { get; } = "CoreConfig";
 
-		public string FixerApiKey { get; set; } = "6d15b97cbd19f58dfb159baf3289ca17";
+		public string FixerApiKey { get; set; }
 
 		public List<CryptoExchangeApiInfo> ExchangeApiInfo { get; set; } = new List<CryptoExchangeApiInfo>
 		{

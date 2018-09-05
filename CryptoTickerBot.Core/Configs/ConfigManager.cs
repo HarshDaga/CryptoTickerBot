@@ -7,7 +7,7 @@ using NLog;
 
 // ReSharper disable StaticMemberInGenericType
 
-namespace CryptoTickerBot.Core
+namespace CryptoTickerBot.Core.Configs
 {
 	public static class ConfigManager
 	{
