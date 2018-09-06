@@ -29,7 +29,7 @@ namespace CryptoTickerBot.Core.Exchanges
 					var data = JsonConvert.DeserializeObject<KoinexTicker> ( json );
 
 					foreach ( var kp in data.Stats.Inr )
-						Update ( kp.Value, kp.Key );
+						Update ( kp.Value, $"{kp.Key}INR" );
 				}
 				catch ( Exception e )
 				{

@@ -28,7 +28,7 @@ namespace CryptoTickerBot.Core.Exchanges
 				{
 					var url = $"{TickerUrl}{symbol}/inr/";
 					var data = await url.GetJsonAsync<TickerDatum> ( ct ).ConfigureAwait ( false );
-					Update ( data, symbol );
+					Update ( data, $"{symbol}INR" );
 					await Task.Delay ( PollingRate, ct ).ConfigureAwait ( false );
 				}
 		}
