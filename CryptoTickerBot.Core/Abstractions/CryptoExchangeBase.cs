@@ -30,6 +30,8 @@ namespace CryptoTickerBot.Core.Abstractions
 		public string TickerUrl { get; protected set; }
 		public OrderedDictionary<string, string> SymbolMappings { get; protected set; }
 		public CryptoExchangeId Id { get; }
+		public ImmutableHashSet<string> BaseSymbols => Markets.BaseSymbols;
+		public Markets Markets { get; protected set; }
 		public IDictionary<string, CryptoCoin> ExchangeData { get; protected set; }
 		public ImmutableHashSet<IObserver<CryptoCoin>> Observers { get; set; }
 		public IDictionary<string, decimal> DepositFees { get; }
@@ -80,6 +82,7 @@ namespace CryptoTickerBot.Core.Abstractions
 			CooldownPeriod = exchange.CooldownPeriod;
 			WithdrawalFees = new Dictionary<string, decimal> ( exchange.WithdrawalFees );
 			DepositFees    = new Dictionary<string, decimal> ( exchange.DepositFees );
+			Markets        = new Markets ( exchange.BaseSymbols );
 			SymbolMappings = exchange.SymbolMappings.Clone ( );
 
 			Policy = Policy
@@ -175,6 +178,7 @@ namespace CryptoTickerBot.Core.Abstractions
 			ExchangeData[symbol] = new CryptoCoin ( symbol );
 
 			DeserializeData ( data, symbol );
+			Markets.AddOrUpdate ( ExchangeData[symbol] );
 
 			LastUpdate = DateTime.UtcNow;
 			OnNext ( ExchangeData[symbol] );

@@ -32,16 +32,18 @@ namespace CryptoTickerBot.Core.Configs
 				SymbolMappings = new OrderedDictionary<string, string>
 				{
 					["BCC"] = "BCH"
-				}
+				},
+				BaseSymbols = new List<string> {"USDT", "BTC", "ETH", "BNB"}
 			},
 			new CryptoExchangeApiInfo
 			{
-				Id        = CryptoExchangeId.Coinbase,
-				Name      = "Coinbase",
-				Url       = "https://www.coinbase.com/",
-				TickerUrl = "wss://ws-feed.pro.coinbase.com",
-				BuyFees   = 0.3m,
-				SellFees  = 0.3m
+				Id          = CryptoExchangeId.Coinbase,
+				Name        = "Coinbase",
+				Url         = "https://www.coinbase.com/",
+				TickerUrl   = "wss://ws-feed.pro.coinbase.com",
+				BuyFees     = 0.3m,
+				SellFees    = 0.3m,
+				BaseSymbols = new List<string> {"BTC", "USD", "EUR", "GBP"}
 			},
 			new CryptoExchangeApiInfo
 			{
@@ -51,7 +53,8 @@ namespace CryptoTickerBot.Core.Configs
 				TickerUrl   = "https://api.coindelta.com/api/v1/public/getticker/",
 				BuyFees     = 0.3m,
 				SellFees    = 0.3m,
-				PollingRate = FromSeconds ( 60 )
+				PollingRate = FromSeconds ( 60 ),
+				BaseSymbols = new List<string> {"USDT", "INR"}
 			},
 			new CryptoExchangeApiInfo
 			{
@@ -61,7 +64,8 @@ namespace CryptoTickerBot.Core.Configs
 				TickerUrl   = "https://koinex.in/api/ticker",
 				BuyFees     = 0.25m,
 				SellFees    = 0m,
-				PollingRate = FromSeconds ( 2 )
+				PollingRate = FromSeconds ( 2 ),
+				BaseSymbols = new List<string> {"INR"}
 			},
 			new CryptoExchangeApiInfo
 			{
@@ -92,7 +96,8 @@ namespace CryptoTickerBot.Core.Configs
 					["XXMR"] = "XMR",
 					["XXRP"] = "XRP",
 					["XZEC"] = "ZEC"
-				}
+				},
+				BaseSymbols = new List<string> {"BTC", "ETH", "USD", "EUR", "GBP", "CAD", "JPY"}
 			},
 
 			new CryptoExchangeApiInfo
@@ -101,7 +106,8 @@ namespace CryptoTickerBot.Core.Configs
 				Name        = "Bitstamp",
 				Url         = "https://www.bitstamp.net/",
 				TickerUrl   = "de504dc5763aeef9ff52",
-				PollingRate = FromSeconds ( 1.5 )
+				PollingRate = FromSeconds ( 1.5 ),
+				BaseSymbols = new List<string> {"BTC", "USD", "EUR"}
 			},
 
 			new CryptoExchangeApiInfo
@@ -111,7 +117,8 @@ namespace CryptoTickerBot.Core.Configs
 				Url            = "https://www.zebpay.com/",
 				TickerUrl      = "https://www.zebapi.com/api/v1/market/ticker-new/",
 				PollingRate    = FromSeconds ( 5 ),
-				CooldownPeriod = FromMinutes ( 5 )
+				CooldownPeriod = FromMinutes ( 5 ),
+				BaseSymbols = new List<string> {"INR"}
 			}
 		};
 
@@ -128,6 +135,8 @@ namespace CryptoTickerBot.Core.Configs
 
 			public OrderedDictionary<string, string> SymbolMappings { get; set; } =
 				new OrderedDictionary<string, string> ( );
+
+			public List<string> BaseSymbols { get; set; } = new List<string> ( );
 
 			public TimeSpan PollingRate { get; set; } = FromSeconds ( 5 );
 			public TimeSpan CooldownPeriod { get; set; } = FromSeconds ( 60 );

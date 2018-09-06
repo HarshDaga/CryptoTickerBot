@@ -31,6 +31,8 @@ namespace CryptoTickerBot.Core.Interfaces
 		DateTime LastChange { get; }
 		TimeSpan LastChangeDuration { get; }
 		int Count { get; }
+		ImmutableHashSet<string> BaseSymbols { get; }
+		Markets Markets { get; }
 		IDictionary<string, CryptoCoin> ExchangeData { get; }
 		IDictionary<string, decimal> DepositFees { get; }
 		IDictionary<string, decimal> WithdrawalFees { get; }
