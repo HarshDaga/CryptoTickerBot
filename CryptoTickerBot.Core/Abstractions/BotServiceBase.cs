@@ -49,7 +49,8 @@ namespace CryptoTickerBot.Core.Abstractions
 		{
 		}
 
-		public bool Equals ( IBotService other ) => Guid.Equals ( other?.Guid );
+		public bool Equals ( IBotService other ) =>
+			Guid.Equals ( other?.Guid );
 
 		public virtual Task StartAsync ( ) =>
 			Task.CompletedTask;
@@ -59,10 +60,13 @@ namespace CryptoTickerBot.Core.Abstractions
 
 		public override bool Equals ( object obj )
 		{
-			if ( ReferenceEquals ( null, obj ) ) return false;
-			if ( ReferenceEquals ( this, obj ) ) return true;
-			if ( obj.GetType ( ) != GetType ( ) ) return false;
-			return Equals ( (IBotService) obj );
+			if ( obj is null )
+				return false;
+			if ( ReferenceEquals ( this, obj ) )
+				return true;
+			if ( obj is IBotService service )
+				return Equals ( service );
+			return false;
 		}
 
 		public override int GetHashCode ( ) => Guid.GetHashCode ( );

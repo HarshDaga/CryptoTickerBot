@@ -17,7 +17,7 @@ namespace CryptoTickerBot.Core.Exchanges
 
 		public BinanceExchange ( ) : base ( CryptoExchangeId.Binance )
 		{
-			TickerUrl = $"{TickerUrl}@{PollingRate.Milliseconds}ms";
+			TickerUrl = $"{TickerUrl}@{PollingRate.TotalMilliseconds}ms";
 		}
 
 		protected override async Task GetExchangeData ( CancellationToken ct )
@@ -30,9 +30,10 @@ namespace CryptoTickerBot.Core.Exchanges
 			using ( var ws = new PureWebSocket ( TickerUrl, options ) )
 			{
 				ws.OnMessage += WsOnMessage;
-				ws.Connect ( );
+				if ( !ws.Connect ( ) )
+					Logger.Error ( "Couldn't connect to Binance" );
 
-				while ( ws.State == WebSocketState.Open )
+				while ( ws.State != WebSocketState.Closed )
 					await Task.Delay ( CooldownPeriod, ct ).ConfigureAwait ( false );
 			}
 		}

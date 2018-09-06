@@ -82,13 +82,13 @@ namespace CryptoTickerBot.Core
 
 			InitExchanges ( );
 
-			Cts.Token.Register ( Stop );
+			Cts.Token.Register ( async ( ) => await StopAsync ( ) );
 		}
 
 		public async Task StartAsync ( CancellationTokenSource cts = null ) =>
 			await StartAsync ( cts, AllExchanges.Keys.ToArray ( ) );
 
-		public void Stop ( )
+		public async Task StopAsync ( )
 		{
 			if ( !IsRunning )
 				return;
@@ -99,6 +99,11 @@ namespace CryptoTickerBot.Core
 			FiatConverter.StopMonitor ( );
 			if ( !Cts.IsCancellationRequested )
 				Cts.Cancel ( false );
+
+			var services = Services.ToList ( );
+
+			foreach ( var service in services )
+				await Detach ( service );
 
 			Terminate?.Invoke ( this );
 		}

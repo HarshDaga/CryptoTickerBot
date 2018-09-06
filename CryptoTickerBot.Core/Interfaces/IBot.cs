@@ -25,7 +25,7 @@ namespace CryptoTickerBot.Core.Interfaces
 		Task StartAsync ( CancellationTokenSource cts = null,
 		                  params CryptoExchangeId[] exchangeIds );
 
-		void Stop ( );
+		Task StopAsync ( );
 
 		bool ContainsService ( IBotService service );
 		Task Attach ( IBotService service );

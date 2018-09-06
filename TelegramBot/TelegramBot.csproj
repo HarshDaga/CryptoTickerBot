@@ -200,10 +200,6 @@
       <Project>{e6348a63-f393-4dcd-b6bd-7c40301de399}</Project>
       <Name>CryptoTickerBot.Data</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CryptoTickerBot.GoogleSheets\CryptoTickerBot.GoogleSheets.csproj">
-      <Project>{60B0B51C-A8E5-4817-ABDB-6ECA39534F35}</Project>
-      <Name>CryptoTickerBot.GoogleSheets</Name>
-    </ProjectReference>
     <ProjectReference Include="..\CryptoTickerBot\CryptoTickerBot.csproj">
       <Project>{e5b5113a-89f5-4211-97ef-388130a85ffa}</Project>
       <Name>CryptoTickerBot</Name>
