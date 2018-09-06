@@ -57,6 +57,10 @@ namespace CryptoTickerBot.Core.Abstractions
 			set => ExchangeData[symbol] = value.Clone ( );
 		}
 
+		public CryptoCoin this [ string baseSymbol,
+		                         string symbol ] =>
+			Markets[baseSymbol, symbol];
+
 		private CancellationTokenSource cts;
 
 		protected CryptoExchangeBase ( CryptoExchangeId id )

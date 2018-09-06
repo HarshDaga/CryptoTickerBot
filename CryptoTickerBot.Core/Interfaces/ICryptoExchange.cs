@@ -41,6 +41,10 @@ namespace CryptoTickerBot.Core.Interfaces
 		[Pure]
 		CryptoCoin this [ string symbol ] { get; set; }
 
+		[Pure]
+		CryptoCoin this [ string baseSymbol,
+		                  string symbol ] { get; }
+
 		event OnUpdateDelegate Changed;
 		event OnUpdateDelegate Next;
 
