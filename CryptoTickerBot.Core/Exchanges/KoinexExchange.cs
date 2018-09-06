@@ -43,11 +43,9 @@ namespace CryptoTickerBot.Core.Exchanges
 		protected override void DeserializeData ( KoinexCoin data,
 		                                          string id )
 		{
-			decimal InrToUsd ( decimal amount ) => FiatConverter.Convert ( amount, "INR", "USD" );
-
-			ExchangeData[id].LowestAsk  = InrToUsd ( data.LowestAsk );
-			ExchangeData[id].HighestBid = InrToUsd ( data.HighestBid );
-			ExchangeData[id].Rate       = InrToUsd ( data.LastTradedPrice );
+			ExchangeData[id].LowestAsk  = data.LowestAsk;
+			ExchangeData[id].HighestBid = data.HighestBid;
+			ExchangeData[id].Rate       = data.LastTradedPrice;
 		}
 
 		#region JSON Classes

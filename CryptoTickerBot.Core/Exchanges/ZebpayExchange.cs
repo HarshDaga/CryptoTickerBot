@@ -36,11 +36,9 @@ namespace CryptoTickerBot.Core.Exchanges
 		protected override void DeserializeData ( TickerDatum data,
 		                                          string id )
 		{
-			decimal InrToUsd ( decimal amount ) => FiatConverter.Convert ( amount, "INR", "USD" );
-
-			ExchangeData[id].LowestAsk  = InrToUsd ( data.Buy );
-			ExchangeData[id].HighestBid = InrToUsd ( data.Sell );
-			ExchangeData[id].Rate       = InrToUsd ( data.Last );
+			ExchangeData[id].LowestAsk  = data.Buy;
+			ExchangeData[id].HighestBid = data.Sell;
+			ExchangeData[id].Rate       = data.Last;
 		}
 
 		public class TickerDatum

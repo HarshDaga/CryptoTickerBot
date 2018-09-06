@@ -34,12 +34,9 @@ namespace CryptoTickerBot.Core.Exchanges
 		protected override void DeserializeData ( CoinDeltaCoin data,
 		                                          string id )
 		{
-			decimal InrToUsd ( decimal amount ) =>
-				FiatConverter.Convert ( amount, data.MarketName.Contains ( "inr" ) ? "INR" : "USD", "USD" );
-
-			ExchangeData[id].LowestAsk  = InrToUsd ( data.Ask );
-			ExchangeData[id].HighestBid = InrToUsd ( data.Bid );
-			ExchangeData[id].Rate       = InrToUsd ( data.Last );
+			ExchangeData[id].LowestAsk  = data.Ask;
+			ExchangeData[id].HighestBid = data.Bid;
+			ExchangeData[id].Rate       = data.Last;
 		}
 
 		public class CoinDeltaCoin
