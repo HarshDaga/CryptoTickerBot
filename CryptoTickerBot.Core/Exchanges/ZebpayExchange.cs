@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
 using CryptoTickerBot.Core.Helpers;
@@ -23,14 +24,22 @@ namespace CryptoTickerBot.Core.Exchanges
 
 		protected override async Task GetExchangeData ( CancellationToken ct )
 		{
+			await FetchAll ( TimeSpan.FromSeconds ( 1 ), ct );
+
 			while ( !ct.IsCancellationRequested )
-				foreach ( var symbol in Symbols )
-				{
-					var url = $"{TickerUrl}{symbol}/inr/";
-					var data = await url.GetJsonAsync<TickerDatum> ( ct ).ConfigureAwait ( false );
-					Update ( data, $"{symbol}INR" );
-					await Task.Delay ( PollingRate, ct ).ConfigureAwait ( false );
-				}
+				await FetchAll ( PollingRate, ct );
+		}
+
+		private async Task FetchAll ( TimeSpan frequency,
+		                              CancellationToken ct )
+		{
+			foreach ( var symbol in Symbols )
+			{
+				var url = $"{TickerUrl}{symbol}/inr/";
+				var data = await url.GetJsonAsync<TickerDatum> ( ct ).ConfigureAwait ( false );
+				Update ( data, $"{symbol}INR" );
+				await Task.Delay ( frequency, ct ).ConfigureAwait ( false );
+			}
 		}
 
 		protected override void DeserializeData ( TickerDatum data,

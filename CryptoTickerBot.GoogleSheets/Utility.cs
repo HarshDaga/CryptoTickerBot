@@ -69,7 +69,7 @@ namespace CryptoTickerBot.GoogleSheets
 						                        .Prepend ( y.Key )
 						                        .ToList ( ) ) )
 				.Prepend ( new List<object> ( ) )
-				.Prepend ( new List<object> {exchange.Name} )
+				.Prepend ( new List<object> {$"{exchange.Name} ({exchange.Count})"} )
 				.ToList ( );
 		}
 	}

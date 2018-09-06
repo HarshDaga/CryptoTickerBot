@@ -17,6 +17,9 @@ namespace CryptoTickerBot.GoogleSheets
 	public class GoogleSheetsUpdaterService : BotServiceBase
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
+
+		private int previousCount;
+
 		public SheetsConfig Config { get; }
 
 		public SheetsService Service { get; }
@@ -83,7 +86,9 @@ namespace CryptoTickerBot.GoogleSheets
 		{
 			try
 			{
-				await ClearSheet ( );
+				if ( valueRange.Values.Count != previousCount )
+					await ClearSheet ( );
+				previousCount = valueRange.Values.Count;
 
 				var request = Service.Spreadsheets.Values.Update ( valueRange, Config.SpreadSheetId, valueRange.Range );
 				request.ValueInputOption =

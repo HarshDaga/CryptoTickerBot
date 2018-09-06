@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using CryptoTickerBot.Core.Extensions;
 
 namespace CryptoTickerBot.Core.Collections
 {
@@ -48,10 +49,10 @@ namespace CryptoTickerBot.Core.Collections
 		{
 			foreach ( var baseSymbol in BaseSymbols )
 			{
-				if ( !coin.Symbol.EndsWith ( baseSymbol, StringComparison.InvariantCultureIgnoreCase ) )
+				if ( !coin.Symbol.EndsWith ( baseSymbol, StringComparison.OrdinalIgnoreCase ) )
 					continue;
 
-				var symbol = coin.Symbol.Replace ( baseSymbol, "" );
+				var symbol = coin.Symbol.ReplaceLastOccurrence ( baseSymbol, "" );
 				this[baseSymbol, symbol] = coin;
 
 				return true;

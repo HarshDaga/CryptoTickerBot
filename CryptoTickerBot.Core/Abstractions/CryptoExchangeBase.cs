@@ -169,13 +169,20 @@ namespace CryptoTickerBot.Core.Abstractions
 
 		protected abstract Task GetExchangeData ( CancellationToken ct );
 
-		protected virtual void Update ( T data,
-		                                string symbol )
+		protected virtual string CleanAndExtractSymbol ( string symbol )
 		{
 			symbol = Regex.Replace ( symbol, @"[\\\/-]", "" );
 			symbol = SymbolMappings.Aggregate ( symbol, ( current,
 			                                              mapping ) =>
 				                                    current.Replace ( mapping.Key, mapping.Value ) );
+
+			return symbol;
+		}
+
+		protected virtual void Update ( T data,
+		                                string symbol )
+		{
+			symbol = CleanAndExtractSymbol ( symbol );
 
 			if ( ExchangeData.TryGetValue ( symbol, out var old ) )
 				old = old.Clone ( );
