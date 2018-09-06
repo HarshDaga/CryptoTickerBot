@@ -85,6 +85,7 @@ namespace CryptoTickerBot.Core.Exchanges
 				ExchangeData[symbol] = new CryptoCoin ( symbol );
 
 			DeserializeData ( data, symbol );
+			Markets.AddOrUpdate ( ExchangeData[symbol] );
 
 			LastUpdate = DateTime.UtcNow;
 			OnNext ( ExchangeData[symbol] );
