@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using CryptoTickerBot.Core.Helpers;
+using Newtonsoft.Json;
 
 namespace CryptoTickerBot.Core
 {
@@ -11,13 +12,23 @@ namespace CryptoTickerBot.Core
 		public string Symbol { get; }
 		public decimal HighestBid { get; set; }
 		public decimal LowestAsk { get; set; }
-		public decimal SellPrice => HighestBid;
-		public decimal BuyPrice => LowestAsk;
-		public decimal Average => ( BuyPrice + SellPrice ) / 2;
 		public decimal Rate { get; set; }
-		public decimal Spread => BuyPrice - SellPrice;
-		public decimal SpreadPercentage => Average != 0 ? Spread / Average : 0;
 		public DateTime Time { get; set; }
+
+		[JsonIgnore]
+		public decimal SellPrice => HighestBid;
+
+		[JsonIgnore]
+		public decimal BuyPrice => LowestAsk;
+
+		[JsonIgnore]
+		public decimal Average => ( BuyPrice + SellPrice ) / 2;
+
+		[JsonIgnore]
+		public decimal Spread => BuyPrice - SellPrice;
+
+		[JsonIgnore]
+		public decimal SpreadPercentage => Average != 0 ? Spread / Average : 0;
 
 		public CryptoCoin (
 			string symbol,

@@ -117,7 +117,7 @@ namespace CryptoTickerBot.GoogleSheets
 		{
 			var start = Config.StartingRow;
 			var firstColumn = Config.StartingColumn;
-			var lastColumn = (char) ( Config.StartingColumn + 7 );
+			var lastColumn = (char) ( Config.StartingColumn + 8 );
 
 			var rows = new List<IList<object>> ( );
 			foreach ( var exchange in Bot.Exchanges.Values.OrderBy ( x => x.Name ) )

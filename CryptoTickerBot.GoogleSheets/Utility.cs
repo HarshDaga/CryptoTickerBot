@@ -44,7 +44,6 @@ namespace CryptoTickerBot.GoogleSheets
 			return ToSheetsRows ( exchange,
 			                      coin => new object[]
 			                      {
-				                      coin.Symbol,
 				                      coin.LowestAsk,
 				                      coin.HighestBid,
 				                      coin.Rate,
@@ -57,9 +56,18 @@ namespace CryptoTickerBot.GoogleSheets
 		public static IList<IList<object>> ToSheetsRows ( this ICryptoExchange exchange,
 		                                                  Func<CryptoCoin, IList<object>> selector )
 		{
-			return exchange.ExchangeData.Values
-				.OrderBy ( coin => coin.Symbol )
-				.Select ( selector )
+			return exchange
+				.Markets
+				.BaseSymbols
+				.OrderBy ( x => x )
+				.SelectMany ( x => exchange
+					              .Markets
+					              .Data[x]
+					              .OrderBy ( y => y.Key )
+					              .Select ( y => (IList<object>) selector ( y.Value )
+						                        .Prepend ( x )
+						                        .Prepend ( y.Key )
+						                        .ToList ( ) ) )
 				.Prepend ( new List<object> ( ) )
 				.Prepend ( new List<object> {exchange.Name} )
 				.ToList ( );
