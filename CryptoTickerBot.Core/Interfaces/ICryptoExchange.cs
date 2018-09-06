@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.Contracts;
 using System.Threading;
 using System.Threading.Tasks;
+using CryptoTickerBot.Core.Collections;
 using CryptoTickerBot.Enums;
 
 namespace CryptoTickerBot.Core.Interfaces
@@ -17,6 +18,7 @@ namespace CryptoTickerBot.Core.Interfaces
 		string Name { get; }
 		string Url { get; }
 		string TickerUrl { get; }
+		OrderedDictionary<string, string> SymbolMappings { get; }
 		decimal BuyFees { get; }
 		decimal SellFees { get; }
 		TimeSpan PollingRate { get; }

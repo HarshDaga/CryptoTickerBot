@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reactive.Disposables;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using CryptoTickerBot.Core.Collections;
 using CryptoTickerBot.Core.Configs;
 using CryptoTickerBot.Core.Helpers;
 using CryptoTickerBot.Core.Interfaces;
@@ -26,6 +28,7 @@ namespace CryptoTickerBot.Core.Abstractions
 		public string Name { get; }
 		public string Url { get; }
 		public string TickerUrl { get; protected set; }
+		public OrderedDictionary<string, string> SymbolMappings { get; protected set; }
 		public CryptoExchangeId Id { get; }
 		public IDictionary<string, CryptoCoin> ExchangeData { get; protected set; }
 		public ImmutableHashSet<IObserver<CryptoCoin>> Observers { get; set; }
@@ -77,6 +80,7 @@ namespace CryptoTickerBot.Core.Abstractions
 			CooldownPeriod = exchange.CooldownPeriod;
 			WithdrawalFees = new Dictionary<string, decimal> ( exchange.WithdrawalFees );
 			DepositFees    = new Dictionary<string, decimal> ( exchange.DepositFees );
+			SymbolMappings = exchange.SymbolMappings.Clone ( );
 
 			Policy = Policy
 				.Handle<TaskCanceledException> ( )
@@ -161,6 +165,11 @@ namespace CryptoTickerBot.Core.Abstractions
 		protected virtual void Update ( T data,
 		                                string symbol )
 		{
+			symbol = Regex.Replace ( symbol, @"[\\\/-]", "" );
+			symbol = SymbolMappings.Aggregate ( symbol, ( current,
+			                                              mapping ) =>
+				                                    current.Replace ( mapping.Key, mapping.Value ) );
+
 			if ( ExchangeData.TryGetValue ( symbol, out var old ) )
 				old = old.Clone ( );
 			ExchangeData[symbol] = new CryptoCoin ( symbol );

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.WebSockets;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
@@ -31,7 +33,7 @@ namespace CryptoTickerBot.Core.Exchanges
 				var datum = await $"{TickerEndpoint}{asset.UrlSymbol}/"
 					.GetJsonAsync<TickerDatum> ( ct );
 
-				var symbol = asset.Name;
+				var symbol = asset.Name.Replace ( "/", "" );
 				ExchangeData[symbol] =
 					new CryptoCoin ( symbol, datum.Bid, datum.Ask, datum.Last, datum.Timestamp );
 
@@ -72,6 +74,11 @@ namespace CryptoTickerBot.Core.Exchanges
 		protected override void Update ( dynamic data,
 		                                 string symbol )
 		{
+			symbol = Regex.Replace ( symbol, @"[\\\/-]", "" );
+			symbol = SymbolMappings.Aggregate ( symbol, ( current,
+			                                              mapping ) =>
+				                                    current.Replace ( mapping.Key, mapping.Value ) );
+
 			if ( ExchangeData.TryGetValue ( symbol, out var old ) )
 				old = old.Clone ( );
 			else

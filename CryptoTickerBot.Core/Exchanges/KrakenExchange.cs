@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
@@ -6,6 +7,7 @@ using CryptoTickerBot.Enums;
 using Flurl.Http;
 using Newtonsoft.Json;
 using NLog;
+using Polly;
 
 namespace CryptoTickerBot.Core.Exchanges
 {
@@ -17,39 +19,44 @@ namespace CryptoTickerBot.Core.Exchanges
 		public readonly string TradableAssetPairsEndpoint;
 		public readonly string TickerEndpoint;
 
+		protected Policy RetryPolicy;
+
 		public KrakenExchange ( ) : base ( CryptoExchangeId.Kraken )
 		{
 			TradableAssetPairsEndpoint = $"{TickerUrl}0/public/AssetPairs";
 			TickerEndpoint             = $"{TickerUrl}0/public/Ticker";
+
+			RetryPolicy = Policy
+				.Handle<FlurlHttpException> ( )
+				.WaitAndRetryAsync ( 5, i => CooldownPeriod );
 		}
 
 		protected override async Task GetExchangeData ( CancellationToken ct )
 		{
-			try
-			{
-				Assets = await TradableAssetPairsEndpoint
-					.AllowHttpStatus ( "520" )
-					.GetJsonAsync<KrakenAssetPairs> ( ct )
-					.ConfigureAwait ( false );
-				var tickerUrlWithPairs = $"{TickerEndpoint}?pair={string.Join ( ",", Assets.Result.Keys )}";
+			Assets = await TradableAssetPairsEndpoint
+				.GetJsonAsync<KrakenAssetPairs> ( ct )
+				.ConfigureAwait ( false );
+			var tickerUrlWithPairs = $"{TickerEndpoint}?pair={string.Join ( ",", Assets.Result.Keys )}";
 
-				while ( !ct.IsCancellationRequested )
+			while ( !ct.IsCancellationRequested )
+			{
+				try
 				{
-					var data = await tickerUrlWithPairs
-						.AllowHttpStatus ( "520" )
-						.GetJsonAsync<Root> ( ct )
-						.ConfigureAwait ( false );
+					var data = await RetryPolicy
+						.ExecuteAsync ( async ( ) =>
+							                await tickerUrlWithPairs
+								                .GetJsonAsync<Root> ( ct )
+								                .ConfigureAwait ( false ) );
 
 					foreach ( var kp in data.Results )
 						Update ( kp.Value, kp.Key );
-
-					await Task.Delay ( PollingRate, ct ).ConfigureAwait ( false );
 				}
-			}
-			catch ( FlurlHttpException e )
-			{
-				if ( e.InnerException is TaskCanceledException )
-					throw e.InnerException;
+				catch ( Exception e )
+				{
+					Logger.Error ( e );
+				}
+
+				await Task.Delay ( PollingRate, ct ).ConfigureAwait ( false );
 			}
 		}
 

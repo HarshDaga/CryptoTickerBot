@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using CryptoTickerBot.Core.Collections;
 using CryptoTickerBot.Core.Interfaces;
 using CryptoTickerBot.Enums;
 using Newtonsoft.Json;
@@ -14,6 +16,7 @@ namespace CryptoTickerBot.Core.Configs
 
 		public string FixerApiKey { get; set; }
 
+		[SuppressMessage ( "ReSharper", "StringLiteralTypo" )]
 		public List<CryptoExchangeApiInfo> ExchangeApiInfo { get; set; } = new List<CryptoExchangeApiInfo>
 		{
 			new CryptoExchangeApiInfo
@@ -25,7 +28,11 @@ namespace CryptoTickerBot.Core.Configs
 				BuyFees        = 0.1m,
 				SellFees       = 0.1m,
 				PollingRate    = FromMilliseconds ( 1000 ),
-				CooldownPeriod = FromSeconds ( 5 )
+				CooldownPeriod = FromSeconds ( 5 ),
+				SymbolMappings = new OrderedDictionary<string, string>
+				{
+					["BCC"] = "BCH"
+				}
 			},
 			new CryptoExchangeApiInfo
 			{
@@ -58,13 +65,36 @@ namespace CryptoTickerBot.Core.Configs
 			},
 			new CryptoExchangeApiInfo
 			{
-				Id        = CryptoExchangeId.Kraken,
-				Name      = "Kraken",
-				Url       = "https://www.kraken.com/",
-				TickerUrl = "https://api.kraken.com/",
-				BuyFees   = 0.26m,
-				SellFees  = 0.26m
+				Id             = CryptoExchangeId.Kraken,
+				Name           = "Kraken",
+				Url            = "https://www.kraken.com/",
+				TickerUrl      = "https://api.kraken.com/",
+				BuyFees        = 0.26m,
+				SellFees       = 0.26m,
+				CooldownPeriod = FromSeconds ( 10 ),
+				SymbolMappings = new OrderedDictionary<string, string>
+				{
+					["ZUSD"] = "USD",
+					["ZEUR"] = "EUR",
+					["ZCAD"] = "CAD",
+					["ZGBP"] = "GBP",
+					["ZJPY"] = "JPY",
+					["XXBT"] = "BTC",
+					["XBT"]  = "BTC",
+					["XETH"] = "ETH",
+					["XLTC"] = "LTC",
+					["XETC"] = "ETC",
+					["XICN"] = "ICN",
+					["XMLN"] = "MLN",
+					["XREP"] = "REP",
+					["XXDG"] = "XDG",
+					["XXLM"] = "XLM",
+					["XXMR"] = "XMR",
+					["XXRP"] = "XRP",
+					["XZEC"] = "ZEC"
+				}
 			},
+
 			new CryptoExchangeApiInfo
 			{
 				Id          = CryptoExchangeId.Bitstamp,
@@ -73,6 +103,7 @@ namespace CryptoTickerBot.Core.Configs
 				TickerUrl   = "de504dc5763aeef9ff52",
 				PollingRate = FromSeconds ( 1.5 )
 			},
+
 			new CryptoExchangeApiInfo
 			{
 				Id             = CryptoExchangeId.Zebpay,
@@ -94,6 +125,10 @@ namespace CryptoTickerBot.Core.Configs
 			public string Url { get; set; }
 
 			public string TickerUrl { get; set; }
+
+			public OrderedDictionary<string, string> SymbolMappings { get; set; } =
+				new OrderedDictionary<string, string> ( );
+
 			public TimeSpan PollingRate { get; set; } = FromSeconds ( 5 );
 			public TimeSpan CooldownPeriod { get; set; } = FromSeconds ( 60 );
 
