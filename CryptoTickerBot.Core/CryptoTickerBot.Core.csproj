@@ -14,6 +14,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="NLog" Version="4.5.9" />
     <PackageReference Include="NLog.Config" Version="4.5.9" />
+    <PackageReference Include="Polly" Version="6.1.0" />
     <PackageReference Include="PurePusherClient" Version="1.0.0" />
     <PackageReference Include="PureWebSockets" Version="2.1.1" />
     <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />

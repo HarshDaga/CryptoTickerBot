@@ -11,6 +11,7 @@ using CryptoTickerBot.Core.Helpers;
 using CryptoTickerBot.Core.Interfaces;
 using CryptoTickerBot.Enums;
 using NLog;
+using Polly;
 using Tababular;
 
 // ReSharper disable StaticMemberInGenericType
@@ -43,6 +44,7 @@ namespace CryptoTickerBot.Core.Abstractions
 		public DateTime LastChange { get; protected set; }
 		public TimeSpan LastChangeDuration => DateTime.UtcNow - LastChange;
 		public int Count => ExchangeData.Count;
+		public Policy Policy { get; set; }
 
 		public CryptoCoin this [ string symbol ]
 		{
@@ -75,6 +77,20 @@ namespace CryptoTickerBot.Core.Abstractions
 			CooldownPeriod = exchange.CooldownPeriod;
 			WithdrawalFees = new Dictionary<string, decimal> ( exchange.WithdrawalFees );
 			DepositFees    = new Dictionary<string, decimal> ( exchange.DepositFees );
+
+			Policy = Policy
+				.Handle<TaskCanceledException> ( )
+				.Or<Exception> ( )
+				.WaitAndRetryForeverAsync (
+					i => CooldownPeriod,
+					( exception,
+					  retryCount,
+					  span ) =>
+					{
+						Logger.Error ( exception );
+						return Task.CompletedTask;
+					}
+				);
 		}
 
 		public event OnUpdateDelegate Changed;
@@ -90,28 +106,19 @@ namespace CryptoTickerBot.Core.Abstractions
 		public virtual async Task StartReceivingAsync ( CancellationTokenSource tokenSource = null )
 		{
 			cts = tokenSource ?? new CancellationTokenSource ( );
-			while ( !cts.IsCancellationRequested )
-				try
-				{
-					StartTime = DateTime.UtcNow;
-					IsStarted = true;
-					Logger.Debug ( $"Starting {Name,-12} receiver." );
 
-					ExchangeData = new ConcurrentDictionary<string, CryptoCoin> ( );
-					await GetExchangeData ( cts.Token ).ConfigureAwait ( false );
+			await Policy.ExecuteAsync ( async ct =>
+			{
+				StartTime = DateTime.UtcNow;
+				IsStarted = true;
+				Logger.Debug ( $"Starting {Name,-12} receiver." );
 
-					IsStarted = false;
-					Logger.Debug ( $"{Name,-12} receiver terminated." );
-				}
-				catch ( TaskCanceledException )
-				{
-					Logger.Info ( $"{Name,-12} task cancelled." );
-				}
-				catch ( Exception e )
-				{
-					Logger.Error ( e );
-					await Task.Delay ( CooldownPeriod, cts.Token ).ConfigureAwait ( false );
-				}
+				ExchangeData = new ConcurrentDictionary<string, CryptoCoin> ( );
+				await GetExchangeData ( ct ).ConfigureAwait ( false );
+
+				IsStarted = false;
+				Logger.Debug ( $"{Name,-12} receiver terminated." );
+			}, cts.Token );
 		}
 
 		public virtual async Task StopReceivingAsync ( )

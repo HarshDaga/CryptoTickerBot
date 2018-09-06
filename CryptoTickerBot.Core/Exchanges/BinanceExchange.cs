@@ -34,7 +34,7 @@ namespace CryptoTickerBot.Core.Exchanges
 					Logger.Error ( "Couldn't connect to Binance" );
 
 				while ( ws.State != WebSocketState.Closed )
-					await Task.Delay ( CooldownPeriod, ct ).ConfigureAwait ( false );
+					await Task.Delay ( PollingRate, ct ).ConfigureAwait ( false );
 			}
 		}
 
