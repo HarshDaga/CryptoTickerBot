@@ -28,13 +28,17 @@ namespace CryptoTickerBot.Core.Exchanges
 			try
 			{
 				Assets = await TradableAssetPairsEndpoint
+					.AllowHttpStatus ( "520" )
 					.GetJsonAsync<KrakenAssetPairs> ( ct )
 					.ConfigureAwait ( false );
 				var tickerUrlWithPairs = $"{TickerEndpoint}?pair={string.Join ( ",", Assets.Result.Keys )}";
 
 				while ( !ct.IsCancellationRequested )
 				{
-					var data = await tickerUrlWithPairs.GetJsonAsync<Root> ( ct ).ConfigureAwait ( false );
+					var data = await tickerUrlWithPairs
+						.AllowHttpStatus ( "520" )
+						.GetJsonAsync<Root> ( ct )
+						.ConfigureAwait ( false );
 
 					foreach ( var kp in data.Results )
 						Update ( kp.Value, kp.Key );
