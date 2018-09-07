@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using CryptoTickerBot.Core.Helpers;
+using CryptoTickerBot.Domain;
 using Newtonsoft.Json;
 
 namespace CryptoTickerBot.Core
 {
-	public class CryptoCoin : IEquatable<CryptoCoin>
+	public class CryptoCoin : IEquatable<CryptoCoin>, ICryptoCoin
 	{
 		public string Symbol { get; }
 		public decimal HighestBid { get; set; }

@@ -8,7 +8,8 @@ using CoinbasePro.Shared.Types;
 using CoinbasePro.WebSocket.Models.Response;
 using CoinbasePro.WebSocket.Types;
 using CryptoTickerBot.Core.Abstractions;
-using CryptoTickerBot.Enums;
+using CryptoTickerBot.Domain;
+using EnumsNET;
 using NLog;
 using WebSocket4Net;
 
@@ -29,7 +30,7 @@ namespace CryptoTickerBot.Core.Exchanges
 			try
 			{
 				Client = new CoinbaseProClient ( );
-				var products = EnumsNET.Enums.GetValues<ProductType> ( ).ToList ( );
+				var products = Enums.GetValues<ProductType> ( ).ToList ( );
 				var channels = new List<ChannelType> {ChannelType.Ticker};
 
 				Client.WebSocket.OnTickerReceived += ( sender,

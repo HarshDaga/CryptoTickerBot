@@ -4,7 +4,7 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
-using CryptoTickerBot.Enums;
+using CryptoTickerBot.Domain;
 using Newtonsoft.Json;
 using NLog;
 using PureWebSockets;

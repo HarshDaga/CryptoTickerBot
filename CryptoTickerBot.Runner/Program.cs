@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
 using Colorful;
 using CryptoTickerBot.Core;
-using CryptoTickerBot.Core.Configs;
 using CryptoTickerBot.CUI;
+using CryptoTickerBot.Domain.Configs;
 using CryptoTickerBot.GoogleSheets;
 
 namespace CryptoTickerBot.Runner

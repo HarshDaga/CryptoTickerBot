@@ -1,5 +1,5 @@
 ﻿using System;
-using CryptoTickerBot.Core.Interfaces;
+using CryptoTickerBot.Domain.Configs;
 
 namespace CryptoTickerBot.GoogleSheets
 {

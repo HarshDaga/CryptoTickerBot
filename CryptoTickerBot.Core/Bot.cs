@@ -3,14 +3,14 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CryptoTickerBot.Core.Configs;
 using CryptoTickerBot.Core.Exchanges;
 using CryptoTickerBot.Core.Helpers;
 using CryptoTickerBot.Core.Interfaces;
-using CryptoTickerBot.Enums;
+using CryptoTickerBot.Domain;
+using CryptoTickerBot.Domain.Configs;
 using JetBrains.Annotations;
 using NLog;
-using static CryptoTickerBot.Enums.CryptoExchangeId;
+using static CryptoTickerBot.Domain.CryptoExchangeId;
 
 namespace CryptoTickerBot.Core
 {

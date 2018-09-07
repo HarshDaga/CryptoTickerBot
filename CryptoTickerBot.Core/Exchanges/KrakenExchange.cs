@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
-using CryptoTickerBot.Enums;
+using CryptoTickerBot.Domain;
 using Flurl.Http;
 using Newtonsoft.Json;
 using NLog;

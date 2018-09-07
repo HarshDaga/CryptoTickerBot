@@ -18,13 +18,13 @@ namespace CryptoTickerBot.GoogleSheets
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
-		private int previousCount;
-
 		public SheetsConfig Config { get; }
 
 		public SheetsService Service { get; }
 
 		public DateTime LastUpdate { get; private set; } = DateTime.UtcNow;
+
+		private int previousCount;
 
 		public GoogleSheetsUpdaterService ( SheetsConfig config )
 		{

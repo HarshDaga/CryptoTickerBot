@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
 using CryptoTickerBot.Core.Converters;
-using CryptoTickerBot.Enums;
+using CryptoTickerBot.Domain;
 using Flurl.Http;
 using Newtonsoft.Json;
 using PurePusher;

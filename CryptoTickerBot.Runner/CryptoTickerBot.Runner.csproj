@@ -9,8 +9,8 @@
   <ItemGroup>
     <ProjectReference Include="..\CryptoTickerBot.Core\CryptoTickerBot.Core.csproj" />
     <ProjectReference Include="..\CryptoTickerBot.CUI\CryptoTickerBot.CUI.csproj" />
-    <ProjectReference Include="..\CryptoTickerBot.Enums\CryptoTickerBot.Enums.csproj" />
     <ProjectReference Include="..\CryptoTickerBot.GoogleSheets\CryptoTickerBot.GoogleSheets.csproj" />
+    <ProjectReference Include="..\CryptoTickerBot.Persistence\CryptoTickerBot.Persistence.csproj" />
   </ItemGroup>
 
 </Project>

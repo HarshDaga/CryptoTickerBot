@@ -2,7 +2,7 @@
 using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
-using CryptoTickerBot.Enums;
+using CryptoTickerBot.Domain;
 
 namespace CryptoTickerBot.Core.Interfaces
 {

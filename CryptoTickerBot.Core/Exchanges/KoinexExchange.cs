@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
 using CryptoTickerBot.Core.Converters;
 using CryptoTickerBot.Core.Helpers;
-using CryptoTickerBot.Enums;
+using CryptoTickerBot.Domain;
 using Newtonsoft.Json;
 using NLog;
 
