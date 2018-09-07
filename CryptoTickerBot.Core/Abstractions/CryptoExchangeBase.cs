@@ -7,7 +7,7 @@ using System.Reactive.Disposables;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using CryptoTickerBot.Core.Collections;
+using CryptoTickerBot.Collections;
 using CryptoTickerBot.Core.Helpers;
 using CryptoTickerBot.Core.Interfaces;
 using CryptoTickerBot.Domain;

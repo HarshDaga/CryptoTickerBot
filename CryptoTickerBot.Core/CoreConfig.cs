@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using CryptoTickerBot.Core.Collections;
+using CryptoTickerBot.Collections;
 using CryptoTickerBot.Domain;
 using CryptoTickerBot.Domain.Configs;
 using Newtonsoft.Json;

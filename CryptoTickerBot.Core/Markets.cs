@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using CryptoTickerBot.Core.Extensions;
 
-namespace CryptoTickerBot.Core.Collections
+namespace CryptoTickerBot.Core
 {
 	public class Markets
 	{

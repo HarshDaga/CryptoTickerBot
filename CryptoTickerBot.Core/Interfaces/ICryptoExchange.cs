@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.Contracts;
 using System.Threading;
 using System.Threading.Tasks;
-using CryptoTickerBot.Core.Collections;
+using CryptoTickerBot.Collections;
 using CryptoTickerBot.Domain;
 
 namespace CryptoTickerBot.Core.Interfaces
