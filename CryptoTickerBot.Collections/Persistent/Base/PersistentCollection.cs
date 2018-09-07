@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
+using Polly;
 
 namespace CryptoTickerBot.Collections.Persistent.Base
 {
@@ -17,6 +19,10 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 		public string FileName { get; }
 
 		public JsonSerializerSettings SerializerSettings { get; set; }
+
+		public int MaxRetryAttempts { get; set; } = 5;
+		public TimeSpan RetryInterval { get; set; } = TimeSpan.FromSeconds ( 2 );
+
 		protected readonly object FileLock = new object ( );
 
 		protected PersistentCollection ( string fileName )
@@ -46,6 +52,7 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 
 		public event SaveDelegate<T> OnSave;
 		public event LoadDelegate<T> OnLoad;
+		public event ErrorDelegate<T> OnError;
 
 		public virtual IEnumerator<T> GetEnumerator ( ) => Collection.GetEnumerator ( );
 
@@ -86,8 +93,23 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 
 			lock ( FileLock )
 			{
-				File.WriteAllText ( FileName, json );
-				OnSave?.Invoke ( this );
+				try
+				{
+					Policy
+						.Handle<Exception> ( )
+						.WaitAndRetry ( MaxRetryAttempts,
+						                i => RetryInterval,
+						                ( exception,
+						                  span ) =>
+							                OnError?.Invoke ( this, exception ) )
+						.Execute ( ( ) => File.WriteAllText ( FileName, json ) );
+
+					OnSave?.Invoke ( this );
+				}
+				catch ( Exception e )
+				{
+					OnError?.Invoke ( this, e );
+				}
 			}
 		}
 

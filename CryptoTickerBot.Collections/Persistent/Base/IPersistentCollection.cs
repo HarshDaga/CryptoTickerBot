@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace CryptoTickerBot.Collections.Persistent.Base
@@ -10,6 +11,7 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 
 		event SaveDelegate<T> OnSave;
 		event LoadDelegate<T> OnLoad;
+		event ErrorDelegate<T> OnError;
 
 		void Save ( );
 		bool Load ( );
@@ -18,4 +20,7 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 	public delegate void SaveDelegate<T> ( IPersistentCollection<T> collection );
 
 	public delegate void LoadDelegate<T> ( IPersistentCollection<T> collection );
+
+	public delegate void ErrorDelegate<T> ( IPersistentCollection<T> collection,
+	                                        Exception exception );
 }
