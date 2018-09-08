@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -29,10 +29,6 @@
     <Reference Include="System.Reactive">
       <HintPath>..\packages\System.Reactive.4.0.0-preview00001\lib\net46\System.Reactive.dll</HintPath>
     </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Configs\" />
   </ItemGroup>
 
 </Project>

@@ -1,14 +1,17 @@
 ﻿using System.Threading.Tasks;
-using Colorful;
 using CryptoTickerBot.Core;
 using CryptoTickerBot.CUI;
 using CryptoTickerBot.Domain.Configs;
 using CryptoTickerBot.GoogleSheets;
+using NLog;
+using Console = Colorful.Console;
 
 namespace CryptoTickerBot.Runner
 {
 	public class Program
 	{
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
+
 		public static async Task Main ( string[] args )
 		{
 			//ConfigManager<CoreConfig>.Reset ( );

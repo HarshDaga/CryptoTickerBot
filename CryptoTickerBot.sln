@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoTickerBot.Domain", "C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoTickerBot.Collections", "CryptoTickerBot.Collections\CryptoTickerBot.Collections.csproj", "{B4BC6565-F6FC-4822-8A2E-CA6B19F973BD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLog.Targets.Sentry", "NLog.Targets.Sentry\NLog.Targets.Sentry.csproj", "{068616D5-8D60-4930-854A-F6D638D043A1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{B4BC6565-F6FC-4822-8A2E-CA6B19F973BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B4BC6565-F6FC-4822-8A2E-CA6B19F973BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B4BC6565-F6FC-4822-8A2E-CA6B19F973BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{068616D5-8D60-4930-854A-F6D638D043A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{068616D5-8D60-4930-854A-F6D638D043A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{068616D5-8D60-4930-854A-F6D638D043A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{068616D5-8D60-4930-854A-F6D638D043A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
