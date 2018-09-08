@@ -23,6 +23,15 @@ namespace CryptoTickerBot.Collections.Persistent
 			return result;
 		}
 
+		public bool AddOrUpdate ( T item )
+		{
+			var result = Collection.Remove ( item );
+			Collection.Add ( item );
+			Save ( );
+
+			return !result;
+		}
+
 		public void ExceptWith ( IEnumerable<T> other )
 		{
 			Collection.ExceptWith ( other );
