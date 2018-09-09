@@ -1,10 +1,10 @@
 ﻿using System.Threading.Tasks;
+using Colorful;
 using CryptoTickerBot.Core;
-using CryptoTickerBot.CUI;
 using CryptoTickerBot.Domain.Configs;
 using CryptoTickerBot.GoogleSheets;
+using CryptoTickerBot.Telegram;
 using NLog;
-using Console = Colorful.Console;
 
 namespace CryptoTickerBot.Runner
 {
@@ -28,10 +28,13 @@ namespace CryptoTickerBot.Runner
 				return Task.CompletedTask;
 			};
 
-			await bot.Attach ( service );
-			await bot.Attach ( new ConsolePrintService ( ) );
+			//await bot.Attach ( service );
+			//await bot.Attach ( new ConsolePrintService ( ) );
 
 			await bot.StartAsync ( );
+
+			var teleService = new TelegramBotService ( ConfigManager<BotConfig>.Instance );
+			await bot.Attach ( teleService );
 
 			Console.ReadLine ( );
 		}

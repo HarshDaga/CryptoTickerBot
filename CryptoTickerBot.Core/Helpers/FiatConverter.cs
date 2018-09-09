@@ -140,7 +140,7 @@ namespace CryptoTickerBot.Core.Helpers
 			var result = Convert ( amount, from, to );
 			var symbol = Map[to];
 
-			return $"{symbol.ISOCurrencySymbol}{result:N}";
+			return $"{symbol.CurrencySymbol}{result:N}";
 		}
 	}
 }

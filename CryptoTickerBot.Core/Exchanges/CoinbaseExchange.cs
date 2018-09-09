@@ -30,6 +30,12 @@ namespace CryptoTickerBot.Core.Exchanges
 			try
 			{
 				Client = new CoinbaseProClient ( );
+
+				Client.WebSocket.OnWebSocketError += ( sender,
+				                                       args ) => Logger.Error ( args.LastOrder.Exception );
+				Client.WebSocket.OnErrorReceived += ( sender,
+				                                      args ) => Logger.Error ( args.LastOrder.Reason );
+
 				var products = Enums.GetValues<ProductType> ( ).ToList ( );
 				var channels = new List<ChannelType> {ChannelType.Ticker};
 
@@ -37,12 +43,12 @@ namespace CryptoTickerBot.Core.Exchanges
 				                                       args ) =>
 				{
 					var ticker = args.LastOrder;
-					Update ( ticker, ticker.ProductId.Replace ( "-", "" ) );
+					Update ( ticker, ticker.ProductId );
 				};
 				Client.WebSocket.Start ( products, channels );
 
 				while ( Client.WebSocket.State != WebSocketState.Closed )
-					await Task.Delay ( CooldownPeriod, ct );
+					await Task.Delay ( PollingRate, ct );
 			}
 			catch ( Exception e )
 			{

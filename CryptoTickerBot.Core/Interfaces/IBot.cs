@@ -15,6 +15,7 @@ namespace CryptoTickerBot.Core.Interfaces
 		bool IsInitialized { get; }
 		bool IsRunning { get; }
 		ImmutableHashSet<IBotService> Services { get; }
+		DateTime StartTime { get; }
 
 		event OnUpdateDelegate Changed;
 		event OnUpdateDelegate Next;
@@ -31,5 +32,7 @@ namespace CryptoTickerBot.Core.Interfaces
 		Task Attach ( IBotService service );
 		Task Detach ( IBotService service );
 		Task DetachAll<T> ( ) where T : IBotService;
+		ICryptoExchange GetExchange ( CryptoExchangeId exchangeId );
+		ICryptoExchange GetExchange ( string exchangeId );
 	}
 }

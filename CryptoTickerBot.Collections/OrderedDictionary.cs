@@ -97,22 +97,6 @@ namespace CryptoTickerBot.Collections
 		}
 
 		/// <summary>
-		///     Find the position of an element by key. Returns -1 if the dictionary does not contain an element with the given
-		///     key.
-		/// </summary>
-		public int IndexOf ( TKey key ) => fKeys.IndexOf ( key );
-
-		/// <summary>
-		///     Remove the element at the given index.
-		/// </summary>
-		public void RemoveAt ( int index )
-		{
-			var key = fKeys[index];
-			fDictionary.Remove ( key );
-			fKeys.RemoveAt ( index );
-		}
-
-		/// <summary>
 		///     Test whether there is an element with the given key.
 		/// </summary>
 		public bool ContainsKey ( TKey key ) => fDictionary.ContainsKey ( key );
@@ -122,18 +106,6 @@ namespace CryptoTickerBot.Collections
 		/// </summary>
 		public bool TryGetValue ( TKey key,
 		                          out TValue value ) => fDictionary.TryGetValue ( key, out value );
-
-		/// <summary>
-		///     Insert an element at the given index.
-		/// </summary>
-		public void Insert ( int index,
-		                     TKey key,
-		                     TValue value )
-		{
-			// Dictionary operation first, so exception thrown if key already exists.
-			fDictionary.Add ( key, value );
-			fKeys.Insert ( index, key );
-		}
 
 		/// <summary>
 		///     Add an element to the dictionary.
@@ -220,6 +192,34 @@ namespace CryptoTickerBot.Collections
 			Enumerate ( ).GetEnumerator ( );
 
 		IEnumerator IEnumerable.GetEnumerator ( ) => Enumerate ( ).GetEnumerator ( );
+
+		/// <summary>
+		///     Find the position of an element by key. Returns -1 if the dictionary does not contain an element with the given
+		///     key.
+		/// </summary>
+		public int IndexOf ( TKey key ) => fKeys.IndexOf ( key );
+
+		/// <summary>
+		///     Remove the element at the given index.
+		/// </summary>
+		public void RemoveAt ( int index )
+		{
+			var key = fKeys[index];
+			fDictionary.Remove ( key );
+			fKeys.RemoveAt ( index );
+		}
+
+		/// <summary>
+		///     Insert an element at the given index.
+		/// </summary>
+		public void Insert ( int index,
+		                     TKey key,
+		                     TValue value )
+		{
+			// Dictionary operation first, so exception thrown if key already exists.
+			fDictionary.Add ( key, value );
+			fKeys.Insert ( index, key );
+		}
 
 		public OrderedDictionary<TKey, TValue> Clone ( )
 		{

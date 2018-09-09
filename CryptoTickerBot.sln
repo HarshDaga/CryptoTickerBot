@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoTickerBot.Collections
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLog.Targets.Sentry", "NLog.Targets.Sentry\NLog.Targets.Sentry.csproj", "{068616D5-8D60-4930-854A-F6D638D043A1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoTickerBot.Telegram", "CryptoTickerBot.Telegram\CryptoTickerBot.Telegram.csproj", "{E96B160D-64AB-4967-AF6B-9A2A9ED3CC75}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{068616D5-8D60-4930-854A-F6D638D043A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{068616D5-8D60-4930-854A-F6D638D043A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{068616D5-8D60-4930-854A-F6D638D043A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E96B160D-64AB-4967-AF6B-9A2A9ED3CC75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E96B160D-64AB-4967-AF6B-9A2A9ED3CC75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E96B160D-64AB-4967-AF6B-9A2A9ED3CC75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E96B160D-64AB-4967-AF6B-9A2A9ED3CC75}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

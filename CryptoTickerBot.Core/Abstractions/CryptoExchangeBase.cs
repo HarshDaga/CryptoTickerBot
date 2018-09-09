@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Collections;
-using CryptoTickerBot.Core.Helpers;
 using CryptoTickerBot.Core.Interfaces;
 using CryptoTickerBot.Domain;
 using CryptoTickerBot.Domain.Configs;
@@ -45,7 +44,7 @@ namespace CryptoTickerBot.Core.Abstractions
 		public DateTime StartTime { get; private set; }
 		public TimeSpan UpTime => DateTime.UtcNow - StartTime;
 		public DateTime LastUpdate { get; protected set; }
-		public TimeSpan Age => DateTime.UtcNow - LastUpdate;
+		public TimeSpan LastUpdateDuration => DateTime.UtcNow - LastUpdate;
 		public DateTime LastChange { get; protected set; }
 		public TimeSpan LastChangeDuration => DateTime.UtcNow - LastChange;
 		public int Count => ExchangeData.Count;
@@ -73,7 +72,7 @@ namespace CryptoTickerBot.Core.Abstractions
 
 			if ( exchange == null )
 			{
-				Logger.Error ( "Exchange info not found." );
+				Logger.Error ( $"Exchange info for {id} not found." );
 				return;
 			}
 
@@ -150,17 +149,23 @@ namespace CryptoTickerBot.Core.Abstractions
 			return coin;
 		}
 
-		public virtual string ToTable ( string fiat )
+		public virtual string ToTable ( params string[] symbols )
 		{
 			var formatter = new TableFormatter ( );
 			var objects = new List<object> ( );
 
-			foreach ( var coin in ExchangeData.Values.OrderBy ( x => x.Symbol ) )
+			foreach (
+				var coin
+				in
+				ExchangeData.Values
+					.Where ( x => symbols.Any ( s => x.Symbol.Contains ( s.ToUpper ( ) ) ) )
+					.OrderBy ( x => x.Symbol )
+			)
 				objects.Add ( new
 				{
 					coin.Symbol,
-					Bid    = $"{FiatConverter.ToString ( coin.HighestBid, "USD", fiat )}",
-					Ask    = $"{FiatConverter.ToString ( coin.LowestAsk, "USD", fiat )}",
+					Bid    = coin.HighestBid,
+					Ask    = coin.LowestAsk,
 					Spread = $"{coin.SpreadPercentage:P}"
 				} );
 
@@ -216,6 +221,6 @@ namespace CryptoTickerBot.Core.Abstractions
 		}
 
 		public override string ToString ( ) =>
-			$"{Name,-12} {UpTime:hh\\:mm\\:ss} {Age:hh\\:mm\\:ss} {LastChangeDuration:hh\\:mm\\:ss}";
+			$"{Name,-12} {UpTime:hh\\:mm\\:ss} {LastUpdateDuration:hh\\:mm\\:ss} {LastChangeDuration:hh\\:mm\\:ss}";
 	}
 }

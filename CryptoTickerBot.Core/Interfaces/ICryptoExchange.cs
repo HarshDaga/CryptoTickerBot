@@ -27,7 +27,7 @@ namespace CryptoTickerBot.Core.Interfaces
 		DateTime StartTime { get; }
 		TimeSpan UpTime { get; }
 		DateTime LastUpdate { get; }
-		TimeSpan Age { get; }
+		TimeSpan LastUpdateDuration { get; }
 		DateTime LastChange { get; }
 		TimeSpan LastChangeDuration { get; }
 		int Count { get; }
@@ -55,6 +55,6 @@ namespace CryptoTickerBot.Core.Interfaces
 		CryptoCoin GetWithFees ( string symbol );
 
 		[Pure]
-		string ToTable ( string fiat = "USD" );
+		string ToTable ( params string[] symbols );
 	}
 }

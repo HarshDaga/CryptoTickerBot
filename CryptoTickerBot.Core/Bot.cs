@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -8,6 +9,7 @@ using CryptoTickerBot.Core.Helpers;
 using CryptoTickerBot.Core.Interfaces;
 using CryptoTickerBot.Domain;
 using CryptoTickerBot.Domain.Configs;
+using EnumsNET;
 using JetBrains.Annotations;
 using NLog;
 using static CryptoTickerBot.Domain.CryptoExchangeId;
@@ -27,6 +29,7 @@ namespace CryptoTickerBot.Core
 		public bool IsInitialized { get; private set; }
 
 		public ImmutableHashSet<IBotService> Services { get; private set; } = ImmutableHashSet<IBotService>.Empty;
+		public DateTime StartTime { get; private set; }
 
 		public ICryptoExchange this [ CryptoExchangeId index ]
 		{
@@ -70,6 +73,8 @@ namespace CryptoTickerBot.Core
 		                               params CryptoExchangeId[] exchangeIds )
 		{
 			Logger.Info ( "Starting Bot" );
+
+			StartTime = DateTime.UtcNow;
 
 			ConfigManager<CoreConfig>.Load ( );
 
@@ -136,6 +141,12 @@ namespace CryptoTickerBot.Core
 			foreach ( var service in services )
 				await Detach ( service );
 		}
+
+		public ICryptoExchange GetExchange ( CryptoExchangeId exchangeId ) =>
+			Exchanges.TryGetValue ( exchangeId, out var exchange ) ? exchange : null;
+
+		public ICryptoExchange GetExchange ( string exchangeId ) =>
+			Enums.TryParse ( exchangeId, out CryptoExchangeId id ) ? GetExchange ( id ) : null;
 
 		private void InitExchanges ( )
 		{
