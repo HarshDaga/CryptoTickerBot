@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core;
 using CryptoTickerBot.Core.Abstractions;
+using CryptoTickerBot.Core.Extensions;
 using CryptoTickerBot.Domain;
 using CryptoTickerBot.Telegram.Extensions;
 using Humanizer;
@@ -17,14 +18,16 @@ using Telegram.Bot.Types;
 
 namespace CryptoTickerBot.Telegram.Subscriptions
 {
-	public class PercentChangeSubscription : CryptoExchangeSubscriptionBase
+	public class PercentChangeSubscription :
+		CryptoExchangeSubscriptionBase,
+		IEquatable<PercentChangeSubscription>
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
-		public Guid Guid { get; } = Guid.NewGuid ( );
 		public Chat Chat { get; }
 		public User User { get; }
 		public CryptoExchangeId ExchangeId { get; }
+
 		public decimal Threshold { get; set; }
 		public IDictionary<string, CryptoCoin> LastSignificantPrice { get; private set; }
 		public ImmutableHashSet<string> Symbols { get; private set; }
@@ -50,6 +53,12 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 					.Where ( x => Symbols.Contains ( x.Key ) )
 			);
 		}
+
+		public override string ToString ( ) =>
+			$"{nameof ( User )}: {User}," +
+			$" {nameof ( Exchange )}: {ExchangeId}," +
+			$" {nameof ( Threshold )}: {Threshold:P}," +
+			$" {nameof ( Symbols )}: {Symbols.Join ( ", " )}";
 
 		public ImmutableHashSet<string> AddCoins ( IEnumerable<string> symbols ) =>
 			Symbols = Symbols.Union ( symbols.Select ( x => x.ToUpper ( ) ) );
@@ -113,5 +122,30 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 				.SendTextBlockAsync ( Chat, builder.ToString ( ) )
 				.ConfigureAwait ( false );
 		}
+
+		#region Equality Members
+
+		public bool Equals ( PercentChangeSubscription other )
+		{
+			if ( other is null ) return false;
+			return ReferenceEquals ( this, other ) || Guid.Equals ( other.Guid );
+		}
+
+		public override bool Equals ( object obj )
+		{
+			if ( obj is null ) return false;
+			if ( ReferenceEquals ( this, obj ) ) return true;
+			return obj.GetType ( ) == GetType ( ) && Equals ( (PercentChangeSubscription) obj );
+		}
+
+		public override int GetHashCode ( ) => Guid.GetHashCode ( );
+
+		public static bool operator == ( PercentChangeSubscription left,
+		                                 PercentChangeSubscription right ) => Equals ( left, right );
+
+		public static bool operator != ( PercentChangeSubscription left,
+		                                 PercentChangeSubscription right ) => !Equals ( left, right );
+
+		#endregion
 	}
 }
