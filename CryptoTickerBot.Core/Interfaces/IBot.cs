@@ -32,7 +32,7 @@ namespace CryptoTickerBot.Core.Interfaces
 		Task Attach ( IBotService service );
 		Task Detach ( IBotService service );
 		Task DetachAll<T> ( ) where T : IBotService;
-		ICryptoExchange GetExchange ( CryptoExchangeId exchangeId );
-		ICryptoExchange GetExchange ( string exchangeId );
+		bool TryGetExchange ( CryptoExchangeId exchangeId, out ICryptoExchange exchange );
+		bool TryGetExchange ( string exchangeId, out ICryptoExchange exchange );
 	}
 }

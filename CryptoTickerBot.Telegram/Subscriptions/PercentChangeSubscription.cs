@@ -26,7 +26,7 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 		public User User { get; }
 		public CryptoExchangeId ExchangeId { get; }
 		public decimal Threshold { get; set; }
-		public IDictionary<string, CryptoCoin> LastSignificantPrice { get; }
+		public IDictionary<string, CryptoCoin> LastSignificantPrice { get; private set; }
 		public ImmutableHashSet<string> Symbols { get; private set; }
 
 		[JsonIgnore]
@@ -39,12 +39,16 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 		                                   IDictionary<string, CryptoCoin> lastSignificantPrice,
 		                                   IEnumerable<string> symbols )
 		{
-			Chat                 = chat;
-			User                 = user;
-			ExchangeId           = exchangeId;
-			Threshold            = threshold;
-			LastSignificantPrice = new ConcurrentDictionary<string, CryptoCoin> ( lastSignificantPrice );
-			Symbols              = ImmutableHashSet<string>.Empty.Union ( symbols );
+			Chat       = chat;
+			User       = user;
+			ExchangeId = exchangeId;
+			Threshold  = threshold;
+			Symbols    = ImmutableHashSet<string>.Empty.Union ( symbols );
+
+			LastSignificantPrice = new ConcurrentDictionary<string, CryptoCoin> (
+				lastSignificantPrice
+					.Where ( x => Symbols.Contains ( x.Key ) )
+			);
 		}
 
 		public ImmutableHashSet<string> AddCoins ( IEnumerable<string> symbols ) =>
@@ -57,7 +61,16 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 		{
 			TelegramBot = telegramBot;
 
-			Start ( TelegramBot.Ctb.GetExchange ( ExchangeId ) );
+			if ( !TelegramBot.Ctb.TryGetExchange ( ExchangeId, out var exchange ) )
+				return;
+
+			if ( LastSignificantPrice is null )
+				LastSignificantPrice = new ConcurrentDictionary<string, CryptoCoin> (
+					exchange.ExchangeData
+						.Where ( x => Symbols.Contains ( x.Key ) )
+				);
+
+			Start ( exchange );
 		}
 
 		public override async void OnNext ( CryptoCoin coin )

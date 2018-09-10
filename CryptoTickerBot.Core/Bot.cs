@@ -142,11 +142,20 @@ namespace CryptoTickerBot.Core
 				await Detach ( service );
 		}
 
-		public ICryptoExchange GetExchange ( CryptoExchangeId exchangeId ) =>
-			Exchanges.TryGetValue ( exchangeId, out var exchange ) ? exchange : null;
+		public bool TryGetExchange ( CryptoExchangeId exchangeId,
+		                             out ICryptoExchange exchange ) =>
+			Exchanges.TryGetValue ( exchangeId, out exchange );
 
-		public ICryptoExchange GetExchange ( string exchangeId ) =>
-			Enums.TryParse ( exchangeId, out CryptoExchangeId id ) ? GetExchange ( id ) : null;
+		public bool TryGetExchange ( string exchangeId,
+		                             out ICryptoExchange exchange )
+		{
+			if ( Enums.TryParse ( exchangeId, out CryptoExchangeId id ) )
+				return TryGetExchange ( id, out exchange );
+
+			exchange = null;
+
+			return false;
+		}
 
 		private void InitExchanges ( )
 		{

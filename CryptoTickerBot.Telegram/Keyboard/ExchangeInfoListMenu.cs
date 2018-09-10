@@ -40,7 +40,7 @@ namespace CryptoTickerBot.Telegram.Keyboard
 
 		private async Task<TelegramKeyboardMenu> ExchangeHandler ( CallbackQuery query )
 		{
-			var exchange = Ctb.GetExchange ( query.Data );
+			Ctb.TryGetExchange ( query.Data, out var exchange );
 
 			await Client.SendTextBlockAsync ( Chat, GetSummary ( exchange ), cancellationToken: CancellationToken );
 
