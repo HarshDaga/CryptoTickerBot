@@ -3,26 +3,35 @@ using CryptoTickerBot.Core.Interfaces;
 
 namespace CryptoTickerBot.Core.Abstractions
 {
-	public abstract class CryptoExchangeSubscription : IDisposable, IObserver<CryptoCoin>
+	public abstract class CryptoExchangeSubscriptionBase : ICryptoExchangeSubscription
 	{
 		public ICryptoExchange Exchange { get; }
 		public DateTime CreationTime { get; }
 		public TimeSpan ActiveSince => DateTime.UtcNow - CreationTime;
-		public IDisposable Disposable;
 
-		protected CryptoExchangeSubscription ( ICryptoExchange exchange )
+		protected CryptoExchangeSubscriptionBase ( ICryptoExchange exchange )
 		{
 			Exchange     = exchange;
 			CreationTime = DateTime.UtcNow;
 		}
 
-		public void Dispose ( ) => Disposable?.Dispose ( );
+		public void Start ( )
+		{
+			Exchange.Subscribe ( this );
+		}
 
-		public abstract void OnNext ( CryptoCoin value );
+		public void Stop ( )
+		{
+			Exchange.Unsubscribe ( this );
+		}
+
+		public void Dispose ( ) => Stop ( );
 
 		public virtual void OnError ( Exception error )
 		{
 		}
+
+		public abstract void OnNext ( CryptoCoin coin );
 
 		public virtual void OnCompleted ( )
 		{

@@ -51,6 +51,8 @@ namespace CryptoTickerBot.Core.Interfaces
 		Task StartReceivingAsync ( CancellationTokenSource cts = null );
 		Task StopReceivingAsync ( );
 
+		void Unsubscribe ( IObserver<CryptoCoin> subscription );
+
 		[Pure]
 		CryptoCoin GetWithFees ( string symbol );
 

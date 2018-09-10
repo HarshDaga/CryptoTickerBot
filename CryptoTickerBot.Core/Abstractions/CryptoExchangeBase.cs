@@ -32,7 +32,7 @@ namespace CryptoTickerBot.Core.Abstractions
 		public ImmutableHashSet<string> BaseSymbols => Markets.BaseSymbols;
 		public Markets Markets { get; protected set; }
 		public IDictionary<string, CryptoCoin> ExchangeData { get; protected set; }
-		public ImmutableHashSet<IObserver<CryptoCoin>> Observers { get; set; }
+		public ImmutableHashSet<IObserver<CryptoCoin>> Observers { get; protected set; }
 		public IDictionary<string, decimal> DepositFees { get; }
 		public IDictionary<string, decimal> WithdrawalFees { get; }
 		public decimal BuyFees { get; }
@@ -135,6 +135,11 @@ namespace CryptoTickerBot.Core.Abstractions
 		{
 			cts.Cancel ( );
 			await Task.CompletedTask;
+		}
+
+		public void Unsubscribe ( IObserver<CryptoCoin> subscription )
+		{
+			Observers = Observers.Remove ( subscription );
 		}
 
 		public virtual CryptoCoin GetWithFees ( string symbol )
