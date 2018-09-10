@@ -75,9 +75,11 @@ namespace CryptoTickerBot.Telegram.Keyboard
 
 		public async Task<Message> Display ( )
 		{
+			var title = Chat.Type == ChatType.Private ? Title : $"{User}:\n{Title}";
+
 			return LastMessage = await Client.SendTextMessageAsync (
 				Chat,
-				Title.ToMarkdown ( ), ParseMode.Markdown,
+				title.ToMarkdown ( ), ParseMode.Markdown,
 				replyMarkup: Keyboard,
 				cancellationToken: CancellationToken
 			).ConfigureAwait ( false );

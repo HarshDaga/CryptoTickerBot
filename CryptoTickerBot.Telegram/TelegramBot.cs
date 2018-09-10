@@ -167,7 +167,24 @@ namespace CryptoTickerBot.Telegram
 			var query = callbackQueryEventArgs.CallbackQuery;
 
 			if ( !menuStates.TryGetValue ( query.Message.MessageId, out var menu ) )
+			{
+				try
+				{
+					await Client
+						.AnswerCallbackQueryAsync ( query.Id,
+						                            "Menu was closed!",
+						                            cancellationToken: Ctb.Cts.Token )
+						.ConfigureAwait ( false );
+					await Client.DeleteMessageAsync ( query.Message.Chat, query.Message.MessageId, Ctb.Cts.Token )
+						.ConfigureAwait ( false );
+				}
+				catch ( Exception e )
+				{
+					Logger.Error ( e );
+				}
+
 				return;
+			}
 
 			if ( menu == null )
 				return;

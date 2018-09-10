@@ -57,7 +57,10 @@ namespace CryptoTickerBot.Telegram.Keyboard
 				.AppendLine ( "" )
 				.AppendLine ( formatter.FormatDictionaries ( objects ) );
 
-			await Client.SendTextBlockAsync ( Chat, builder.ToString ( ) ).ConfigureAwait ( false );
+			await Client.SendTextBlockAsync ( Chat,
+			                                  builder.ToString ( ),
+			                                  cancellationToken: CancellationToken )
+				.ConfigureAwait ( false );
 
 			return this;
 		}

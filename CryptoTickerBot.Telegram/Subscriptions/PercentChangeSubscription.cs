@@ -15,6 +15,7 @@ using Humanizer.Localisation;
 using Newtonsoft.Json;
 using NLog;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace CryptoTickerBot.Telegram.Subscriptions
 {
@@ -24,7 +25,7 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
-		public Chat Chat { get; }
+		public ChatId ChatId { get; }
 		public User User { get; }
 		public CryptoExchangeId ExchangeId { get; }
 
@@ -35,14 +36,16 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 		[JsonIgnore]
 		public TelegramBot TelegramBot { get; private set; }
 
-		public PercentChangeSubscription ( Chat chat,
+		private Chat chat;
+
+		public PercentChangeSubscription ( ChatId chatId,
 		                                   User user,
 		                                   CryptoExchangeId exchangeId,
 		                                   decimal threshold,
 		                                   IDictionary<string, CryptoCoin> lastSignificantPrice,
 		                                   IEnumerable<string> symbols )
 		{
-			Chat       = chat;
+			ChatId     = chatId;
 			User       = user;
 			ExchangeId = exchangeId;
 			Threshold  = threshold;
@@ -56,6 +59,7 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 
 		public override string ToString ( ) =>
 			$"{nameof ( User )}: {User}," +
+			$" {( chat.Type == ChatType.Private ? "" : $"{chat.Title}," )}" +
 			$" {nameof ( Exchange )}: {ExchangeId}," +
 			$" {nameof ( Threshold )}: {Threshold:P}," +
 			$" {nameof ( Symbols )}: {Symbols.Join ( ", " )}";
@@ -66,7 +70,7 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 		public ImmutableHashSet<string> RemoveCoins ( IEnumerable<string> symbols ) =>
 			Symbols = Symbols.Except ( symbols.Select ( x => x.ToUpper ( ) ) );
 
-		public void Start ( TelegramBot telegramBot )
+		public async Task Start ( TelegramBot telegramBot )
 		{
 			TelegramBot = telegramBot;
 
@@ -78,6 +82,8 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 					exchange.ExchangeData
 						.Where ( x => Symbols.Contains ( x.Key ) )
 				);
+
+			chat = await TelegramBot.Client.GetChatAsync ( ChatId, TelegramBot.Ctb.Cts.Token );
 
 			Start ( exchange );
 		}
@@ -119,7 +125,7 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 				.AppendLine ( $"in {change.TimeDiff.Humanize ( 3, minUnit: TimeUnit.Second )}" );
 
 			await TelegramBot.Client
-				.SendTextBlockAsync ( Chat, builder.ToString ( ) )
+				.SendTextBlockAsync ( ChatId, builder.ToString ( ) )
 				.ConfigureAwait ( false );
 		}
 
