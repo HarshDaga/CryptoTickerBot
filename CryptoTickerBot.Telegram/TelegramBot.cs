@@ -38,8 +38,8 @@ namespace CryptoTickerBot.Telegram
 		private readonly ImmutableDictionary<string, CommandHandlerDelegate> commandHandlers =
 			ImmutableDictionary<string, CommandHandlerDelegate>.Empty;
 
-		private readonly IDictionary<User, TelegramKeyboardMenu> menuStates =
-			new ConcurrentDictionary<User, TelegramKeyboardMenu> ( );
+		private readonly IDictionary<int, TelegramKeyboardMenu> menuStates =
+			new ConcurrentDictionary<int, TelegramKeyboardMenu> ( );
 
 		public TelegramBot ( BotConfig config,
 		                     IBot ctb )
@@ -73,7 +73,7 @@ namespace CryptoTickerBot.Telegram
 			commandHandlers = commandHandlers
 				.AddRange ( new Dictionary<string, CommandHandlerDelegate>
 					{
-						["/menu"] = HandleMenu
+						["/menu"] = HandleMenuCommand
 					}
 				);
 		}
@@ -100,21 +100,80 @@ namespace CryptoTickerBot.Telegram
 			}
 		}
 
+		public void Stop ( )
+		{
+			Client.StopReceiving ( );
+		}
+
+		private void UpdateMenuState ( int id,
+		                               TelegramKeyboardMenu menu )
+		{
+			menuStates.Remove ( id );
+			if ( menu != null )
+				menuStates[menu.Id] = menu;
+		}
+
+		private async Task<bool> MenuTextInput ( Message message )
+		{
+			if ( !menuStates.TryGetValue ( message.MessageId, out var menu ) || menu == null )
+				return false;
+
+			var id = menu.Id;
+			menu = await menu.HandleMessageAsync ( message ).ConfigureAwait ( false );
+			UpdateMenuState ( id, menu );
+
+			return true;
+		}
+
+		private async Task CloseExistingKeyboards ( User user )
+		{
+			foreach ( var menu in menuStates.Values.Where ( x => x.User == user ).ToList ( ) )
+			{
+				await menu.DeleteMenu ( ).ConfigureAwait ( false );
+				menuStates.Remove ( menu.Id );
+			}
+		}
+
+		private async Task HandleMenuCommand ( Message message )
+		{
+			var from = message.From;
+
+			await CloseExistingKeyboards ( message.From );
+
+			var menu = new MainMenu ( this, from, message.Chat );
+			await menu.Display ( ).ConfigureAwait ( false );
+			menuStates[menu.Id] = menu;
+		}
+
+		private void ParseMessage ( Message message,
+		                            out string command,
+		                            out List<string> parameters )
+		{
+			var text = message.Text;
+			command = text.Split ( ' ' ).First ( );
+			if ( command.Contains ( $"@{Self.Username}" ) )
+				command = command.Substring ( 0, command.IndexOf ( $"@{Self.Username}", StringComparison.Ordinal ) );
+			parameters = text
+				.Split ( new[] {' '}, StringSplitOptions.RemoveEmptyEntries )
+				.Skip ( 1 )
+				.ToList ( );
+		}
+
+		#region TelegramBotClient Event Handlers
+
 		private async void OnCallbackQuery ( object sender,
 		                                     CallbackQueryEventArgs callbackQueryEventArgs )
 		{
 			var query = callbackQueryEventArgs.CallbackQuery;
 
-			if ( !menuStates.TryGetValue ( query.From, out var menu ) )
+			if ( !menuStates.TryGetValue ( query.Message.MessageId, out var menu ) )
 				return;
 
-			if ( menu != null )
-				menuStates[query.From] = await menu.HandleQueryAsync ( query ).ConfigureAwait ( false );
-		}
+			if ( menu == null )
+				return;
 
-		public void Stop ( )
-		{
-			Client.StopReceiving ( );
+			menu = await menu.HandleQueryAsync ( query ).ConfigureAwait ( false );
+			UpdateMenuState ( query.Message.MessageId, menu );
 		}
 
 		private static void OnError ( object sender,
@@ -164,8 +223,8 @@ namespace CryptoTickerBot.Telegram
 				if ( message is null || message.Type != MessageType.Text )
 					return;
 
-				ParseMessage( message, out var command, out var parameters );
-				Logger.Debug ( $"Received from {message.From} : {command} {parameters.Join( ", " )}" );
+				ParseMessage ( message, out var command, out var parameters );
+				Logger.Debug ( $"Received from {message.From} : {command} {parameters.Join ( ", " )}" );
 
 				if ( commandHandlers.TryGetValue ( command, out var handler ) )
 				{
@@ -181,53 +240,6 @@ namespace CryptoTickerBot.Telegram
 			}
 		}
 
-		private async Task<bool> MenuTextInput ( Message message )
-		{
-			if ( menuStates.TryGetValue ( message.From, out var menu ) && menu != null )
-			{
-				menuStates[message.From] = await menu.HandleMessageAsync ( message ).ConfigureAwait ( false );
-
-				return true;
-			}
-
-			return false;
-		}
-
-		private async Task HandleMenu ( Message message )
-		{
-			var from = message.From;
-
-			if ( message.Chat.Type != ChatType.Private )
-			{
-				await Client
-					.SendTextBlockAsync ( message.Chat,
-					                      "This can only be done from a private chat.",
-					                      cancellationToken: Ctb.Cts.Token )
-					.ConfigureAwait ( false );
-				return;
-			}
-
-			menuStates.TryGetValue ( message.From, out var menu );
-			if ( menu != null )
-				await menu.DeleteMenu ( ).ConfigureAwait ( false );
-
-			menu = new MainMenu ( this, from, message.Chat );
-			await menu.Display ( ).ConfigureAwait ( false );
-			menuStates[message.From] = menu;
-		}
-
-		private void ParseMessage ( Message message,
-		                            out string command,
-		                            out List<string> parameters )
-		{
-			var text = message.Text;
-			command = text.Split ( ' ' ).First ( );
-			if ( command.Contains ( $"@{Self.Username}" ) )
-				command = command.Substring ( 0, command.IndexOf ( $"@{Self.Username}", StringComparison.Ordinal ) );
-			parameters = text
-				.Split ( new[] {' '}, StringSplitOptions.RemoveEmptyEntries )
-				.Skip ( 1 )
-				.ToList ( );
-		}
+		#endregion
 	}
 }

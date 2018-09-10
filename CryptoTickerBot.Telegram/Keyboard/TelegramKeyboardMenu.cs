@@ -32,12 +32,13 @@ namespace CryptoTickerBot.Telegram.Keyboard
 		protected TelegramBotClient Client => TelegramBot.Client;
 		protected CancellationToken CancellationToken => TelegramBot.Ctb.Cts.Token;
 
+		public Message LastMessage { get; protected set; }
+		public int Id => LastMessage.MessageId;
+
 		protected readonly Dictionary<string, QueryHandlerDelegate> Handlers =
 			new Dictionary<string, QueryHandlerDelegate> ( );
 
 		protected MessageHandlerDelegate MessageHandler;
-
-		protected Message LastMessageSent;
 
 		protected TelegramKeyboardMenu ( TelegramBot telegramBot,
 		                                 User user,
@@ -74,7 +75,7 @@ namespace CryptoTickerBot.Telegram.Keyboard
 
 		public async Task<Message> Display ( )
 		{
-			return LastMessageSent = await Client.SendTextMessageAsync (
+			return LastMessage = await Client.SendTextMessageAsync (
 				Chat,
 				Title.ToMarkdown ( ), ParseMode.Markdown,
 				replyMarkup: Keyboard,
@@ -84,9 +85,9 @@ namespace CryptoTickerBot.Telegram.Keyboard
 
 		public async Task DeleteMenu ( )
 		{
-			if ( LastMessageSent != null )
+			if ( LastMessage != null )
 				await Client
-					.DeleteMessageAsync ( Chat, LastMessageSent.MessageId, CancellationToken )
+					.DeleteMessageAsync ( Chat, LastMessage.MessageId, CancellationToken )
 					.ConfigureAwait ( false );
 		}
 
@@ -103,7 +104,14 @@ namespace CryptoTickerBot.Telegram.Keyboard
 		public virtual async Task<TelegramKeyboardMenu> HandleQueryAsync ( CallbackQuery query )
 		{
 			if ( query.From != User )
+			{
+				await Client
+					.AnswerCallbackQueryAsync ( query.Id,
+					                            "This is not your menu!",
+					                            cancellationToken: CancellationToken )
+					.ConfigureAwait ( false );
 				return this;
+			}
 
 			await Client
 				.AnswerCallbackQueryAsync ( query.Id, cancellationToken: CancellationToken )
