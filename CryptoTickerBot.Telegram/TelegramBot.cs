@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Extensions;
@@ -19,6 +20,8 @@ using Telegram.Bot.Types.Enums;
 
 namespace CryptoTickerBot.Telegram
 {
+	public delegate Task CommandHandlerDelegate ( Message message );
+
 	public class TelegramBot
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
@@ -31,6 +34,9 @@ namespace CryptoTickerBot.Telegram
 		public BotConfig Config { get; set; }
 		public Policy Policy { get; set; }
 		public Policy RetryForeverPolicy { get; set; }
+
+		private readonly ImmutableDictionary<string, CommandHandlerDelegate> commandHandlers =
+			ImmutableDictionary<string, CommandHandlerDelegate>.Empty;
 
 		private readonly IDictionary<User, TelegramKeyboardMenu> userMenuStates =
 			new ConcurrentDictionary<User, TelegramKeyboardMenu> ( );
@@ -63,6 +69,13 @@ namespace CryptoTickerBot.Telegram
 						return Task.CompletedTask;
 					}
 				);
+
+			commandHandlers = commandHandlers
+				.AddRange ( new Dictionary<string, CommandHandlerDelegate>
+					{
+						["/menu"] = HandleMenu
+					}
+				);
 		}
 
 		public async Task StartAsync ( )
@@ -77,7 +90,8 @@ namespace CryptoTickerBot.Telegram
 						Logger.Info ( $"Hello! My name is {Me.FirstName}" );
 
 						Client.StartReceiving ( );
-					} );
+					} )
+					.ConfigureAwait ( false );
 			}
 			catch ( Exception e )
 			{
@@ -151,12 +165,17 @@ namespace CryptoTickerBot.Telegram
 					return;
 
 				var from = message.From;
+				ParseMessage ( message, out var command, out var parameters );
+				Logger.Debug ( $"Received from {from} : {command} {parameters.Join ( ", " )}" );
 
-				if ( await HandleCommand ( message ) )
+				if ( commandHandlers.TryGetValue ( command, out var handler ) )
+				{
+					await handler ( message ).ConfigureAwait ( false );
 					return;
+				}
 
 				if ( userMenuStates.TryGetValue ( from, out var menu ) && menu != null )
-					userMenuStates[from] = await menu.HandleMessageAsync ( message );
+					userMenuStates[from] = await menu.HandleMessageAsync ( message ).ConfigureAwait ( false );
 			}
 			catch ( Exception exception )
 			{
@@ -164,34 +183,26 @@ namespace CryptoTickerBot.Telegram
 			}
 		}
 
-		private async Task<bool> HandleCommand ( Message message )
+		private async Task HandleMenu ( Message message )
 		{
 			var from = message.From;
 
-			ParseMessage ( message, out var command, out var parameters );
-			Logger.Debug ( $"Received from {from} : {command} {parameters.Join ( ", " )}" );
-
-			if ( command == "/menu" )
+			if ( message.Chat.Type != ChatType.Private )
 			{
-				if ( message.Chat.Type != ChatType.Private )
-				{
-					await Client.SendTextBlockAsync ( message.Chat,
-					                                  "This can only be done from a private chat.",
-					                                  cancellationToken: Ctb.Cts.Token );
-					return true;
-				}
-
-				userMenuStates.TryGetValue ( from, out var menu );
-				if ( menu != null )
-					await menu.DeleteMenu ( );
-
-				userMenuStates[from] = new MainMenu ( this, from, message.Chat );
-				await userMenuStates[from].Display ( );
-
-				return true;
+				await Client
+					.SendTextBlockAsync ( message.Chat,
+					                      "This can only be done from a private chat.",
+					                      cancellationToken: Ctb.Cts.Token )
+					.ConfigureAwait ( false );
+				return;
 			}
 
-			return false;
+			userMenuStates.TryGetValue ( from, out var menu );
+			if ( menu != null )
+				await menu.DeleteMenu ( ).ConfigureAwait ( false );
+
+			userMenuStates[from] = new MainMenu ( this, from, message.Chat );
+			await userMenuStates[from].Display ( ).ConfigureAwait ( false );
 		}
 
 		private void ParseMessage ( Message message,
