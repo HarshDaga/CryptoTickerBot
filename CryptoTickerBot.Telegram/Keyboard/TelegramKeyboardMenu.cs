@@ -56,6 +56,8 @@ namespace CryptoTickerBot.Telegram.Keyboard
 			BuildKeyboard ( );
 		}
 
+		public override string ToString ( ) => $"{User} {Title}";
+
 		protected void BuildKeyboard ( )
 		{
 			Keyboard = Labels?.ToInlineKeyboardMarkup ( );
@@ -70,9 +72,9 @@ namespace CryptoTickerBot.Telegram.Keyboard
 		                       StringComparison comparison = StringComparison.OrdinalIgnoreCase ) =>
 			Labels.Any ( x => x.Any ( y => y.Equals ( label, comparison ) ) );
 
-		public async Task Display ( )
+		public async Task<Message> Display ( )
 		{
-			LastMessageSent = await Client.SendTextMessageAsync (
+			return LastMessageSent = await Client.SendTextMessageAsync (
 				Chat,
 				Title.ToMarkdown ( ), ParseMode.Markdown,
 				replyMarkup: Keyboard,

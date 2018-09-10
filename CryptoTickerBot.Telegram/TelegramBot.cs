@@ -29,7 +29,7 @@ namespace CryptoTickerBot.Telegram
 		public IBot Ctb { get; }
 
 		public TelegramBotClient Client { get; }
-		public User Me { get; private set; }
+		public User Self { get; private set; }
 		public TelegramBotData BotData { get; }
 		public BotConfig Config { get; set; }
 		public Policy Policy { get; set; }
@@ -38,7 +38,7 @@ namespace CryptoTickerBot.Telegram
 		private readonly ImmutableDictionary<string, CommandHandlerDelegate> commandHandlers =
 			ImmutableDictionary<string, CommandHandlerDelegate>.Empty;
 
-		private readonly IDictionary<User, TelegramKeyboardMenu> userMenuStates =
+		private readonly IDictionary<User, TelegramKeyboardMenu> menuStates =
 			new ConcurrentDictionary<User, TelegramKeyboardMenu> ( );
 
 		public TelegramBot ( BotConfig config,
@@ -86,8 +86,8 @@ namespace CryptoTickerBot.Telegram
 				await Policy
 					.ExecuteAsync ( async ( ) =>
 					{
-						Me = await Client.GetMeAsync ( );
-						Logger.Info ( $"Hello! My name is {Me.FirstName}" );
+						Self = await Client.GetMeAsync ( );
+						Logger.Info ( $"Hello! My name is {Self.FirstName}" );
 
 						Client.StartReceiving ( );
 					} )
@@ -105,11 +105,11 @@ namespace CryptoTickerBot.Telegram
 		{
 			var query = callbackQueryEventArgs.CallbackQuery;
 
-			if ( !userMenuStates.TryGetValue ( query.From, out var menu ) )
+			if ( !menuStates.TryGetValue ( query.From, out var menu ) )
 				return;
 
 			if ( menu != null )
-				userMenuStates[query.From] = await menu.HandleQueryAsync ( query ).ConfigureAwait ( false );
+				menuStates[query.From] = await menu.HandleQueryAsync ( query ).ConfigureAwait ( false );
 		}
 
 		public void Stop ( )
@@ -161,12 +161,11 @@ namespace CryptoTickerBot.Telegram
 			{
 				var message = e.Message;
 
-				if ( message == null || message.Type != MessageType.Text )
+				if ( message is null || message.Type != MessageType.Text )
 					return;
 
-				var from = message.From;
-				ParseMessage ( message, out var command, out var parameters );
-				Logger.Debug ( $"Received from {from} : {command} {parameters.Join ( ", " )}" );
+				ParseMessage( message, out var command, out var parameters );
+				Logger.Debug ( $"Received from {message.From} : {command} {parameters.Join( ", " )}" );
 
 				if ( commandHandlers.TryGetValue ( command, out var handler ) )
 				{
@@ -174,13 +173,24 @@ namespace CryptoTickerBot.Telegram
 					return;
 				}
 
-				if ( userMenuStates.TryGetValue ( from, out var menu ) && menu != null )
-					userMenuStates[from] = await menu.HandleMessageAsync ( message ).ConfigureAwait ( false );
+				await MenuTextInput ( message );
 			}
 			catch ( Exception exception )
 			{
 				Logger.Error ( exception );
 			}
+		}
+
+		private async Task<bool> MenuTextInput ( Message message )
+		{
+			if ( menuStates.TryGetValue ( message.From, out var menu ) && menu != null )
+			{
+				menuStates[message.From] = await menu.HandleMessageAsync ( message ).ConfigureAwait ( false );
+
+				return true;
+			}
+
+			return false;
 		}
 
 		private async Task HandleMenu ( Message message )
@@ -197,12 +207,13 @@ namespace CryptoTickerBot.Telegram
 				return;
 			}
 
-			userMenuStates.TryGetValue ( from, out var menu );
+			menuStates.TryGetValue ( message.From, out var menu );
 			if ( menu != null )
 				await menu.DeleteMenu ( ).ConfigureAwait ( false );
 
-			userMenuStates[from] = new MainMenu ( this, from, message.Chat );
-			await userMenuStates[from].Display ( ).ConfigureAwait ( false );
+			menu = new MainMenu ( this, from, message.Chat );
+			await menu.Display ( ).ConfigureAwait ( false );
+			menuStates[message.From] = menu;
 		}
 
 		private void ParseMessage ( Message message,
@@ -211,8 +222,8 @@ namespace CryptoTickerBot.Telegram
 		{
 			var text = message.Text;
 			command = text.Split ( ' ' ).First ( );
-			if ( command.Contains ( $"@{Me.Username}" ) )
-				command = command.Substring ( 0, command.IndexOf ( $"@{Me.Username}", StringComparison.Ordinal ) );
+			if ( command.Contains ( $"@{Self.Username}" ) )
+				command = command.Substring ( 0, command.IndexOf ( $"@{Self.Username}", StringComparison.Ordinal ) );
 			parameters = text
 				.Split ( new[] {' '}, StringSplitOptions.RemoveEmptyEntries )
 				.Skip ( 1 )

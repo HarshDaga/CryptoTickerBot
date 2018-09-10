@@ -9,7 +9,6 @@ namespace CryptoTickerBot.Core.Interfaces
 		DateTime CreationTime { get; }
 		TimeSpan ActiveSince { get; }
 
-		void Start ( );
 		void Stop ( );
 	}
 }

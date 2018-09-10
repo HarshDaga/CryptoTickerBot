@@ -1,26 +1,34 @@
 ﻿using System;
 using CryptoTickerBot.Core.Interfaces;
+using Newtonsoft.Json;
 
 namespace CryptoTickerBot.Core.Abstractions
 {
 	public abstract class CryptoExchangeSubscriptionBase : ICryptoExchangeSubscription
 	{
-		public ICryptoExchange Exchange { get; }
+		[JsonIgnore]
+		public ICryptoExchange Exchange { get; protected set; }
+
 		public DateTime CreationTime { get; }
+
+		[JsonIgnore]
 		public TimeSpan ActiveSince => DateTime.UtcNow - CreationTime;
 
-		protected CryptoExchangeSubscriptionBase ( ICryptoExchange exchange )
+		protected CryptoExchangeSubscriptionBase ( )
 		{
-			Exchange     = exchange;
 			CreationTime = DateTime.UtcNow;
 		}
 
-		public void Start ( )
+		protected void Start ( ICryptoExchange exchange )
 		{
+			if ( exchange is null )
+				return;
+
+			Exchange = exchange;
 			Exchange.Subscribe ( this );
 		}
 
-		public void Stop ( )
+		public virtual void Stop ( )
 		{
 			Exchange.Unsubscribe ( this );
 		}
