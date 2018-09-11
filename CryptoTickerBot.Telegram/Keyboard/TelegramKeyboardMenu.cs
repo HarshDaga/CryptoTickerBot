@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Interfaces;
 using CryptoTickerBot.Telegram.Extensions;
+using NLog;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -20,6 +21,8 @@ namespace CryptoTickerBot.Telegram.Keyboard
 
 	internal class TelegramKeyboardMenu
 	{
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
+
 		public TelegramBot TelegramBot { get; }
 		public User User { get; }
 		public Chat Chat { get; }
@@ -30,7 +33,7 @@ namespace CryptoTickerBot.Telegram.Keyboard
 
 		protected IBot Ctb => TelegramBot.Ctb;
 		protected TelegramBotClient Client => TelegramBot.Client;
-		protected CancellationToken CancellationToken => TelegramBot.Ctb.Cts.Token;
+		protected CancellationToken CancellationToken => TelegramBot.CancellationToken;
 
 		public Message LastMessage { get; protected set; }
 		public int Id => LastMessage.MessageId;
@@ -87,10 +90,17 @@ namespace CryptoTickerBot.Telegram.Keyboard
 
 		public async Task DeleteMenu ( )
 		{
-			if ( LastMessage != null )
-				await Client
-					.DeleteMessageAsync ( Chat, LastMessage.MessageId, CancellationToken )
-					.ConfigureAwait ( false );
+			try
+			{
+				if ( LastMessage != null )
+					await Client
+						.DeleteMessageAsync ( Chat, LastMessage.MessageId, CancellationToken )
+						.ConfigureAwait ( false );
+			}
+			catch ( Exception e )
+			{
+				Logger.Error ( e );
+			}
 		}
 
 		protected async Task<TelegramKeyboardMenu> SwitchTo ( TelegramKeyboardMenu menu )
