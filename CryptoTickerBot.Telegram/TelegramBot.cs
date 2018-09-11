@@ -8,7 +8,8 @@ using CryptoTickerBot.Core.Extensions;
 using CryptoTickerBot.Core.Interfaces;
 using CryptoTickerBot.Domain;
 using CryptoTickerBot.Telegram.Extensions;
-using CryptoTickerBot.Telegram.Keyboard;
+using CryptoTickerBot.Telegram.Menus;
+using CryptoTickerBot.Telegram.Menus.Abstractions;
 using CryptoTickerBot.Telegram.Subscriptions;
 using EnumsNET;
 using NLog;
@@ -41,8 +42,8 @@ namespace CryptoTickerBot.Telegram
 
 		private readonly Dictionary<string, (string usage, CommandHandlerDelegate handler)> commandHandlers;
 
-		private readonly ConcurrentDictionary<int, TelegramKeyboardMenu> menuStates =
-			new ConcurrentDictionary<int, TelegramKeyboardMenu> ( );
+		private readonly ConcurrentDictionary<int, ITelegramKeyboardMenu> menuStates =
+			new ConcurrentDictionary<int, ITelegramKeyboardMenu> ( );
 
 		public TelegramBot ( BotConfig config,
 		                     IBot ctb )
@@ -125,7 +126,7 @@ namespace CryptoTickerBot.Telegram
 		}
 
 		private void UpdateMenuState ( int id,
-		                               TelegramKeyboardMenu menu )
+		                               ITelegramKeyboardMenu menu )
 		{
 			menuStates.TryRemove ( id, out _ );
 			if ( menu != null )
@@ -134,26 +135,31 @@ namespace CryptoTickerBot.Telegram
 
 		private async Task<bool> MenuTextInput ( Message message )
 		{
-			if ( !menuStates.TryGetValue ( message.MessageId, out var menu ) || menu == null )
-				return false;
-
-			var id = menu.Id;
-			menu = await menu.HandleMessageAsync ( message ).ConfigureAwait ( false );
-			UpdateMenuState ( id, menu );
+			foreach ( var menu in GetOpenMenus ( message.From, message.Chat ) )
+				await menu.HandleMessageAsync ( message ).ConfigureAwait ( false );
 
 			return true;
 		}
 
-		private async Task CloseExistingKeyboards ( User user )
+		private async Task CloseExistingMenus ( User user )
 		{
-			foreach ( var menu in menuStates.Values.Where ( x => x.User == user ).ToList ( ) )
+			foreach ( var menu in menuStates.Values.Where ( x => x != null && x.User == user ).ToList ( ) )
 			{
 				await menu.DeleteMenu ( ).ConfigureAwait ( false );
 				menuStates.TryRemove ( menu.Id, out _ );
 			}
 		}
 
-		private async Task AddOrUpdateSubscription ( TelegramPercentChangeSubscription subscription )
+		private IEnumerable<ITelegramKeyboardMenu> GetOpenMenus ( User user,
+		                                                          Chat chat )
+		{
+			foreach ( var menu in menuStates.Values
+				.Where ( x => x != null && x.User == user && x.Chat.Id == chat.Id )
+				.ToList ( ) )
+				yield return menu;
+		}
+
+		public async Task AddOrUpdateSubscription ( TelegramPercentChangeSubscription subscription )
 		{
 			var list = Data.GetPercentChangeSubscriptions ( x => x.IsSimilarTo ( subscription ) );
 
@@ -182,7 +188,7 @@ namespace CryptoTickerBot.Telegram
 		{
 			var from = message.From;
 
-			await CloseExistingKeyboards ( message.From );
+			await CloseExistingMenus ( message.From );
 
 			var menu = new MainMenu ( this, from, message.Chat );
 			await menu.Display ( ).ConfigureAwait ( false );

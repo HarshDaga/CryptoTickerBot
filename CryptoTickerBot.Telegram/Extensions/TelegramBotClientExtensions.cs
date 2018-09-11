@@ -84,5 +84,22 @@ namespace CryptoTickerBot.Telegram.Extensions
 			                                           replyMarkup: keyboard,
 			                                           cancellationToken: cancellationToken );
 		}
+
+		public static async Task<Message> SendOptionsAsync<T> ( this TelegramBotClient client,
+		                                                        ChatId chatId,
+		                                                        User user,
+		                                                        string text,
+		                                                        IEnumerable<IEnumerable<T>> options,
+		                                                        CancellationToken cancellationToken = default )
+		{
+			var keyboard = new ReplyKeyboardMarkup (
+					options.Select ( x => x.Select ( y => new KeyboardButton ( y.ToString ( ) ) ) ),
+					true, true )
+				{Selective = true};
+			return await client.SendTextMessageAsync ( chatId,
+			                                           $"{user}\n{text}",
+			                                           replyMarkup: keyboard,
+			                                           cancellationToken: cancellationToken );
+		}
 	}
 }
