@@ -47,7 +47,7 @@ namespace CryptoTickerBot.Core.Abstractions
 			$" {nameof ( Exchange )}: {Exchange}," +
 			$" {nameof ( ActiveSince )}: {ActiveSince.Humanize ( 4, minUnit: TimeUnit.Second )}";
 
-		protected void Start ( ICryptoExchange exchange )
+		protected virtual void Start ( ICryptoExchange exchange )
 		{
 			if ( exchange is null )
 				return;

@@ -4,23 +4,27 @@ using Newtonsoft.Json;
 
 namespace CryptoTickerBot.Collections.Persistent.Base
 {
-	public interface IPersistentCollection<T> : ICollection<T>
+	public interface IPersistentCollection
 	{
 		string FileName { get; }
 		JsonSerializerSettings SerializerSettings { get; set; }
 
-		event SaveDelegate<T> OnSave;
-		event LoadDelegate<T> OnLoad;
-		event ErrorDelegate<T> OnError;
+		event SaveDelegate OnSave;
+		event LoadDelegate OnLoad;
+		event ErrorDelegate OnError;
 
 		void Save ( );
 		bool Load ( );
 	}
 
-	public delegate void SaveDelegate<T> ( IPersistentCollection<T> collection );
+	public interface IPersistentCollection<T> : IPersistentCollection, ICollection<T>
+	{
+	}
 
-	public delegate void LoadDelegate<T> ( IPersistentCollection<T> collection );
+	public delegate void SaveDelegate ( IPersistentCollection collection );
 
-	public delegate void ErrorDelegate<T> ( IPersistentCollection<T> collection,
-	                                        Exception exception );
+	public delegate void LoadDelegate ( IPersistentCollection collection );
+
+	public delegate void ErrorDelegate ( IPersistentCollection collection,
+	                                     Exception exception );
 }

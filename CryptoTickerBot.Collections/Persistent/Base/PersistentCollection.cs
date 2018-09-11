@@ -50,9 +50,9 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 				Collection = new TCollection ( );
 		}
 
-		public event SaveDelegate<T> OnSave;
-		public event LoadDelegate<T> OnLoad;
-		public event ErrorDelegate<T> OnError;
+		public event SaveDelegate OnSave;
+		public event LoadDelegate OnLoad;
+		public event ErrorDelegate OnError;
 
 		public virtual IEnumerator<T> GetEnumerator ( ) => Collection.GetEnumerator ( );
 

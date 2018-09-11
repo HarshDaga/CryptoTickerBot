@@ -3,7 +3,6 @@ using Telegram.Bot.Types.InlineQueryResults;
 
 namespace CryptoTickerBot.Telegram.Extensions
 {
-	// TODO split into extension classes
 	public static class CryptoExchangeExtensions
 	{
 		public static InlineQueryResultArticle ToInlineQueryResult (

@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Extensions;
 using CryptoTickerBot.Core.Interfaces;
 using CryptoTickerBot.Domain;
 using CryptoTickerBot.Telegram.Extensions;
 using CryptoTickerBot.Telegram.Keyboard;
+using CryptoTickerBot.Telegram.Subscriptions;
+using EnumsNET;
 using NLog;
 using Polly;
 using Telegram.Bot;
@@ -30,15 +32,16 @@ namespace CryptoTickerBot.Telegram
 
 		public TelegramBotClient Client { get; }
 		public User Self { get; private set; }
-		public TelegramBotData BotData { get; }
+		public TelegramBotData Data { get; }
 		public BotConfig Config { get; set; }
 		public Policy Policy { get; set; }
 		public Policy RetryForeverPolicy { get; set; }
 
-		private readonly ImmutableDictionary<string, CommandHandlerDelegate> commandHandlers =
-			ImmutableDictionary<string, CommandHandlerDelegate>.Empty;
+		public CancellationToken CancellationToken => Ctb.Cts.Token;
 
-		private readonly IDictionary<int, TelegramKeyboardMenu> menuStates =
+		private readonly Dictionary<string, (string usage, CommandHandlerDelegate handler)> commandHandlers;
+
+		private readonly ConcurrentDictionary<int, TelegramKeyboardMenu> menuStates =
 			new ConcurrentDictionary<int, TelegramKeyboardMenu> ( );
 
 		public TelegramBot ( BotConfig config,
@@ -53,8 +56,8 @@ namespace CryptoTickerBot.Telegram
 			Client.OnCallbackQuery += OnCallbackQuery;
 			Client.OnReceiveError  += OnError;
 
-			BotData       =  new TelegramBotData ( );
-			BotData.Error += exception => Logger.Error ( exception );
+			Data       =  new TelegramBotData ( );
+			Data.Error += exception => Logger.Error ( exception );
 
 			Policy = Policy
 				.Handle<Exception> ( )
@@ -70,12 +73,12 @@ namespace CryptoTickerBot.Telegram
 					}
 				);
 
-			commandHandlers = commandHandlers
-				.AddRange ( new Dictionary<string, CommandHandlerDelegate>
-					{
-						["/menu"] = HandleMenuCommand
-					}
-				);
+			commandHandlers = new Dictionary<string, (string, CommandHandlerDelegate)>
+			{
+				["/menu"] = ( "/menu", HandleMenuCommand ),
+				["/subscribe"] = ( "/subscribe [Exchange] [Percentage] [Silent=true/false] [Symbols]",
+				                   HandleSubscribeCommand )
+			};
 		}
 
 		public async Task StartAsync ( )
@@ -86,12 +89,14 @@ namespace CryptoTickerBot.Telegram
 				await Policy
 					.ExecuteAsync ( async ( ) =>
 					{
-						Self = await Client.GetMeAsync ( );
+						Self = await Client.GetMeAsync ( CancellationToken );
 						Logger.Info ( $"Hello! My name is {Self.FirstName}" );
 
-						Client.StartReceiving ( );
+						Client.StartReceiving ( cancellationToken: CancellationToken );
 					} )
 					.ConfigureAwait ( false );
+
+				await ResumeSubscriptions ( );
 			}
 			catch ( Exception e )
 			{
@@ -105,10 +110,24 @@ namespace CryptoTickerBot.Telegram
 			Client.StopReceiving ( );
 		}
 
+		#region Helpers
+
+		private async Task ResumeSubscriptions ( )
+		{
+			foreach ( var subscription in Data.PercentChangeSubscriptions )
+			{
+				subscription.Trigger += async ( sub,
+				                                old,
+				                                current ) =>
+					Data.AddOrUpdate ( sub as TelegramPercentChangeSubscription );
+				await subscription.Resume ( this );
+			}
+		}
+
 		private void UpdateMenuState ( int id,
 		                               TelegramKeyboardMenu menu )
 		{
-			menuStates.Remove ( id );
+			menuStates.TryRemove ( id, out _ );
 			if ( menu != null )
 				menuStates[menu.Id] = menu;
 		}
@@ -130,9 +149,34 @@ namespace CryptoTickerBot.Telegram
 			foreach ( var menu in menuStates.Values.Where ( x => x.User == user ).ToList ( ) )
 			{
 				await menu.DeleteMenu ( ).ConfigureAwait ( false );
-				menuStates.Remove ( menu.Id );
+				menuStates.TryRemove ( menu.Id, out _ );
 			}
 		}
+
+		private async Task AddOrUpdateSubscription ( TelegramPercentChangeSubscription subscription )
+		{
+			var list = Data.GetPercentChangeSubscriptions ( x => x.IsSimilarTo ( subscription ) );
+
+			var existing = list.SingleOrDefault ( x => x.Threshold == subscription.Threshold );
+			if ( existing is null )
+			{
+				Data.AddOrUpdate ( subscription );
+				subscription.Trigger += async ( sub,
+				                                old,
+				                                current ) =>
+					Data.AddOrUpdate ( sub as TelegramPercentChangeSubscription );
+				await subscription.Start ( this, true );
+
+				return;
+			}
+
+			await existing.MergeWith ( subscription );
+			Data.AddOrUpdate ( existing );
+		}
+
+		#endregion
+
+		#region Command Handlers
 
 		private async Task HandleMenuCommand ( Message message )
 		{
@@ -145,19 +189,52 @@ namespace CryptoTickerBot.Telegram
 			menuStates[menu.Id] = menu;
 		}
 
-		private void ParseMessage ( Message message,
-		                            out string command,
-		                            out List<string> parameters )
+		private async Task HandleSubscribeCommand ( Message message )
 		{
-			var text = message.Text;
-			command = text.Split ( ' ' ).First ( );
-			if ( command.Contains ( $"@{Self.Username}" ) )
-				command = command.Substring ( 0, command.IndexOf ( $"@{Self.Username}", StringComparison.Ordinal ) );
-			parameters = text
-				.Split ( new[] {' '}, StringSplitOptions.RemoveEmptyEntries )
-				.Skip ( 1 )
-				.ToList ( );
+			var from = message.From;
+			message.ExtractCommand ( Self, out var command, out var parameters );
+
+			if ( parameters.Count < 3 )
+			{
+				await Client.SendTextBlockAsync ( message.Chat,
+				                                  $"Usage:\n{commandHandlers[command].usage}",
+				                                  cancellationToken: CancellationToken );
+				return;
+			}
+
+			if ( !Enums.TryParse ( parameters[0], true, out CryptoExchangeId exchangeId ) )
+			{
+				await Client.SendTextBlockAsync ( message.Chat,
+				                                  $"{parameters[0]} is not a valid Exchange name",
+				                                  cancellationToken: CancellationToken );
+				return;
+			}
+
+			if ( !decimal.TryParse ( parameters[1].Trim ( '%' ), out var threshold ) )
+			{
+				await Client.SendTextBlockAsync ( message.Chat,
+				                                  $"{parameters[1]} is not a valid percentage value",
+				                                  cancellationToken: CancellationToken );
+				return;
+			}
+
+			var index = bool.TryParse ( parameters[2].ToLower ( ), out var isSilent ) ? 3 : 2;
+
+			var subscription = new TelegramPercentChangeSubscription (
+				message.Chat,
+				from,
+				exchangeId,
+				threshold / 100m,
+				isSilent,
+				parameters
+					.Skip ( index )
+					.Select ( x => x.Trim ( ' ', ',' ) )
+			);
+
+			await AddOrUpdateSubscription ( subscription );
 		}
+
+		#endregion
 
 		#region TelegramBotClient Event Handlers
 
@@ -207,8 +284,8 @@ namespace CryptoTickerBot.Telegram
 		{
 			var from = e.InlineQuery.From;
 			Logger.Info ( $"Received inline query from: {from.Id,-10} {from.FirstName}" );
-			if ( !BotData.Users.Contains ( from ) )
-				BotData.AddUser ( from, UserRole.Guest );
+			if ( !Data.Users.Contains ( from ) )
+				Data.AddOrUpdate ( from, UserRole.Guest );
 
 			var words = e.InlineQuery.Query.Split ( new[] {' '}, StringSplitOptions.RemoveEmptyEntries );
 			var inlineQueryResults = Ctb.Exchanges.Values
@@ -221,7 +298,8 @@ namespace CryptoTickerBot.Telegram
 					.AnswerInlineQueryAsync (
 						e.InlineQuery.Id,
 						inlineQueryResults,
-						0
+						0,
+						cancellationToken: CancellationToken
 					).ConfigureAwait ( false );
 			}
 			catch ( Exception exception )
@@ -240,12 +318,12 @@ namespace CryptoTickerBot.Telegram
 				if ( message is null || message.Type != MessageType.Text )
 					return;
 
-				ParseMessage ( message, out var command, out var parameters );
+				message.ExtractCommand ( Self, out var command, out var parameters );
 				Logger.Debug ( $"Received from {message.From} : {command} {parameters.Join ( ", " )}" );
 
-				if ( commandHandlers.TryGetValue ( command, out var handler ) )
+				if ( commandHandlers.TryGetValue ( command, out var tuple ) )
 				{
-					await handler ( message ).ConfigureAwait ( false );
+					await tuple.handler ( message ).ConfigureAwait ( false );
 					return;
 				}
 
