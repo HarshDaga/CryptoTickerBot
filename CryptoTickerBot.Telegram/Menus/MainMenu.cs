@@ -29,6 +29,8 @@ namespace CryptoTickerBot.Telegram.Menus
 
 			BuildKeyboard ( );
 			AddHandlers ( );
+
+			ButtonPopups["exit"] = "Cya!";
 		}
 
 		private void AddHandlers ( )
@@ -67,7 +69,7 @@ namespace CryptoTickerBot.Telegram.Menus
 
 		private async Task<TelegramKeyboardMenuBase> ExchangeInfoHandler ( CallbackQuery query )
 		{
-			var exchangeId = await GetExchangeIdAsync ( );
+			var exchangeId = await ReadExchangeIdAsync ( );
 			if ( exchangeId is null )
 				return this;
 

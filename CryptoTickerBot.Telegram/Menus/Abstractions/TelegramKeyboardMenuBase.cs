@@ -45,6 +45,9 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 		protected readonly Dictionary<string, QueryHandlerDelegate> Handlers =
 			new Dictionary<string, QueryHandlerDelegate> ( );
 
+		protected readonly Dictionary<string, string> ButtonPopups =
+			new Dictionary<string, string> ( );
+
 		private readonly ConcurrentQueue<Message> messages = new ConcurrentQueue<Message> ( );
 
 		protected TelegramKeyboardMenuBase ( TelegramBot telegramBot,
@@ -109,9 +112,14 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 				return this;
 			}
 
-			await Client
-				.AnswerCallbackQueryAsync ( query.Id, cancellationToken: CancellationToken )
-				.ConfigureAwait ( false );
+			if ( ButtonPopups.TryGetValue ( query.Data, out var popupMessage ) )
+				await Client
+					.AnswerCallbackQueryAsync ( query.Id, popupMessage, cancellationToken: CancellationToken )
+					.ConfigureAwait ( false );
+			else
+				await Client
+					.AnswerCallbackQueryAsync ( query.Id, cancellationToken: CancellationToken )
+					.ConfigureAwait ( false );
 
 			if ( !Handlers.TryGetValue ( query.Data, out var handler ) )
 				return this;
@@ -195,9 +203,9 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 
 		#endregion
 
-		#region Get Message
+		#region Read Message
 
-		protected async Task<Message> GetMessageAsync ( )
+		protected async Task<Message> ReadMessageAsync ( )
 		{
 			Message message;
 			while ( !messages.TryDequeue ( out message ) )
@@ -206,12 +214,11 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 			return message;
 		}
 
-		protected async Task<bool> GetBoolAsync ( string text,
-		                                          bool @default = false )
+		protected async Task<bool?> ReadBoolAsync ( string text )
 		{
 			await SendOptionsAsync ( text, new[] {"yes", "no"}, 2 );
 
-			var message = await GetMessageAsync ( );
+			var message = await ReadMessageAsync ( );
 
 			if ( new[] {"true", "y", "yes"}.Contains ( message.Text.ToLower ( ) ) )
 				return true;
@@ -219,16 +226,16 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 			if ( new[] {"false", "n", "no"}.Contains ( message.Text.ToLower ( ) ) )
 				return false;
 
-			return @default;
+			return null;
 		}
 
-		protected async Task<CryptoExchangeId?> GetExchangeIdAsync ( )
+		protected async Task<CryptoExchangeId?> ReadExchangeIdAsync ( )
 		{
 			var exchanges = TelegramBot.Ctb.Exchanges.Keys.Select ( x => x.ToString ( ) );
 
 			await SendOptionsAsync ( "Select Exchange", exchanges, 2 );
 
-			var message = await GetMessageAsync ( );
+			var message = await ReadMessageAsync ( );
 			if ( Enums.TryParse ( message.Text, out CryptoExchangeId exchangeId ) )
 				return exchangeId;
 

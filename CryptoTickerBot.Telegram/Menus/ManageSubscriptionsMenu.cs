@@ -24,6 +24,8 @@ namespace CryptoTickerBot.Telegram.Menus
 
 			BuildKeyboard ( );
 			AddHandlers ( );
+
+			ButtonPopups["edit subscription"] = "Coming soon!";
 		}
 
 		private void AddHandlers ( )
@@ -35,16 +37,16 @@ namespace CryptoTickerBot.Telegram.Menus
 
 		private async Task<TelegramKeyboardMenuBase> AddSubscriptionHandler ( CallbackQuery query )
 		{
-			var exchangeId = await GetExchangeIdAsync ( );
+			var exchangeId = await ReadExchangeIdAsync ( );
 			if ( exchangeId is null )
 				return this;
 
-			var threshold = await GetThresholdAsync ( );
+			var threshold = await ReadThresholdAsync ( );
 			if ( threshold == -1 )
 				return this;
 
-			var isSilent = await GetBoolAsync ( "Keep Silent?" );
-			var symbols = await GetSymbolsAsync ( );
+			var isSilent = await ReadBoolAsync ( "Keep Silent?" ) ?? false;
+			var symbols = await ReadSymbolsAsync ( );
 
 			var subscription = new TelegramPercentChangeSubscription (
 				Chat,
@@ -60,11 +62,11 @@ namespace CryptoTickerBot.Telegram.Menus
 			return this;
 		}
 
-		private async Task<decimal> GetThresholdAsync ( )
+		private async Task<decimal> ReadThresholdAsync ( )
 		{
 			await RequestReplyAsync ( "Enter the threshold%" );
 
-			var message = await GetMessageAsync ( );
+			var message = await ReadMessageAsync ( );
 
 			if ( decimal.TryParse ( message.Text.Trim ( '%' ), out var threshold ) )
 				return threshold;
@@ -74,11 +76,11 @@ namespace CryptoTickerBot.Telegram.Menus
 			return -1;
 		}
 
-		private async Task<List<string>> GetSymbolsAsync ( )
+		private async Task<List<string>> ReadSymbolsAsync ( )
 		{
 			await RequestReplyAsync ( "Enter the symbols" );
 
-			var message = await GetMessageAsync ( );
+			var message = await ReadMessageAsync ( );
 
 			return message.Text
 				.Split ( " ,".ToCharArray ( ), StringSplitOptions.RemoveEmptyEntries )
