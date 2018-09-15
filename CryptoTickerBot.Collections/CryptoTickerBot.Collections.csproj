@@ -15,6 +15,9 @@
     <Reference Include="Polly">
       <HintPath>..\..\..\..\..\.nuget\packages\polly\6.1.0\lib\netstandard2.0\Polly.dll</HintPath>
     </Reference>
+    <Reference Include="System.Reactive">
+      <HintPath>..\..\..\..\..\.nuget\packages\system.reactive\4.1.0\lib\netstandard2.0\System.Reactive.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

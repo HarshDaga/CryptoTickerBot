@@ -2,9 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
+using System.Reactive.Linq;
 using Newtonsoft.Json;
 using Polly;
+
+// ReSharper disable StaticMemberInGenericType
 
 namespace CryptoTickerBot.Collections.Persistent.Base
 {
@@ -12,6 +14,15 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 		IPersistentCollection<T>
 		where TCollection : ICollection<T>, new ( )
 	{
+		public static JsonSerializerSettings DefaultSerializerSettings { get; } = new JsonSerializerSettings
+		{
+			NullValueHandling      = NullValueHandling.Ignore,
+			DefaultValueHandling   = DefaultValueHandling.IgnoreAndPopulate,
+			Formatting             = Formatting.Indented,
+			ReferenceLoopHandling  = ReferenceLoopHandling.Ignore,
+			ObjectCreationHandling = ObjectCreationHandling.Replace
+		};
+
 		protected TCollection Collection { get; set; }
 
 		public int Count => Collection.Count;
@@ -20,36 +31,39 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 		public string FileName { get; }
 
 		public JsonSerializerSettings SerializerSettings { get; set; }
+		public TimeSpan FlushInterval { get; }
 
 		public int MaxRetryAttempts { get; set; } = 5;
 		public TimeSpan RetryInterval { get; set; } = TimeSpan.FromSeconds ( 2 );
 
 		protected readonly object FileLock = new object ( );
 
-		protected PersistentCollection ( string fileName )
-		{
-			FileName = fileName;
-			SerializerSettings = new JsonSerializerSettings
-			{
-				NullValueHandling      = NullValueHandling.Ignore,
-				DefaultValueHandling   = DefaultValueHandling.IgnoreAndPopulate,
-				Formatting             = Formatting.Indented,
-				ReferenceLoopHandling  = ReferenceLoopHandling.Ignore,
-				ObjectCreationHandling = ObjectCreationHandling.Replace
-			};
+		private volatile bool saveRequested;
+		private IDisposable disposable;
 
-			if ( !Load ( ) )
-				Collection = new TCollection ( );
+		protected PersistentCollection ( string fileName ) :
+			this ( fileName, DefaultSerializerSettings, TimeSpan.FromSeconds ( 1 ) )
+		{
 		}
 
 		protected PersistentCollection ( string fileName,
-		                                 JsonSerializerSettings serializerSettings )
+		                                 JsonSerializerSettings serializerSettings ) :
+			this ( fileName, serializerSettings, TimeSpan.FromSeconds ( 1 ) )
+		{
+		}
+
+		protected PersistentCollection ( string fileName,
+		                                 JsonSerializerSettings serializerSettings,
+		                                 TimeSpan flushInterval )
 		{
 			FileName           = fileName;
 			SerializerSettings = serializerSettings;
+			FlushInterval      = flushInterval;
 
 			if ( !Load ( ) )
 				Collection = new TCollection ( );
+
+			disposable = Observable.Interval ( FlushInterval ).Subscribe ( l => ForceSave ( ) );
 		}
 
 		public event SaveDelegate OnSave;
@@ -89,8 +103,11 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 			return result;
 		}
 
-		public void Save ( )
+		public void ForceSave ( )
 		{
+			if ( !saveRequested )
+				return;
+
 			var json = JsonConvert.SerializeObject ( Collection );
 
 			lock ( FileLock )
@@ -110,14 +127,18 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 				}
 				catch ( Exception e )
 				{
+					disposable.Dispose ( );
+					disposable = null;
 					OnError?.Invoke ( this, e );
 				}
 			}
+
+			saveRequested = false;
 		}
 
-		public async Task SaveAsync ( )
+		public void Save ( )
 		{
-			await Task.Run ( ( ) => Save ( ) );
+			saveRequested = true;
 		}
 
 		public bool Load ( )
@@ -146,6 +167,11 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 				Collection.Add ( item );
 
 			Save ( );
+		}
+
+		public void Dispose ( )
+		{
+			disposable?.Dispose ( );
 		}
 	}
 }

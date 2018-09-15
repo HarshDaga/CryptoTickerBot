@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using CryptoTickerBot.Collections.Persistent;
 using CryptoTickerBot.Collections.Persistent.Base;
 using CryptoTickerBot.Data.Domain;
@@ -51,12 +50,6 @@ namespace CryptoTickerBot.Telegram
 		{
 			foreach ( var collection in collections )
 				collection.Save ( );
-		}
-
-		public async Task SaveAsync ( )
-		{
-			foreach ( var collection in collections )
-				await collection.SaveAsync ( );
 		}
 
 		public List<TelegramPercentChangeSubscription> GetPercentChangeSubscriptions (

@@ -327,6 +327,9 @@ namespace CryptoTickerBot.Telegram
 				message.ExtractCommand ( Self, out var command, out var parameters );
 				Logger.Debug ( $"Received from {message.From} : {command} {parameters.Join ( ", " )}" );
 
+				if ( !Data.Users.Contains ( message.From ) )
+					Data.AddOrUpdate ( message.From, UserRole.Guest );
+
 				if ( commandHandlers.TryGetValue ( command, out var tuple ) )
 				{
 					await tuple.handler ( message ).ConfigureAwait ( false );

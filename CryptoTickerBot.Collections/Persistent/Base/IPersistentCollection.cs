@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace CryptoTickerBot.Collections.Persistent.Base
 {
-	public interface IPersistentCollection
+	public interface IPersistentCollection : IDisposable
 	{
 		string FileName { get; }
 		JsonSerializerSettings SerializerSettings { get; set; }
+		TimeSpan FlushInterval { get; }
 
 		event SaveDelegate OnSave;
 		event LoadDelegate OnLoad;
 		event ErrorDelegate OnError;
 
+		void ForceSave ( );
 		void Save ( );
-		Task SaveAsync ( );
 		bool Load ( );
 	}
 
