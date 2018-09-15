@@ -1,9 +1,9 @@
 ﻿using System.Drawing;
 using System.Threading.Tasks;
 using Colorful;
-using CryptoTickerBot.Core;
 using CryptoTickerBot.Core.Abstractions;
 using CryptoTickerBot.Core.Interfaces;
+using CryptoTickerBot.Data.Domain;
 
 namespace CryptoTickerBot.CUI
 {

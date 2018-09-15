@@ -5,9 +5,12 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
-using CryptoTickerBot.Core.Extensions;
 using CryptoTickerBot.Core.Interfaces;
-using CryptoTickerBot.Domain;
+using CryptoTickerBot.Data.Domain;
+using CryptoTickerBot.Data.Extensions;
+using CryptoTickerBot.Data.Helpers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using NLog;
 
 namespace CryptoTickerBot.Core.Subscriptions
@@ -18,6 +21,7 @@ namespace CryptoTickerBot.Core.Subscriptions
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
+		[JsonConverter ( typeof ( StringEnumConverter ) )]
 		public CryptoExchangeId ExchangeId { get; }
 
 		public decimal Threshold { get; set; }
@@ -68,7 +72,7 @@ namespace CryptoTickerBot.Core.Subscriptions
 			if ( !LastSignificantPrice.ContainsKey ( coin.Symbol ) )
 				LastSignificantPrice[coin.Symbol] = coin;
 
-			var change = coin - LastSignificantPrice[coin.Symbol];
+			var change = PriceChange.Difference ( coin, LastSignificantPrice[coin.Symbol] );
 			var percentage = Math.Abs ( change.Percentage );
 
 			if ( percentage >= Threshold )
@@ -92,7 +96,7 @@ namespace CryptoTickerBot.Core.Subscriptions
 		public bool Equals ( PercentChangeSubscription other )
 		{
 			if ( other is null ) return false;
-			return ReferenceEquals ( this, other ) || Guid.Equals ( other.Guid );
+			return ReferenceEquals ( this, other ) || Id.Equals ( other.Id );
 		}
 
 		public override bool Equals ( object obj )
@@ -102,7 +106,7 @@ namespace CryptoTickerBot.Core.Subscriptions
 			return obj.GetType ( ) == GetType ( ) && Equals ( (PercentChangeSubscription) obj );
 		}
 
-		public override int GetHashCode ( ) => Guid.GetHashCode ( );
+		public override int GetHashCode ( ) => Id.GetHashCode ( );
 
 		public static bool operator == ( PercentChangeSubscription left,
 		                                 PercentChangeSubscription right ) => Equals ( left, right );

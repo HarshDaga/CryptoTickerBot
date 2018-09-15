@@ -7,12 +7,11 @@ using System.Threading.Tasks;
 using CryptoTickerBot.Core.Exchanges;
 using CryptoTickerBot.Core.Helpers;
 using CryptoTickerBot.Core.Interfaces;
-using CryptoTickerBot.Domain;
-using CryptoTickerBot.Domain.Configs;
+using CryptoTickerBot.Data.Domain;
 using EnumsNET;
 using JetBrains.Annotations;
 using NLog;
-using static CryptoTickerBot.Domain.CryptoExchangeId;
+using static CryptoTickerBot.Data.Domain.CryptoExchangeId;
 
 namespace CryptoTickerBot.Core
 {
@@ -51,7 +50,7 @@ namespace CryptoTickerBot.Core
 					[CoinDelta] = new CoinDeltaExchange ( ),
 					[Koinex]    = new KoinexExchange ( ),
 					[Kraken]    = new KrakenExchange ( ),
-					[Zebpay]    = new ZebpayExchange ( )
+					//[Zebpay]    = new ZebpayExchange ( )
 				} );
 		}
 
@@ -75,8 +74,6 @@ namespace CryptoTickerBot.Core
 			Logger.Info ( "Starting Bot" );
 
 			StartTime = DateTime.UtcNow;
-
-			ConfigManager<CoreConfig>.Load ( );
 
 			Cts       = cts ?? new CancellationTokenSource ( );
 			IsRunning = true;

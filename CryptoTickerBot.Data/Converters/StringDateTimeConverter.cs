@@ -1,9 +1,9 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace CryptoTickerBot.Core.Converters
+namespace CryptoTickerBot.Data.Converters
 {
-	internal class StringDateTimeConverter : JsonConverter
+	public class StringDateTimeConverter : JsonConverter
 	{
 		public override bool CanConvert ( Type t ) => t == typeof ( DateTime ) || t == typeof ( DateTime? );
 

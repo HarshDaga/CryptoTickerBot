@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace CryptoTickerBot.Core.Converters
+namespace CryptoTickerBot.Data.Converters
 {
 	public class UriConverter : JsonConverter
 	{

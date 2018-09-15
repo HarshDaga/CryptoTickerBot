@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CryptoTickerBot.Core.Extensions;
 using CryptoTickerBot.Core.Interfaces;
-using CryptoTickerBot.Domain;
+using CryptoTickerBot.Data.Domain;
+using CryptoTickerBot.Data.Extensions;
 using CryptoTickerBot.Telegram.Extensions;
 using CryptoTickerBot.Telegram.Menus;
 using CryptoTickerBot.Telegram.Menus.Abstractions;
@@ -34,7 +34,7 @@ namespace CryptoTickerBot.Telegram
 		public TelegramBotClient Client { get; }
 		public User Self { get; private set; }
 		public TelegramBotData Data { get; }
-		public BotConfig Config { get; set; }
+		public TelegramBotConfig Config { get; set; }
 		public Policy Policy { get; set; }
 		public Policy RetryForeverPolicy { get; set; }
 
@@ -45,7 +45,7 @@ namespace CryptoTickerBot.Telegram
 		private readonly ConcurrentDictionary<int, ITelegramKeyboardMenu> menuStates =
 			new ConcurrentDictionary<int, ITelegramKeyboardMenu> ( );
 
-		public TelegramBot ( BotConfig config,
+		public TelegramBot ( TelegramBotConfig config,
 		                     IBot ctb )
 		{
 			Config = config;

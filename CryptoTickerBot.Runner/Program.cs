@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
 using Colorful;
 using CryptoTickerBot.Core;
-using CryptoTickerBot.Domain.Configs;
-using CryptoTickerBot.GoogleSheets;
+using CryptoTickerBot.Data.Configs;
+//using CryptoTickerBot.GoogleSheets;
 using CryptoTickerBot.Telegram;
 using NLog;
 
@@ -18,22 +18,22 @@ namespace CryptoTickerBot.Runner
 
 			var bot = new Bot ( );
 
-			var config = ConfigManager<SheetsConfig>.Instance;
+			//var config = ConfigManager<SheetsConfig>.Instance;
 
-			var service = new GoogleSheetsUpdaterService ( config );
+			//var service = new GoogleSheetsUpdaterService ( config );
 
-			service.Update += updaterService =>
-			{
-				Console.WriteLine ( $"Sheets Updated @ {service.LastUpdate}" );
-				return Task.CompletedTask;
-			};
+			//service.Update += updaterService =>
+			//{
+			//	Console.WriteLine ( $"Sheets Updated @ {service.LastUpdate}" );
+			//	return Task.CompletedTask;
+			//};
 
 			//await bot.Attach ( service );
 			//await bot.Attach ( new ConsolePrintService ( ) );
 
 			await bot.StartAsync ( );
 
-			var teleService = new TelegramBotService ( ConfigManager<BotConfig>.Instance );
+			var teleService = new TelegramBotService ( ConfigManager<TelegramBotConfig>.Instance );
 			await bot.Attach ( teleService );
 
 			Console.ReadLine ( );

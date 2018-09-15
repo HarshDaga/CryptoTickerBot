@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Interfaces;
-using CryptoTickerBot.Domain;
+using CryptoTickerBot.Data.Domain;
 using CryptoTickerBot.Telegram.Extensions;
 using EnumsNET;
 using MoreLinq.Extensions;
@@ -118,7 +118,7 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 
 			var menu = await handler ( query ).ConfigureAwait ( false );
 
-			return await SwitchTo ( menu );
+			return await SwitchTo ( menu ).ConfigureAwait ( false );
 		}
 
 		public virtual async Task HandleMessageAsync ( Message message )
@@ -147,13 +147,17 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 
 		protected async Task<TelegramKeyboardMenuBase> SwitchTo ( TelegramKeyboardMenuBase menu )
 		{
-			await DeleteMenu ( ).ConfigureAwait ( false );
+			await DeleteMenu ( );
 
 			if ( menu != null )
-				await menu.Display ( ).ConfigureAwait ( false );
+				await menu.Display ( );
 
 			return menu;
 		}
+
+		protected async Task<TelegramKeyboardMenuBase> BackHandler ( CallbackQuery query ) => Parent;
+
+		protected async Task<TelegramKeyboardMenuBase> DummyHandler ( CallbackQuery query ) => this;
 
 		#region Send Message
 
@@ -190,6 +194,8 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 			LastMessage = await Client.SendOptionsAsync ( Chat, User, text, options.Batch ( 2 ), CancellationToken );
 
 		#endregion
+
+		#region Get Message
 
 		protected async Task<Message> GetMessageAsync ( )
 		{
@@ -238,8 +244,6 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 			}
 		}
 
-		protected async Task<TelegramKeyboardMenuBase> BackHandler ( CallbackQuery query ) => Parent;
-
-		protected async Task<TelegramKeyboardMenuBase> DummyHandler ( CallbackQuery query ) => this;
+		#endregion
 	}
 }

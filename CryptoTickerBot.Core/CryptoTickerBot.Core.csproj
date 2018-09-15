@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CryptoTickerBot.Collections\CryptoTickerBot.Collections.csproj" />
-    <ProjectReference Include="..\CryptoTickerBot.Domain\CryptoTickerBot.Domain.csproj" />
+    <ProjectReference Include="..\CryptoTickerBot.Data\CryptoTickerBot.Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>

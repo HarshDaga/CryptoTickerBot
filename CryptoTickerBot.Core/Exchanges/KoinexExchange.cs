@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
-using CryptoTickerBot.Core.Converters;
 using CryptoTickerBot.Core.Helpers;
-using CryptoTickerBot.Domain;
+using CryptoTickerBot.Data.Converters;
+using CryptoTickerBot.Data.Domain;
 using Newtonsoft.Json;
 using NLog;
 

@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
-using CryptoTickerBot.Domain;
+using CryptoTickerBot.Data.Domain;
 using Flurl.Http;
 using Newtonsoft.Json;
 

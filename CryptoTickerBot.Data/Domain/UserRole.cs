@@ -1,4 +1,4 @@
-﻿namespace CryptoTickerBot.Domain
+﻿namespace CryptoTickerBot.Data.Domain
 {
 	public enum UserRole
 	{

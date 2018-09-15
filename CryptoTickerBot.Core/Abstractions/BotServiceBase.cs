@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Interfaces;
+using CryptoTickerBot.Data.Domain;
 
 namespace CryptoTickerBot.Core.Abstractions
 {

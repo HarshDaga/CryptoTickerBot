@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace CryptoTickerBot.Collections.Persistent.Base
@@ -14,6 +15,7 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 		event ErrorDelegate OnError;
 
 		void Save ( );
+		Task SaveAsync ( );
 		bool Load ( );
 	}
 

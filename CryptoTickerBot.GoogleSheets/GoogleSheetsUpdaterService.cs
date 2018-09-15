@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CryptoTickerBot.Core;
 using CryptoTickerBot.Core.Abstractions;
 using CryptoTickerBot.Core.Interfaces;
+using CryptoTickerBot.Data.Domain;
 using Google;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;

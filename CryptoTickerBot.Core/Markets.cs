@@ -2,7 +2,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using CryptoTickerBot.Core.Extensions;
+using CryptoTickerBot.Data.Domain;
+using CryptoTickerBot.Data.Extensions;
 
 namespace CryptoTickerBot.Core
 {

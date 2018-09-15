@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Polly;
 
@@ -30,10 +31,11 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 			FileName = fileName;
 			SerializerSettings = new JsonSerializerSettings
 			{
-				NullValueHandling     = NullValueHandling.Ignore,
-				DefaultValueHandling  = DefaultValueHandling.IgnoreAndPopulate,
-				Formatting            = Formatting.Indented,
-				ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+				NullValueHandling      = NullValueHandling.Ignore,
+				DefaultValueHandling   = DefaultValueHandling.IgnoreAndPopulate,
+				Formatting             = Formatting.Indented,
+				ReferenceLoopHandling  = ReferenceLoopHandling.Ignore,
+				ObjectCreationHandling = ObjectCreationHandling.Replace
 			};
 
 			if ( !Load ( ) )
@@ -111,6 +113,11 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 					OnError?.Invoke ( this, e );
 				}
 			}
+		}
+
+		public async Task SaveAsync ( )
+		{
+			await Task.Run ( ( ) => Save ( ) );
 		}
 
 		public bool Load ( )

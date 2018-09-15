@@ -11,13 +11,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoTickerBot.GoogleSheet
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoTickerBot.Runner", "CryptoTickerBot.Runner\CryptoTickerBot.Runner.csproj", "{0F5D956C-0152-49A3-BE4B-CB70E7AD5CD2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoTickerBot.Domain", "CryptoTickerBot.Domain\CryptoTickerBot.Domain.csproj", "{39AA8BD3-1407-468F-933A-47247D9DD2AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoTickerBot.Data", "CryptoTickerBot.Data\CryptoTickerBot.Data.csproj", "{39AA8BD3-1407-468F-933A-47247D9DD2AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoTickerBot.Collections", "CryptoTickerBot.Collections\CryptoTickerBot.Collections.csproj", "{B4BC6565-F6FC-4822-8A2E-CA6B19F973BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoTickerBot.Collections", "CryptoTickerBot.Collections\CryptoTickerBot.Collections.csproj", "{B4BC6565-F6FC-4822-8A2E-CA6B19F973BD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLog.Targets.Sentry", "NLog.Targets.Sentry\NLog.Targets.Sentry.csproj", "{068616D5-8D60-4930-854A-F6D638D043A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NLog.Targets.Sentry", "NLog.Targets.Sentry\NLog.Targets.Sentry.csproj", "{068616D5-8D60-4930-854A-F6D638D043A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoTickerBot.Telegram", "CryptoTickerBot.Telegram\CryptoTickerBot.Telegram.csproj", "{E96B160D-64AB-4967-AF6B-9A2A9ED3CC75}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoTickerBot.Telegram", "CryptoTickerBot.Telegram\CryptoTickerBot.Telegram.csproj", "{E96B160D-64AB-4967-AF6B-9A2A9ED3CC75}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

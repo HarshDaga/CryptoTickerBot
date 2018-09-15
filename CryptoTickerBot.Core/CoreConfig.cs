@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using CryptoTickerBot.Collections;
-using CryptoTickerBot.Domain;
-using CryptoTickerBot.Domain.Configs;
+using CryptoTickerBot.Data.Configs;
+using CryptoTickerBot.Data.Domain;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -115,7 +115,7 @@ namespace CryptoTickerBot.Core
 				Name           = "Zebpay",
 				Url            = "https://www.zebpay.com/",
 				TickerUrl      = "https://www.zebapi.com/api/v1/market/ticker-new/",
-				PollingRate    = TimeSpan.FromSeconds ( 5 ),
+				PollingRate    = TimeSpan.FromSeconds ( 30 ),
 				CooldownPeriod = TimeSpan.FromMinutes ( 5 ),
 				BaseSymbols    = new List<string> {"INR"}
 			}
@@ -144,6 +144,7 @@ namespace CryptoTickerBot.Core
 			public decimal SellFees { get; set; }
 			public Dictionary<string, decimal> DepositFees { get; set; } = new Dictionary<string, decimal> ( );
 			public Dictionary<string, decimal> WithdrawalFees { get; set; } = new Dictionary<string, decimal> ( );
+			public override string ToString ( ) => Name;
 		}
 	}
 }

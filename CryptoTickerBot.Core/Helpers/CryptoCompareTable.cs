@@ -3,7 +3,8 @@ using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using CryptoTickerBot.Core.Interfaces;
-using CryptoTickerBot.Domain;
+using CryptoTickerBot.Data.Domain;
+using CryptoTickerBot.Data.Extensions;
 using MoreLinq;
 
 namespace CryptoTickerBot.Core.Helpers

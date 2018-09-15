@@ -5,7 +5,7 @@ using System.Diagnostics.Contracts;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Collections;
-using CryptoTickerBot.Domain;
+using CryptoTickerBot.Data.Domain;
 
 namespace CryptoTickerBot.Core.Interfaces
 {

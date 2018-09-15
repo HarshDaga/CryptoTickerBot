@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CryptoTickerBot.Data.Extensions;
 using MoreLinq;
 using Telegram.Bot;
 using Telegram.Bot.Types;

@@ -20,7 +20,9 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 		string Title { get; }
 		User User { get; }
 
-		bool Contains ( string label, StringComparison comparison = StringComparison.OrdinalIgnoreCase );
+		bool Contains ( string label,
+		                StringComparison comparison = StringComparison.OrdinalIgnoreCase );
+
 		Task DeleteMenu ( );
 		Task<Message> Display ( );
 		Task HandleMessageAsync ( Message message );

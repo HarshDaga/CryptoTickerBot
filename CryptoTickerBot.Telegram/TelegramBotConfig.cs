@@ -1,11 +1,11 @@
 ﻿using System;
-using CryptoTickerBot.Domain.Configs;
+using CryptoTickerBot.Data.Configs;
 
 namespace CryptoTickerBot.Telegram
 {
-	public class BotConfig : IConfig
+	public class TelegramBotConfig : IConfig
 	{
-		public string ConfigFileName { get; } = "BotConfig.json";
+		public string ConfigFileName { get; } = "TelegramBotConfig";
 
 		public string BotToken { get; set; }
 		public int OwnerId { get; set; }

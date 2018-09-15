@@ -7,16 +7,16 @@ namespace CryptoTickerBot.Runner
 	public class TelegramBotService : BotServiceBase
 	{
 		public TelegramBot TelegramBot { get; set; }
-		public BotConfig BotConfig { get; set; }
+		public TelegramBotConfig TelegramBotConfig { get; set; }
 
-		public TelegramBotService ( BotConfig botConfig )
+		public TelegramBotService ( TelegramBotConfig telegramBotConfig )
 		{
-			BotConfig = botConfig;
+			TelegramBotConfig = telegramBotConfig;
 		}
 
 		public override async Task StartAsync ( )
 		{
-			TelegramBot = new TelegramBot ( BotConfig, Bot );
+			TelegramBot = new TelegramBot ( TelegramBotConfig, Bot );
 
 			await TelegramBot.StartAsync ( );
 		}

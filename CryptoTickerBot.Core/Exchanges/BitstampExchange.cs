@@ -4,8 +4,8 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
-using CryptoTickerBot.Core.Converters;
-using CryptoTickerBot.Domain;
+using CryptoTickerBot.Data.Converters;
+using CryptoTickerBot.Data.Domain;
 using Flurl.Http;
 using Newtonsoft.Json;
 using PurePusher;
@@ -87,7 +87,7 @@ namespace CryptoTickerBot.Core.Exchanges
 			LastUpdate = DateTime.UtcNow;
 			OnNext ( ExchangeData[symbol] );
 
-			if ( ExchangeData[symbol] != old )
+			if ( !ExchangeData[symbol].HasSameValues ( old ) )
 				OnChanged ( ExchangeData[symbol] );
 		}
 

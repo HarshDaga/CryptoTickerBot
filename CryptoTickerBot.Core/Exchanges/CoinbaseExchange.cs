@@ -8,7 +8,7 @@ using CoinbasePro.Shared.Types;
 using CoinbasePro.WebSocket.Models.Response;
 using CoinbasePro.WebSocket.Types;
 using CryptoTickerBot.Core.Abstractions;
-using CryptoTickerBot.Domain;
+using CryptoTickerBot.Data.Domain;
 using EnumsNET;
 using NLog;
 using WebSocket4Net;

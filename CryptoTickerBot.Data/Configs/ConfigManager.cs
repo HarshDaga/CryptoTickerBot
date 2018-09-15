@@ -6,14 +6,15 @@ using NLog;
 
 // ReSharper disable StaticMemberInGenericType
 
-namespace CryptoTickerBot.Domain.Configs
+namespace CryptoTickerBot.Data.Configs
 {
 	public static class ConfigManager
 	{
 		public static JsonSerializerSettings SerializerSettings { get; set; } = new JsonSerializerSettings
 		{
-			Formatting        = Formatting.Indented,
-			NullValueHandling = NullValueHandling.Ignore
+			Formatting             = Formatting.Indented,
+			NullValueHandling      = NullValueHandling.Ignore,
+			ObjectCreationHandling = ObjectCreationHandling.Replace
 		};
 
 		public static T Get<T> ( ) where T : IConfig, new ( ) =>

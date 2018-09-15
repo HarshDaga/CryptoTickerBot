@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using CryptoTickerBot.Core;
-using CryptoTickerBot.Core.Extensions;
 using CryptoTickerBot.Core.Subscriptions;
-using CryptoTickerBot.Domain;
+using CryptoTickerBot.Data.Domain;
+using CryptoTickerBot.Data.Extensions;
+using CryptoTickerBot.Data.Helpers;
 using CryptoTickerBot.Telegram.Extensions;
 using Humanizer;
 using Humanizer.Localisation;
@@ -107,10 +107,10 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 		                                          CryptoCoin current )
 		{
 			Logger.Debug (
-				$"{Guid} Invoked subscription for {User} @ {current.Rate:N} {current.Symbol} {Exchange.Name}"
+				$"{Id} Invoked subscription for {User} @ {current.Rate:N} {current.Symbol} {Exchange.Name}"
 			);
 
-			var change = current - old;
+			var change = PriceChange.Difference ( current, old );
 			var builder = new StringBuilder ( );
 			builder
 				.AppendLine ( $"{Exchange.Name,-14} {current.Symbol}" )
@@ -132,7 +132,7 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 		public bool Equals ( TelegramPercentChangeSubscription other )
 		{
 			if ( other is null ) return false;
-			return ReferenceEquals ( this, other ) || Guid.Equals ( other.Guid );
+			return ReferenceEquals ( this, other ) || Id.Equals ( other.Id );
 		}
 
 		public override bool Equals ( object obj )
@@ -142,7 +142,7 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 			return obj.GetType ( ) == GetType ( ) && Equals ( (TelegramPercentChangeSubscription) obj );
 		}
 
-		public override int GetHashCode ( ) => Guid.GetHashCode ( );
+		public override int GetHashCode ( ) => Id.GetHashCode ( );
 
 		public static bool operator == ( TelegramPercentChangeSubscription left,
 		                                 TelegramPercentChangeSubscription right ) => Equals ( left, right );

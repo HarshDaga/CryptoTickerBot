@@ -1,8 +1,8 @@
 ﻿using System;
 using CryptoTickerBot.Core.Interfaces;
+using CryptoTickerBot.Data.Domain;
 using Humanizer;
 using Humanizer.Localisation;
-using Newtonsoft.Json;
 
 namespace CryptoTickerBot.Core.Abstractions
 {
@@ -10,14 +10,12 @@ namespace CryptoTickerBot.Core.Abstractions
 		ICryptoExchangeSubscription,
 		IEquatable<CryptoExchangeSubscriptionBase>
 	{
-		public Guid Guid { get; } = Guid.NewGuid ( );
+		public Guid Id { get; } = Guid.NewGuid ( );
 
-		[JsonIgnore]
 		public ICryptoExchange Exchange { get; protected set; }
 
 		public DateTime CreationTime { get; }
 
-		[JsonIgnore]
 		public TimeSpan ActiveSince => DateTime.UtcNow - CreationTime;
 
 		protected CryptoExchangeSubscriptionBase ( )
@@ -43,7 +41,7 @@ namespace CryptoTickerBot.Core.Abstractions
 		}
 
 		public override string ToString ( ) =>
-			$"{nameof ( Guid )}: {Guid}," +
+			$"{nameof ( Id )}: {Id}," +
 			$" {nameof ( Exchange )}: {Exchange}," +
 			$" {nameof ( ActiveSince )}: {ActiveSince.Humanize ( 4, minUnit: TimeUnit.Second )}";
 
@@ -62,14 +60,14 @@ namespace CryptoTickerBot.Core.Abstractions
 		{
 			if ( other is null ) return false;
 			if ( ReferenceEquals ( this, other ) ) return true;
-			return Guid.Equals ( other.Guid );
+			return Id.Equals ( other.Id );
 		}
 
 		public bool Equals ( CryptoExchangeSubscriptionBase other )
 		{
 			if ( other is null ) return false;
 			if ( ReferenceEquals ( this, other ) ) return true;
-			return Guid.Equals ( other.Guid );
+			return Id.Equals ( other.Id );
 		}
 
 		public override bool Equals ( object obj )
@@ -79,7 +77,7 @@ namespace CryptoTickerBot.Core.Abstractions
 			return obj is CryptoExchangeSubscriptionBase other && Equals ( other );
 		}
 
-		public override int GetHashCode ( ) => Guid.GetHashCode ( );
+		public override int GetHashCode ( ) => Id.GetHashCode ( );
 
 		public static bool operator == ( CryptoExchangeSubscriptionBase left,
 		                                 CryptoExchangeSubscriptionBase right ) => Equals ( left, right );

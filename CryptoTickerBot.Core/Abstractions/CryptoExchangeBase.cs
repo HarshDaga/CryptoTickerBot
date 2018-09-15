@@ -9,8 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Collections;
 using CryptoTickerBot.Core.Interfaces;
-using CryptoTickerBot.Domain;
-using CryptoTickerBot.Domain.Configs;
+using CryptoTickerBot.Data.Configs;
+using CryptoTickerBot.Data.Domain;
 using NLog;
 using Polly;
 using Tababular;
@@ -204,7 +204,7 @@ namespace CryptoTickerBot.Core.Abstractions
 			LastUpdate = DateTime.UtcNow;
 			OnNext ( ExchangeData[symbol] );
 
-			if ( ExchangeData[symbol] != old )
+			if ( !ExchangeData[symbol].HasSameValues ( old ) )
 				OnChanged ( ExchangeData[symbol] );
 		}
 

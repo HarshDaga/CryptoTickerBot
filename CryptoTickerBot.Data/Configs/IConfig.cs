@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace CryptoTickerBot.Domain.Configs
+namespace CryptoTickerBot.Data.Configs
 {
 	public interface IConfig
 	{
