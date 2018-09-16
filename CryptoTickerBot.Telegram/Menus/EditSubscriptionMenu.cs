@@ -84,6 +84,7 @@ namespace CryptoTickerBot.Telegram.Menus
 
 		private async Task<TelegramKeyboardMenuBase> DeleteHandler ( CallbackQuery query )
 		{
+			Subscription.Stop ( );
 			TelegramBot.Data.PercentChangeSubscriptions.Remove ( Subscription );
 
 			await SendTextBlockAsync ( $"Removed :\n\n{Subscription.Summary ( )}" );
