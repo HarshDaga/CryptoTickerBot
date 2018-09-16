@@ -63,7 +63,7 @@ namespace CryptoTickerBot.Telegram.Menus
 		private async Task<TelegramKeyboardMenuBase> EditSubscriptionHandler ( CallbackQuery query )
 		{
 			var subscriptions = TelegramBot.Data.PercentChangeSubscriptions
-				.Where ( x => x.ChatId.Identifier == Chat.Id )
+				.Where ( x => x.ChatId.Identifier == Chat.Id && x.User == User )
 				.ToList ( );
 
 			if ( !subscriptions.Any ( ) )
