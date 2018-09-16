@@ -150,6 +150,9 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 
 		protected async Task<TelegramKeyboardMenuBase> SwitchTo ( TelegramKeyboardMenuBase menu )
 		{
+			if ( ReferenceEquals ( menu, this ) && LastId == Id )
+				return this;
+
 			await DeleteMenu ( );
 
 			if ( menu != null )
@@ -224,9 +227,23 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 			return null;
 		}
 
-		protected async Task<CryptoExchangeId?> ReadExchangeIdAsync ( )
+		protected async Task<decimal> ReadPercentage ( decimal @default = -1 )
 		{
-			var exchanges = TelegramBot.Ctb.Exchanges.Keys.Select ( x => x.ToString ( ) );
+			var message = await ReadMessageAsync ( );
+
+			if ( decimal.TryParse ( message.Text.Trim ( '%' ), out var percentage ) )
+				return percentage;
+
+			await SendTextBlockAsync ( $"{message.Text} is not a valid percentage value" );
+
+			return @default;
+		}
+
+		protected async Task<CryptoExchangeId?> ReadExchangeIdAsync ( IEnumerable<CryptoExchangeId> exchangeIds )
+		{
+			var exchanges = TelegramBot.Ctb.Exchanges.Keys
+				.Intersect ( exchangeIds )
+				.Select ( x => x.ToString ( ) );
 
 			await SendOptionsAsync ( "Select Exchange", exchanges, 2 );
 
@@ -237,6 +254,20 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 			await SendTextBlockAsync ( $"{message.Text} is not a known exchange" );
 
 			return null;
+		}
+
+		protected async Task<CryptoExchangeId?> ReadExchangeIdAsync ( ) =>
+			await ReadExchangeIdAsync ( TelegramBot.Ctb.Exchanges.Keys );
+
+		protected async Task<List<string>> ReadSymbolsAsync ( )
+		{
+			await RequestReplyAsync ( "Enter the symbols" );
+
+			var message = await ReadMessageAsync ( );
+
+			return message.Text
+				.Split ( " ,".ToCharArray ( ), StringSplitOptions.RemoveEmptyEntries )
+				.ToList ( );
 		}
 
 		protected void ClearMessageQueue ( )

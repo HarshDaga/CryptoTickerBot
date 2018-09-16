@@ -35,7 +35,7 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 
 		private CancellationToken CancellationToken => TelegramBot.CancellationToken;
 
-		private Chat chat;
+		public Chat Chat { get; private set; }
 
 		public TelegramPercentChangeSubscription ( ChatId chatId,
 		                                           User user,
@@ -53,7 +53,7 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 
 		public override string ToString ( ) =>
 			$"{nameof ( User )}: {User}," +
-			$"{( chat.Type == ChatType.Private ? "" : $" {chat.Title}," )}" +
+			$"{( Chat.Type == ChatType.Private ? "" : $" {Chat.Title}," )}" +
 			$" {nameof ( Exchange )}: {ExchangeId}," +
 			$" {nameof ( Threshold )}: {Threshold:P}," +
 			$" {nameof ( IsSilent )}: {IsSilent}," +
@@ -70,7 +70,7 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 		                          bool isBeingCreated = false )
 		{
 			TelegramBot = telegramBot;
-			chat        = await TelegramBot.Client.GetChatAsync ( ChatId, CancellationToken );
+			Chat        = await TelegramBot.Client.GetChatAsync ( ChatId, CancellationToken );
 
 			if ( !TelegramBot.Ctb.TryGetExchange ( ExchangeId, out var exchange ) )
 				return;
@@ -98,11 +98,10 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 			AddSymbols ( subscription.Symbols );
 
 			await TelegramBot.Client
-					.SendTextBlockAsync ( ChatId,
-					                      $"Merged with subscription:\n{Summary ( )}",
-					                      disableNotification: IsSilent,
-					                      cancellationToken: CancellationToken )
-				;
+				.SendTextBlockAsync ( ChatId,
+				                      $"Merged with subscription:\n{Summary ( )}",
+				                      disableNotification: IsSilent,
+				                      cancellationToken: CancellationToken );
 		}
 
 		protected override async Task OnTrigger ( CryptoCoin old,

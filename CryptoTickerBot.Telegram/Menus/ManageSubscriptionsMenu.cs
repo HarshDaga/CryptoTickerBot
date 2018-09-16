@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CryptoTickerBot.Telegram.Menus.Abstractions;
 using CryptoTickerBot.Telegram.Subscriptions;
+using Humanizer;
 using MoreLinq;
 using Telegram.Bot.Types;
 
@@ -24,14 +24,12 @@ namespace CryptoTickerBot.Telegram.Menus
 
 			BuildKeyboard ( );
 			AddHandlers ( );
-
-			ButtonPopups["edit subscription"] = "Coming soon!";
 		}
 
 		private void AddHandlers ( )
 		{
 			Handlers["add subscription"]  = AddSubscriptionHandler;
-			Handlers["edit subscription"] = DummyHandler;
+			Handlers["edit subscription"] = EditSubscriptionHandler;
 			Handlers["back"]              = BackHandler;
 		}
 
@@ -62,29 +60,50 @@ namespace CryptoTickerBot.Telegram.Menus
 			return this;
 		}
 
+		private async Task<TelegramKeyboardMenuBase> EditSubscriptionHandler ( CallbackQuery query )
+		{
+			var subscriptions = TelegramBot.Data.PercentChangeSubscriptions
+				.Where ( x => x.ChatId.Identifier == Chat.Id )
+				.ToList ( );
+
+			var exchangeId =
+				await ReadExchangeIdAsync ( subscriptions
+					                            .Select ( x => x.ExchangeId )
+					                            .Distinct ( )
+				);
+			if ( exchangeId is null )
+				return this;
+
+			subscriptions = subscriptions.Where ( x => x.ExchangeId == exchangeId ).ToList ( );
+
+			if ( subscriptions.Count == 1 )
+				return new EditSubscriptionMenu ( TelegramBot, subscriptions[0], this );
+
+			var threshold = await ReadThresholdAsync ( subscriptions.Select ( x => x.Threshold ) );
+			if ( threshold == -1 )
+				return this;
+
+			var subscription = subscriptions.SingleOrDefault ( x => x.Threshold == threshold );
+			if ( subscription is null )
+				return this;
+
+			return new EditSubscriptionMenu ( TelegramBot, subscription, this );
+		}
+
 		private async Task<decimal> ReadThresholdAsync ( )
 		{
 			await RequestReplyAsync ( "Enter the threshold%" );
 
-			var message = await ReadMessageAsync ( );
-
-			if ( decimal.TryParse ( message.Text.Trim ( '%' ), out var threshold ) )
-				return threshold;
-
-			await SendTextBlockAsync ( $"{message.Text} is not a valid percentage value" );
-
-			return -1;
+			return await ReadPercentage ( );
 		}
 
-		private async Task<List<string>> ReadSymbolsAsync ( )
+		private async Task<decimal> ReadThresholdAsync ( IEnumerable<decimal> thresholds )
 		{
-			await RequestReplyAsync ( "Enter the symbols" );
+			var list = thresholds.ToList ( );
+			await SendOptionsAsync (
+				$"{"subscription".ToQuantity ( list.Count )} found\nChoose threshold%", list, 2 );
 
-			var message = await ReadMessageAsync ( );
-
-			return message.Text
-				.Split ( " ,".ToCharArray ( ), StringSplitOptions.RemoveEmptyEntries )
-				.ToList ( );
+			return await ReadPercentage ( );
 		}
 	}
 }
