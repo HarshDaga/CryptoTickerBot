@@ -6,11 +6,13 @@ using CryptoTickerBot.Core.Abstractions;
 using CryptoTickerBot.Core.Helpers;
 using CryptoTickerBot.Data.Converters;
 using CryptoTickerBot.Data.Domain;
+using Fody;
 using Newtonsoft.Json;
 using NLog;
 
 namespace CryptoTickerBot.Core.Exchanges
 {
+	[ConfigureAwait ( false )]
 	public class KoinexExchange : CryptoExchangeBase<KoinexExchange.KoinexCoin>
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
@@ -36,7 +38,7 @@ namespace CryptoTickerBot.Core.Exchanges
 					Logger.Error ( e );
 				}
 
-				await Task.Delay ( PollingRate, ct ).ConfigureAwait ( false );
+				await Task.Delay ( PollingRate, ct );
 			}
 		}
 

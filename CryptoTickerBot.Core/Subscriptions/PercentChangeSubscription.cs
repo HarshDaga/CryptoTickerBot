@@ -9,12 +9,14 @@ using CryptoTickerBot.Core.Interfaces;
 using CryptoTickerBot.Data.Domain;
 using CryptoTickerBot.Data.Extensions;
 using CryptoTickerBot.Data.Helpers;
+using Fody;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using NLog;
 
 namespace CryptoTickerBot.Core.Subscriptions
 {
+	[ConfigureAwait ( false )]
 	public class PercentChangeSubscription :
 		CryptoExchangeSubscriptionBase,
 		IEquatable<PercentChangeSubscription>
@@ -80,10 +82,8 @@ namespace CryptoTickerBot.Core.Subscriptions
 				var previous = LastSignificantPrice[coin.Symbol].Clone ( );
 				LastSignificantPrice[coin.Symbol] = coin.Clone ( );
 
-				await OnTrigger ( previous.Clone ( ), coin.Clone ( ) )
-					.ConfigureAwait ( false );
-				Trigger?.Invoke ( this, previous.Clone ( ), coin.Clone ( ) )
-					.ConfigureAwait ( false );
+				await OnTrigger ( previous.Clone ( ), coin.Clone ( ) );
+				Trigger?.Invoke ( this, previous.Clone ( ), coin.Clone ( ) );
 			}
 		}
 

@@ -9,12 +9,14 @@ using System.Timers;
 using CryptoTickerBot.Data.Configs;
 using CryptoTickerBot.Data.Extensions;
 using Flurl.Http;
+using Fody;
 using Newtonsoft.Json;
 using NLog;
 using Polly;
 
 namespace CryptoTickerBot.Core.Helpers
 {
+	[ConfigureAwait ( false )]
 	public static class FiatConverter
 	{
 		public static readonly string TickerUrl = "http://data.fixer.io/api/latest";
@@ -107,7 +109,7 @@ namespace CryptoTickerBot.Core.Helpers
 
 		private static async Task FetchRates ( )
 		{
-			var json = await TickerUrl.GetStringAsync ( ).ConfigureAwait ( false );
+			var json = await TickerUrl.GetStringAsync ( );
 			var data = JsonConvert.DeserializeObject<dynamic> ( json );
 			UsdTo =
 				JsonConvert.DeserializeObject<Dictionary<string, decimal>> ( data.rates.ToString ( ) );

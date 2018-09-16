@@ -46,6 +46,19 @@ namespace CryptoTickerBot.Data.Domain
 			Time       = time ?? DateTime.UtcNow;
 		}
 
+		public virtual bool HasSameValues ( CryptoCoin coin ) =>
+			coin != null && Symbol == coin.Symbol &&
+			HighestBid == coin.HighestBid && LowestAsk == coin.LowestAsk;
+
+		[DebuggerStepThrough]
+		[Pure]
+		public CryptoCoin Clone ( ) =>
+			new CryptoCoin ( Symbol, HighestBid, LowestAsk, Rate, Time );
+
+		[Pure]
+		public override string ToString ( ) =>
+			$"{Symbol,-9}: Highest Bid = {HighestBid,-10:N} Lowest Ask = {LowestAsk,-10:N}";
+
 		#region Equality Members
 
 		public bool Equals ( CryptoCoin other )
@@ -80,18 +93,5 @@ namespace CryptoTickerBot.Data.Domain
 		                                 CryptoCoin right ) => !Equals ( left, right );
 
 		#endregion
-
-		public virtual bool HasSameValues ( CryptoCoin coin ) =>
-			coin != null && Symbol == coin.Symbol &&
-			HighestBid == coin.HighestBid && LowestAsk == coin.LowestAsk;
-
-		[DebuggerStepThrough]
-		[Pure]
-		public CryptoCoin Clone ( ) =>
-			new CryptoCoin ( Symbol, HighestBid, LowestAsk, Rate, Time );
-
-		[Pure]
-		public override string ToString ( ) =>
-			$"{Symbol,-9}: Highest Bid = {HighestBid,-10:N} Lowest Ask = {LowestAsk,-10:N}";
 	}
 }

@@ -156,6 +156,11 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 			return true;
 		}
 
+		public void Dispose ( )
+		{
+			disposable?.Dispose ( );
+		}
+
 		public virtual void AddWithoutSaving ( T item )
 		{
 			Collection.Add ( item );
@@ -167,11 +172,6 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 				Collection.Add ( item );
 
 			Save ( );
-		}
-
-		public void Dispose ( )
-		{
-			disposable?.Dispose ( );
 		}
 	}
 }

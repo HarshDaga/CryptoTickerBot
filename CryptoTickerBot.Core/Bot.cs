@@ -49,7 +49,7 @@ namespace CryptoTickerBot.Core
 					[Coinbase]  = new CoinbaseExchange ( ),
 					[CoinDelta] = new CoinDeltaExchange ( ),
 					[Koinex]    = new KoinexExchange ( ),
-					[Kraken]    = new KrakenExchange ( ),
+					[Kraken]    = new KrakenExchange ( )
 					//[Zebpay]    = new ZebpayExchange ( )
 				} );
 		}

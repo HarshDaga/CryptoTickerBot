@@ -5,12 +5,14 @@ using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
 using CryptoTickerBot.Data.Domain;
 using Flurl.Http;
+using Fody;
 using Newtonsoft.Json;
 using NLog;
 using Polly;
 
 namespace CryptoTickerBot.Core.Exchanges
 {
+	[ConfigureAwait ( false )]
 	public class KrakenExchange : CryptoExchangeBase<KrakenExchange.KrakenCoinInfo>
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
@@ -34,8 +36,8 @@ namespace CryptoTickerBot.Core.Exchanges
 		protected override async Task GetExchangeData ( CancellationToken ct )
 		{
 			Assets = await TradableAssetPairsEndpoint
-				.GetJsonAsync<KrakenAssetPairs> ( ct )
-				.ConfigureAwait ( false );
+					.GetJsonAsync<KrakenAssetPairs> ( ct )
+				;
 			var tickerUrlWithPairs = $"{TickerEndpoint}?pair={string.Join ( ",", Assets.Result.Keys )}";
 
 			while ( !ct.IsCancellationRequested )
@@ -46,7 +48,7 @@ namespace CryptoTickerBot.Core.Exchanges
 						.ExecuteAsync ( async ( ) =>
 							                await tickerUrlWithPairs
 								                .GetJsonAsync<Root> ( ct )
-								                .ConfigureAwait ( false ) );
+						);
 
 					foreach ( var kp in data.Results )
 						Update ( kp.Value, kp.Key );
@@ -56,7 +58,7 @@ namespace CryptoTickerBot.Core.Exchanges
 					Logger.Error ( e );
 				}
 
-				await Task.Delay ( PollingRate, ct ).ConfigureAwait ( false );
+				await Task.Delay ( PollingRate, ct );
 			}
 		}
 

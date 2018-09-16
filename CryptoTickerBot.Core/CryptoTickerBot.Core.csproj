@@ -6,8 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ConfigureAwait.Fody" Version="2.1.1" />
     <PackageReference Include="Flurl" Version="2.8.0" />
     <PackageReference Include="Flurl.Http" Version="2.4.0" />
+    <PackageReference Include="Fody" Version="3.2.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="GDAX.Api.ClientLibrary" Version="1.0.21" />
     <PackageReference Include="PurePusherClient" Version="1.0.0" />
     <PackageReference Include="PureWebSockets" Version="2.1.1" />

@@ -5,12 +5,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
 using CryptoTickerBot.Data.Domain;
+using Fody;
 using Newtonsoft.Json;
 using NLog;
 using PureWebSockets;
 
 namespace CryptoTickerBot.Core.Exchanges
 {
+	[ConfigureAwait ( false )]
 	public class BinanceExchange : CryptoExchangeBase<BinanceExchange.BinanceTickerDatum>
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
@@ -34,7 +36,7 @@ namespace CryptoTickerBot.Core.Exchanges
 					Logger.Error ( "Couldn't connect to Binance" );
 
 				while ( ws.State != WebSocketState.Closed )
-					await Task.Delay ( PollingRate, ct ).ConfigureAwait ( false );
+					await Task.Delay ( PollingRate, ct );
 			}
 		}
 

@@ -11,6 +11,7 @@ using CryptoTickerBot.Collections;
 using CryptoTickerBot.Core.Interfaces;
 using CryptoTickerBot.Data.Configs;
 using CryptoTickerBot.Data.Domain;
+using Fody;
 using NLog;
 using Polly;
 using Tababular;
@@ -19,6 +20,7 @@ using Tababular;
 
 namespace CryptoTickerBot.Core.Abstractions
 {
+	[ConfigureAwait ( false )]
 	public abstract class CryptoExchangeBase<T> : ICryptoExchange
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
@@ -124,7 +126,7 @@ namespace CryptoTickerBot.Core.Abstractions
 				Logger.Debug ( $"Starting {Name,-12} receiver." );
 
 				ExchangeData = new ConcurrentDictionary<string, CryptoCoin> ( );
-				await GetExchangeData ( ct ).ConfigureAwait ( false );
+				await GetExchangeData ( ct );
 
 				IsStarted = false;
 				Logger.Debug ( $"{Name,-12} receiver terminated." );

@@ -5,6 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ConfigureAwait.Fody" Version="2.1.1" />
+    <PackageReference Include="Fody" Version="3.2.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Polly" Version="6.1.0" />
     <PackageReference Include="System.Reactive" Version="4.1.0" />
   </ItemGroup>

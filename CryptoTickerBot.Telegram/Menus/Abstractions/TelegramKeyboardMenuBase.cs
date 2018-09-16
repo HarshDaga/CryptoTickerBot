@@ -8,6 +8,7 @@ using CryptoTickerBot.Core.Interfaces;
 using CryptoTickerBot.Data.Domain;
 using CryptoTickerBot.Telegram.Extensions;
 using EnumsNET;
+using Fody;
 using MoreLinq.Extensions;
 using NLog;
 using Telegram.Bot;
@@ -21,6 +22,7 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 {
 	internal delegate Task<TelegramKeyboardMenuBase> QueryHandlerDelegate ( CallbackQuery query );
 
+	[ConfigureAwait ( false )]
 	internal abstract class TelegramKeyboardMenuBase : ITelegramKeyboardMenu
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
@@ -80,9 +82,7 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 		{
 			var title = Chat.Type == ChatType.Private ? Title : $"{User}:\n{Title}";
 
-			return MenuMessage = await
-				SendTextBlockAsync ( title, replyMarkup: Keyboard )
-					.ConfigureAwait ( false );
+			return MenuMessage = await SendTextBlockAsync ( title, replyMarkup: Keyboard );
 		}
 
 		public async Task DeleteMenu ( )
@@ -90,9 +90,7 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 			try
 			{
 				if ( MenuMessage != null )
-					await Client
-						.DeleteMessageAsync ( Chat, MenuMessage.MessageId, CancellationToken )
-						.ConfigureAwait ( false );
+					await Client.DeleteMessageAsync ( Chat, MenuMessage.MessageId, CancellationToken );
 			}
 			catch ( Exception e )
 			{
@@ -107,26 +105,23 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 				await Client
 					.AnswerCallbackQueryAsync ( query.Id,
 					                            "This is not your menu!",
-					                            cancellationToken: CancellationToken )
-					.ConfigureAwait ( false );
+					                            cancellationToken: CancellationToken );
 				return this;
 			}
 
 			if ( ButtonPopups.TryGetValue ( query.Data, out var popupMessage ) )
 				await Client
-					.AnswerCallbackQueryAsync ( query.Id, popupMessage, cancellationToken: CancellationToken )
-					.ConfigureAwait ( false );
+					.AnswerCallbackQueryAsync ( query.Id, popupMessage, cancellationToken: CancellationToken );
 			else
 				await Client
-					.AnswerCallbackQueryAsync ( query.Id, cancellationToken: CancellationToken )
-					.ConfigureAwait ( false );
+					.AnswerCallbackQueryAsync ( query.Id, cancellationToken: CancellationToken );
 
 			if ( !Handlers.TryGetValue ( query.Data, out var handler ) )
 				return this;
 
-			var menu = await handler ( query ).ConfigureAwait ( false );
+			var menu = await handler ( query );
 
-			return await SwitchTo ( menu ).ConfigureAwait ( false );
+			return await SwitchTo ( menu );
 		}
 
 		public virtual async Task HandleMessageAsync ( Message message )

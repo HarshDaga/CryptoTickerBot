@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
 using CryptoTickerBot.Core.Interfaces;
 using CryptoTickerBot.Data.Domain;
+using Fody;
 using Google;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
@@ -14,6 +15,7 @@ using NLog;
 
 namespace CryptoTickerBot.GoogleSheets
 {
+	[ConfigureAwait ( false )]
 	public class GoogleSheetsUpdaterService : BotServiceBase
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
@@ -52,7 +54,7 @@ namespace CryptoTickerBot.GoogleSheets
 			try
 			{
 				var valueRanges = GetValueRangeToUpdate ( );
-				await UpdateSheet ( valueRanges ).ConfigureAwait ( false );
+				await UpdateSheet ( valueRanges );
 			}
 			catch ( Exception e )
 			{
@@ -79,7 +81,7 @@ namespace CryptoTickerBot.GoogleSheets
 
 			var request = Service.Spreadsheets.BatchUpdate ( requestBody, Config.SpreadSheetId );
 
-			await request.ExecuteAsync ( Bot.Cts.Token ).ConfigureAwait ( false );
+			await request.ExecuteAsync ( Bot.Cts.Token );
 		}
 
 		private async Task UpdateSheet ( ValueRange valueRange )
@@ -94,7 +96,7 @@ namespace CryptoTickerBot.GoogleSheets
 				request.ValueInputOption =
 					SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
 
-				await request.ExecuteAsync ( Bot.Cts.Token ).ConfigureAwait ( false );
+				await request.ExecuteAsync ( Bot.Cts.Token );
 
 				Update?.Invoke ( this );
 			}
@@ -108,7 +110,7 @@ namespace CryptoTickerBot.GoogleSheets
 				if ( e is GoogleApiException gae && gae.Error?.Code == 429 )
 				{
 					Logger.Warn ( gae, "Too many Google Api requests. Cooling down." );
-					await Task.Delay ( Config.CooldownPeriod, Bot.Cts.Token ).ConfigureAwait ( false );
+					await Task.Delay ( Config.CooldownPeriod, Bot.Cts.Token );
 				}
 				else
 				{

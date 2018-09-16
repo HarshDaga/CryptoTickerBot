@@ -2,9 +2,9 @@
 using Colorful;
 using CryptoTickerBot.Core;
 using CryptoTickerBot.Data.Configs;
-//using CryptoTickerBot.GoogleSheets;
 using CryptoTickerBot.Telegram;
 using NLog;
+//using CryptoTickerBot.GoogleSheets;
 
 namespace CryptoTickerBot.Runner
 {

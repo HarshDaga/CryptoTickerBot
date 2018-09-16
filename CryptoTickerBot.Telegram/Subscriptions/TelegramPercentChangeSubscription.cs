@@ -8,6 +8,7 @@ using CryptoTickerBot.Data.Domain;
 using CryptoTickerBot.Data.Extensions;
 using CryptoTickerBot.Data.Helpers;
 using CryptoTickerBot.Telegram.Extensions;
+using Fody;
 using Humanizer;
 using Humanizer.Localisation;
 using Newtonsoft.Json;
@@ -17,6 +18,7 @@ using Telegram.Bot.Types.Enums;
 
 namespace CryptoTickerBot.Telegram.Subscriptions
 {
+	[ConfigureAwait ( false )]
 	public class TelegramPercentChangeSubscription :
 		PercentChangeSubscription,
 		IEquatable<TelegramPercentChangeSubscription>
@@ -96,11 +98,11 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 			AddSymbols ( subscription.Symbols );
 
 			await TelegramBot.Client
-				.SendTextBlockAsync ( ChatId,
-				                      $"Merged with subscription:\n{Summary ( )}",
-				                      disableNotification: IsSilent,
-				                      cancellationToken: CancellationToken )
-				.ConfigureAwait ( false );
+					.SendTextBlockAsync ( ChatId,
+					                      $"Merged with subscription:\n{Summary ( )}",
+					                      disableNotification: IsSilent,
+					                      cancellationToken: CancellationToken )
+				;
 		}
 
 		protected override async Task OnTrigger ( CryptoCoin old,
@@ -123,8 +125,7 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 				.SendTextBlockAsync ( ChatId,
 				                      builder.ToString ( ),
 				                      disableNotification: IsSilent,
-				                      cancellationToken: CancellationToken )
-				.ConfigureAwait ( false );
+				                      cancellationToken: CancellationToken );
 		}
 
 		#region Equality Members
