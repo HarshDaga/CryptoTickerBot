@@ -205,6 +205,8 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 
 		protected async Task<Message> ReadMessageAsync ( )
 		{
+			ClearMessageQueue ( );
+
 			Message message;
 			while ( !messages.TryDequeue ( out message ) )
 				await Task.Delay ( 100, CancellationToken );
