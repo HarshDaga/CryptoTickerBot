@@ -59,6 +59,7 @@ namespace CryptoTickerBot.Telegram.Extensions
 
 			return await client.SendTextMessageAsync ( chatId,
 			                                           text,
+			                                           disableNotification: true,
 			                                           replyMarkup: keyboard,
 			                                           cancellationToken: cancellationToken );
 		}
@@ -82,6 +83,7 @@ namespace CryptoTickerBot.Telegram.Extensions
 				true, true );
 			return await client.SendTextMessageAsync ( chatId,
 			                                           text,
+			                                           disableNotification: true,
 			                                           replyMarkup: keyboard,
 			                                           cancellationToken: cancellationToken );
 		}
@@ -99,6 +101,7 @@ namespace CryptoTickerBot.Telegram.Extensions
 				{Selective = true};
 			return await client.SendTextMessageAsync ( chatId,
 			                                           $"{user}\n{text}",
+													   disableNotification: true,
 			                                           replyMarkup: keyboard,
 			                                           cancellationToken: cancellationToken );
 		}

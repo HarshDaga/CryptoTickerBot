@@ -50,7 +50,7 @@ namespace CryptoTickerBot.Telegram.Menus
 				Chat,
 				User,
 				exchangeId.Value,
-				threshold / 100m,
+				threshold,
 				isSilent,
 				symbols
 			);
@@ -107,7 +107,9 @@ namespace CryptoTickerBot.Telegram.Menus
 		{
 			var list = thresholds.ToList ( );
 			await SendOptionsAsync (
-				$"{"subscription".ToQuantity ( list.Count )} found\nChoose threshold%", list, 2 );
+				$"{"subscription".ToQuantity ( list.Count )} found\nChoose threshold%",
+				list.Select ( x => $"{x:P}" ),
+				2 );
 
 			return await ReadPercentage ( );
 		}

@@ -61,7 +61,7 @@ namespace CryptoTickerBot.Telegram.Menus
 			if ( threshold == -1 )
 				return this;
 
-			Subscription.Threshold = threshold / 100m;
+			Subscription.Threshold = threshold;
 
 			return await UpdateSubscription ( );
 		}

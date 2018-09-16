@@ -179,7 +179,7 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 			string text,
 			int replyToMessageId = 0,
 			bool disableWebPagePreview = false,
-			bool disableNotification = false,
+			bool disableNotification = true,
 			IReplyMarkup replyMarkup = null
 		) =>
 			LastMessage = await Client.SendTextMessageAsync ( Chat,
@@ -192,7 +192,7 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 		protected async Task<Message> RequestReplyAsync (
 			string text,
 			bool disableWebPagePreview = false,
-			bool disableNotification = false,
+			bool disableNotification = true,
 			IReplyMarkup replyMarkup = null
 		) =>
 			LastMessage = await Client.SendTextMessageAsync ( Chat,
@@ -242,7 +242,7 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 			var message = await ReadMessageAsync ( );
 
 			if ( decimal.TryParse ( message.Text.Trim ( '%' ), out var percentage ) )
-				return percentage;
+				return percentage / 100m;
 
 			await SendTextBlockAsync ( $"{message.Text} is not a valid percentage value" );
 
