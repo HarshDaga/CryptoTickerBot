@@ -262,10 +262,8 @@ namespace CryptoTickerBot.Telegram
 					await Client
 							.AnswerCallbackQueryAsync ( query.Id,
 							                            "Menu was closed!",
-							                            cancellationToken: Ctb.Cts.Token )
-						;
-					await Client.DeleteMessageAsync ( query.Message.Chat, query.Message.MessageId, Ctb.Cts.Token )
-						;
+							                            cancellationToken: Ctb.Cts.Token );
+					await Client.DeleteMessageAsync ( query.Message.Chat, query.Message.MessageId, Ctb.Cts.Token );
 				}
 				catch ( Exception e )
 				{

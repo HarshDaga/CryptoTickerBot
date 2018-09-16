@@ -119,9 +119,17 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 			if ( !Handlers.TryGetValue ( query.Data, out var handler ) )
 				return this;
 
-			var menu = await handler ( query );
+			try
+			{
+				var menu = await handler ( query );
+				return await SwitchTo ( menu );
+			}
+			catch ( Exception e )
+			{
+				Logger.Error ( e );
+			}
 
-			return await SwitchTo ( menu );
+			return await SwitchTo ( null );
 		}
 
 		public virtual async Task HandleMessageAsync ( Message message )

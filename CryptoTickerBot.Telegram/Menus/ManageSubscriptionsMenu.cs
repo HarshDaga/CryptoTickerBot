@@ -66,6 +66,12 @@ namespace CryptoTickerBot.Telegram.Menus
 				.Where ( x => x.ChatId.Identifier == Chat.Id )
 				.ToList ( );
 
+			if ( !subscriptions.Any ( ) )
+			{
+				await SendTextBlockAsync ( "There are no subscriptions to edit" );
+				return this;
+			}
+
 			var exchangeId =
 				await ReadExchangeIdAsync ( subscriptions
 					                            .Select ( x => x.ExchangeId )
