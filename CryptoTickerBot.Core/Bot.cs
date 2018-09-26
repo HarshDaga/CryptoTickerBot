@@ -62,6 +62,8 @@ namespace CryptoTickerBot.Core
 		[UsedImplicitly]
 		public event TerminateDelegate Terminate;
 
+		public event StartDelegate Start;
+
 		[UsedImplicitly]
 		public event OnUpdateDelegate Changed;
 
@@ -85,6 +87,8 @@ namespace CryptoTickerBot.Core
 			InitExchanges ( );
 
 			Cts.Token.Register ( async ( ) => await StopAsync ( ) );
+
+			Start?.Invoke ( this );
 		}
 
 		public async Task StartAsync ( CancellationTokenSource cts = null ) =>
@@ -185,6 +189,4 @@ namespace CryptoTickerBot.Core
 			Changed?.Invoke ( exchange, coin );
 		}
 	}
-
-	public delegate void TerminateDelegate ( Bot bot );
 }

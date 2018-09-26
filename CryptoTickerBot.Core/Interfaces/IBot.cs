@@ -20,6 +20,7 @@ namespace CryptoTickerBot.Core.Interfaces
 		event OnUpdateDelegate Changed;
 		event OnUpdateDelegate Next;
 		event TerminateDelegate Terminate;
+		event StartDelegate Start;
 
 		Task StartAsync ( CancellationTokenSource cts = null );
 
@@ -39,4 +40,8 @@ namespace CryptoTickerBot.Core.Interfaces
 		bool TryGetExchange ( string exchangeId,
 		                      out ICryptoExchange exchange );
 	}
+
+	public delegate void TerminateDelegate ( Bot bot );
+
+	public delegate Task StartDelegate ( Bot bot );
 }

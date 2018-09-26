@@ -1,8 +1,7 @@
 ﻿using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
-using CryptoTickerBot.Telegram;
 
-namespace CryptoTickerBot.Runner
+namespace CryptoTickerBot.Telegram
 {
 	public class TelegramBotService : BotServiceBase
 	{
@@ -14,11 +13,14 @@ namespace CryptoTickerBot.Runner
 			TelegramBotConfig = telegramBotConfig;
 		}
 
-		public override async Task StartAsync ( )
+		public override Task StartAsync ( )
 		{
 			TelegramBot = new TelegramBot ( TelegramBotConfig, Bot );
 
-			await TelegramBot.StartAsync ( );
+			TelegramBot.Ctb.Start += async bot =>
+				await TelegramBot.StartAsync ( );
+
+			return Task.CompletedTask;
 		}
 	}
 }
