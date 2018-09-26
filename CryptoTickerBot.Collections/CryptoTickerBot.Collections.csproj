@@ -6,10 +6,11 @@
 
   <ItemGroup>
     <PackageReference Include="ConfigureAwait.Fody" Version="2.1.1" />
-    <PackageReference Include="Fody" Version="3.2.2">
+    <PackageReference Include="Fody" Version="3.2.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="Polly" Version="6.1.0" />
     <PackageReference Include="System.Reactive" Version="4.1.0" />
   </ItemGroup>
