@@ -17,7 +17,7 @@ namespace CryptoTickerBot.Runner
 
 		private static RunnerConfig RunnerConfig => ConfigManager<RunnerConfig>.Instance;
 
-		public static async Task Main ( string[] args )
+		public static async Task Main ( )
 		{
 			//ConfigManager<CoreConfig>.Reset ( );
 

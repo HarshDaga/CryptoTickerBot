@@ -22,7 +22,7 @@ namespace CryptoTickerBot.Core.Exchanges
 			TickerUrl = $"{TickerUrl}@{PollingRate.TotalMilliseconds}ms";
 		}
 
-		protected override async Task GetExchangeData ( CancellationToken ct )
+		protected override async Task GetExchangeDataAsync ( CancellationToken ct )
 		{
 			var options = new PureWebSocketOptions
 			{
@@ -31,12 +31,35 @@ namespace CryptoTickerBot.Core.Exchanges
 
 			using ( var ws = new PureWebSocket ( TickerUrl, options ) )
 			{
+				var closed = false;
+
 				ws.OnMessage += WsOnMessage;
+				ws.OnClosed += reason =>
+				{
+					Logger.Info ( $"Binance closed: {reason}" );
+					closed = true;
+				};
+				ws.OnError += exception =>
+				{
+					Logger.Error ( exception );
+					closed = true;
+				};
+
 				if ( !ws.Connect ( ) )
 					Logger.Error ( "Couldn't connect to Binance" );
 
 				while ( ws.State != WebSocketState.Closed )
+				{
+					if ( UpTime > LastUpdateDuration &&
+					     LastUpdateDuration > TimeSpan.FromHours ( 1 ) ||
+					     closed )
+					{
+						ws.Disconnect ( );
+						break;
+					}
+
 					await Task.Delay ( PollingRate, ct );
+				}
 			}
 		}
 

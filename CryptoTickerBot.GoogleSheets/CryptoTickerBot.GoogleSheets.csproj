@@ -2,18 +2,19 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ConfigureAwait.Fody" Version="2.1.1" />
-    <PackageReference Include="Fody" Version="3.2.4">
+    <PackageReference Include="ConfigureAwait.Fody" Version="2.1.4" />
+    <PackageReference Include="Fody" Version="3.3.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Google.Apis" Version="1.35.2" />
-    <PackageReference Include="Google.Apis.Auth" Version="1.35.2" />
-    <PackageReference Include="Google.Apis.Core" Version="1.35.2" />
-    <PackageReference Include="Google.Apis.Sheets.v4" Version="1.35.2.1358" />
+    <PackageReference Include="Google.Apis" Version="1.36.1" />
+    <PackageReference Include="Google.Apis.Auth" Version="1.36.1" />
+    <PackageReference Include="Google.Apis.Core" Version="1.36.1" />
+    <PackageReference Include="Google.Apis.Sheets.v4" Version="1.36.1.1428" />
   </ItemGroup>
 
   <ItemGroup>

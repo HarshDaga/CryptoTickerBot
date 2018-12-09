@@ -6,6 +6,11 @@ namespace CryptoTickerBot.Core.Helpers
 {
 	public static class Utility
 	{
+		static Utility ( )
+		{
+			ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+		}
+
 		public static async Task<string> DownloadWebPageAsync ( string url )
 		{
 			var client = new WebClient ( );

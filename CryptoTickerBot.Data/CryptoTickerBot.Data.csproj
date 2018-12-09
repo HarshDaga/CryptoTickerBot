@@ -2,26 +2,27 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ConfigureAwait.Fody" Version="2.1.1" />
+    <PackageReference Include="ConfigureAwait.Fody" Version="2.1.4" />
     <PackageReference Include="Enums.NET" Version="2.3.2" />
-    <PackageReference Include="Fody" Version="3.2.4">
+    <PackageReference Include="Fody" Version="3.3.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Humanizer" Version="2.5.1" />
+    <PackageReference Include="Humanizer.Core" Version="2.5.16" />
     <PackageReference Include="JetBrains.Annotations" Version="2018.2.1" />
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageReference Include="morelinq" Version="3.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="NLog" Version="4.5.10" />
-    <PackageReference Include="NLog.Config" Version="4.5.10" />
-    <PackageReference Include="Polly" Version="6.1.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="NLog" Version="4.5.11" />
+    <PackageReference Include="NLog.Config" Version="4.5.11" />
+    <PackageReference Include="Polly" Version="6.1.2" />
     <PackageReference Include="SharpRaven" Version="2.4.0" />
     <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
-    <PackageReference Include="Tababular" Version="2.0.0" />
+    <PackageReference Include="Tababular" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>

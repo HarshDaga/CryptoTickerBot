@@ -16,6 +16,7 @@ using NLog;
 using Polly;
 using Tababular;
 
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 // ReSharper disable StaticMemberInGenericType
 
 namespace CryptoTickerBot.Core.Abstractions
@@ -126,7 +127,7 @@ namespace CryptoTickerBot.Core.Abstractions
 				Logger.Debug ( $"Starting {Name,-12} receiver." );
 
 				ExchangeData = new ConcurrentDictionary<string, CryptoCoin> ( );
-				await GetExchangeData ( ct );
+				await GetExchangeDataAsync ( ct );
 
 				IsStarted = false;
 				Logger.Debug ( $"{Name,-12} receiver terminated." );
@@ -179,7 +180,7 @@ namespace CryptoTickerBot.Core.Abstractions
 			return formatter.FormatObjects ( objects );
 		}
 
-		protected abstract Task GetExchangeData ( CancellationToken ct );
+		protected abstract Task GetExchangeDataAsync ( CancellationToken ct );
 
 		protected virtual string CleanAndExtractSymbol ( string symbol )
 		{

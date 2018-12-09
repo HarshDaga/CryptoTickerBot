@@ -8,6 +8,7 @@ using CryptoTickerBot.Data.Converters;
 using CryptoTickerBot.Data.Domain;
 using Flurl.Http;
 using Newtonsoft.Json;
+using NLog;
 using PurePusher;
 
 namespace CryptoTickerBot.Core.Exchanges
@@ -16,6 +17,7 @@ namespace CryptoTickerBot.Core.Exchanges
 	{
 		private const string TradingPairsEndpoint = "https://www.bitstamp.net/api/v2/trading-pairs-info/";
 		private const string TickerEndpoint = "https://www.bitstamp.net/api/v2/ticker/";
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
 		public PurePusherClient Client { get; private set; }
 		public List<BitstampAsset> Assets { get; private set; }
@@ -45,8 +47,9 @@ namespace CryptoTickerBot.Core.Exchanges
 			}
 		}
 
-		protected override async Task GetExchangeData ( CancellationToken ct )
+		protected override async Task GetExchangeDataAsync ( CancellationToken ct )
 		{
+			var closed = false;
 			Assets = await TradingPairsEndpoint.GetJsonAsync<List<BitstampAsset>> ( ct );
 
 			await FetchInitialData ( ct );
@@ -56,9 +59,6 @@ namespace CryptoTickerBot.Core.Exchanges
 				DebugMode = false
 			} );
 
-			if ( !Client.Connect ( ) )
-				return;
-
 			Client.Connected += sender =>
 			{
 				foreach ( var asset in Assets )
@@ -66,9 +66,28 @@ namespace CryptoTickerBot.Core.Exchanges
 						.Subscribe ( $"live_trades_{asset.UrlSymbol}" )
 						.Bind ( "trade", o => Update ( o, asset.Name ) );
 			};
+			Client.Error += ( sender,
+			                  error ) =>
+			{
+				Logger.Error ( error );
+				closed = true;
+			};
+
+			if ( !Client.Connect ( ) )
+				return;
 
 			while ( Client.Connection.State != WebSocketState.Closed )
+			{
+				if ( UpTime > LastUpdateDuration &&
+				     LastUpdateDuration > TimeSpan.FromHours ( 1 ) ||
+				     closed )
+				{
+					Client.Disconnect ( );
+					break;
+				}
+
 				await Task.Delay ( PollingRate, ct );
+			}
 		}
 
 		protected override void Update ( dynamic data,

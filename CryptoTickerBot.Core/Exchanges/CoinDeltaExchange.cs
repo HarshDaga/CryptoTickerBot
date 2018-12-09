@@ -16,7 +16,7 @@ namespace CryptoTickerBot.Core.Exchanges
 		{
 		}
 
-		protected override async Task GetExchangeData ( CancellationToken ct )
+		protected override async Task GetExchangeDataAsync ( CancellationToken ct )
 		{
 			while ( !ct.IsCancellationRequested )
 			{

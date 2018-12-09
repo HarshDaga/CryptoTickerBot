@@ -21,7 +21,7 @@ namespace CryptoTickerBot.Core.Exchanges
 		public readonly string TradableAssetPairsEndpoint;
 		public readonly string TickerEndpoint;
 
-		protected Policy RetryPolicy;
+		protected readonly Policy RetryPolicy;
 
 		public KrakenExchange ( ) : base ( CryptoExchangeId.Kraken )
 		{
@@ -33,11 +33,10 @@ namespace CryptoTickerBot.Core.Exchanges
 				.WaitAndRetryAsync ( 5, i => CooldownPeriod );
 		}
 
-		protected override async Task GetExchangeData ( CancellationToken ct )
+		protected override async Task GetExchangeDataAsync ( CancellationToken ct )
 		{
 			Assets = await TradableAssetPairsEndpoint
-					.GetJsonAsync<KrakenAssetPairs> ( ct )
-				;
+				.GetJsonAsync<KrakenAssetPairs> ( ct );
 			var tickerUrlWithPairs = $"{TickerEndpoint}?pair={string.Join ( ",", Assets.Result.Keys )}";
 
 			while ( !ct.IsCancellationRequested )

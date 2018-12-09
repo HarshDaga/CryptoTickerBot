@@ -2,21 +2,21 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>7.1</LangVersion>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ConfigureAwait.Fody" Version="2.1.1" />
+    <PackageReference Include="ConfigureAwait.Fody" Version="2.1.4" />
     <PackageReference Include="Flurl" Version="2.8.0" />
     <PackageReference Include="Flurl.Http" Version="2.4.0" />
-    <PackageReference Include="Fody" Version="3.2.4">
+    <PackageReference Include="Fody" Version="3.3.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="GDAX.Api.ClientLibrary" Version="1.0.21" />
-    <PackageReference Include="PurePusherClient" Version="1.0.0" />
-    <PackageReference Include="PureWebSockets" Version="2.1.1" />
-    <PackageReference Include="System.Reactive" Version="4.1.0" />
+    <PackageReference Include="GDAX.Api.ClientLibrary" Version="1.0.25" />
+    <PackageReference Include="PurePusherClient" Version="1.1.0" />
+    <PackageReference Include="PureWebSockets" Version="2.2.0" />
+    <PackageReference Include="System.Reactive" Version="4.1.2" />
   </ItemGroup>
 
   <ItemGroup>

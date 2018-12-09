@@ -23,7 +23,7 @@ namespace CryptoTickerBot.Core.Exchanges
 		{
 		}
 
-		protected override async Task GetExchangeData ( CancellationToken ct )
+		protected override async Task GetExchangeDataAsync ( CancellationToken ct )
 		{
 			await FetchAll ( TimeSpan.FromSeconds ( 2 ), ct );
 

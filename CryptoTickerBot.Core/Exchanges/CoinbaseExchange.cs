@@ -25,18 +25,25 @@ namespace CryptoTickerBot.Core.Exchanges
 		{
 		}
 
-		protected override async Task GetExchangeData ( CancellationToken ct )
+		protected override async Task GetExchangeDataAsync ( CancellationToken ct )
 		{
 			try
 			{
+				var closed = false;
 				Client = new CoinbaseProClient ( );
 
 				Client.WebSocket.OnWebSocketError += ( sender,
-				                                       args ) => Logger.Error ( args.LastOrder.Exception );
+				                                       args ) =>
+				{
+				};
 				Client.WebSocket.OnErrorReceived += ( sender,
-				                                      args ) => Logger.Error ( args.LastOrder.Reason );
+				                                      args ) =>
+				{
+					Logger.Error ( args.LastOrder.Reason );
+					closed = true;
+				};
 
-				var products = Enums.GetValues<ProductType> ( ).ToList ( );
+				var products = Enums.GetValues<ProductType> ( ).Except ( new[] {ProductType.Unknown} ).ToList ( );
 				var channels = new List<ChannelType> {ChannelType.Ticker};
 
 				Client.WebSocket.OnTickerReceived += ( sender,
@@ -48,7 +55,17 @@ namespace CryptoTickerBot.Core.Exchanges
 				Client.WebSocket.Start ( products, channels );
 
 				while ( Client.WebSocket.State != WebSocketState.Closed )
+				{
+					if ( UpTime > LastUpdateDuration &&
+					     LastUpdateDuration > TimeSpan.FromHours ( 1 ) ||
+					     closed )
+					{
+						Client.WebSocket.Stop ( );
+						break;
+					}
+
 					await Task.Delay ( PollingRate, ct );
+				}
 			}
 			catch ( Exception e )
 			{
