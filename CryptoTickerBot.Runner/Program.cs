@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Colorful;
 using CryptoTickerBot.Core;
 using CryptoTickerBot.CUI;
@@ -16,9 +17,16 @@ namespace CryptoTickerBot.Runner
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
 		private static RunnerConfig RunnerConfig => ConfigManager<RunnerConfig>.Instance;
+		private static readonly ManualResetEvent QuitEvent = new ManualResetEvent ( false );
 
 		public static async Task Main ( )
 		{
+			Console.CancelKeyPress += ( sender,
+			                            eArgs ) =>
+			{
+				QuitEvent.Set ( );
+				eArgs.Cancel = true;
+			};
 			//ConfigManager<CoreConfig>.Reset ( );
 
 			var bot = new Bot ( );
@@ -49,7 +57,7 @@ namespace CryptoTickerBot.Runner
 
 			await bot.StartAsync ( );
 
-			Console.ReadLine ( );
+			QuitEvent.WaitOne ( );
 		}
 	}
 }
