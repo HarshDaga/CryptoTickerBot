@@ -98,13 +98,13 @@ namespace CryptoTickerBot.Core
 		{
 			if ( !IsRunning )
 				return;
+			IsRunning = false;
 
 			Logger.Info ( "Stopping Bot" );
 
-			IsRunning = false;
 			FiatConverter.StopMonitor ( );
 			if ( !Cts.IsCancellationRequested )
-				Cts.Cancel ( false );
+				Cts.Cancel ( );
 
 			var services = Services.ToList ( );
 
@@ -112,6 +112,15 @@ namespace CryptoTickerBot.Core
 				await Detach ( service );
 
 			Terminate?.Invoke ( this );
+		}
+
+		public void RestartExchangeMonitors ( )
+		{
+			foreach ( var exchange in Exchanges.Values )
+			{
+				exchange.StopReceivingAsync ( );
+				exchange.StartReceivingAsync ( Cts.Token );
+			}
 		}
 
 		public bool ContainsService ( IBotService service ) =>
@@ -167,7 +176,7 @@ namespace CryptoTickerBot.Core
 
 				//CompareTable.AddExchange ( exchange );
 
-				exchange.StartReceivingAsync ( Cts );
+				exchange.StartReceivingAsync ( Cts?.Token );
 			}
 
 			IsInitialized = true;

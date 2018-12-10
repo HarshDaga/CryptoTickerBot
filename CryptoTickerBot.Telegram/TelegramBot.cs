@@ -20,6 +20,8 @@ using Telegram.Bot.Args;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+
 #pragma warning disable 1998
 
 namespace CryptoTickerBot.Telegram
@@ -80,7 +82,8 @@ namespace CryptoTickerBot.Telegram
 			{
 				["/menu"] = ( "/menu", HandleMenuCommand ),
 				["/subscribe"] = ( "/subscribe [Exchange] [Percentage] [Silent=true/false] [Symbols]",
-				                   HandleSubscribeCommand )
+				                   HandleSubscribeCommand ),
+				["/restart"] = ( "/restart", HandleRestartCommand )
 			};
 		}
 
@@ -90,14 +93,13 @@ namespace CryptoTickerBot.Telegram
 			try
 			{
 				await Policy
-						.ExecuteAsync ( async ( ) =>
-						{
-							Self = await Client.GetMeAsync ( CancellationToken );
-							Logger.Info ( $"Hello! My name is {Self.FirstName}" );
+					.ExecuteAsync ( async ( ) =>
+					{
+						Self = await Client.GetMeAsync ( CancellationToken );
+						Logger.Info ( $"Hello! My name is {Self.FirstName}" );
 
-							Client.StartReceiving ( cancellationToken: CancellationToken );
-						} )
-					;
+						Client.StartReceiving ( cancellationToken: CancellationToken );
+					} );
 
 				await ResumeSubscriptions ( );
 			}
@@ -246,6 +248,14 @@ namespace CryptoTickerBot.Telegram
 			await AddOrUpdateSubscription ( subscription );
 		}
 
+		private async Task HandleRestartCommand ( Message message )
+		{
+			Ctb.RestartExchangeMonitors ( );
+			await Client.SendTextBlockAsync ( message.Chat,
+			                                  "Restarted exchange monitors",
+			                                  cancellationToken: CancellationToken );
+		}
+
 		#endregion
 
 		#region TelegramBotClient Event Handlers
@@ -260,9 +270,9 @@ namespace CryptoTickerBot.Telegram
 				try
 				{
 					await Client
-							.AnswerCallbackQueryAsync ( query.Id,
-							                            "Menu was closed!",
-							                            cancellationToken: Ctb.Cts.Token );
+						.AnswerCallbackQueryAsync ( query.Id,
+						                            "Menu was closed!",
+						                            cancellationToken: Ctb.Cts.Token );
 					await Client.DeleteMessageAsync ( query.Message.Chat, query.Message.MessageId, Ctb.Cts.Token );
 				}
 				catch ( Exception e )

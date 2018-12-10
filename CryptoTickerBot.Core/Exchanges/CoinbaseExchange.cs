@@ -27,50 +27,48 @@ namespace CryptoTickerBot.Core.Exchanges
 
 		protected override async Task GetExchangeDataAsync ( CancellationToken ct )
 		{
-			try
+			var closed = false;
+			Client = new CoinbaseProClient ( );
+
+			Client.WebSocket.OnWebSocketError += ( sender,
+			                                       args ) =>
 			{
-				var closed = false;
-				Client = new CoinbaseProClient ( );
+			};
+			Client.WebSocket.OnErrorReceived += ( sender,
+			                                      args ) =>
+			{
+				Logger.Error ( args.LastOrder.Reason );
+				closed = true;
+			};
 
-				Client.WebSocket.OnWebSocketError += ( sender,
-				                                       args ) =>
+			StartWebSocket ( );
+
+			while ( Client.WebSocket.State != WebSocketState.Closed )
+			{
+				if ( UpTime > LastUpdateDuration &&
+				     LastUpdateDuration > TimeSpan.FromHours ( 1 ) ||
+				     closed )
 				{
-				};
-				Client.WebSocket.OnErrorReceived += ( sender,
-				                                      args ) =>
-				{
-					Logger.Error ( args.LastOrder.Reason );
-					closed = true;
-				};
-
-				var products = Enums.GetValues<ProductType> ( ).Except ( new[] {ProductType.Unknown} ).ToList ( );
-				var channels = new List<ChannelType> {ChannelType.Ticker};
-
-				Client.WebSocket.OnTickerReceived += ( sender,
-				                                       args ) =>
-				{
-					var ticker = args.LastOrder;
-					Update ( ticker, ticker.ProductId );
-				};
-				Client.WebSocket.Start ( products, channels );
-
-				while ( Client.WebSocket.State != WebSocketState.Closed )
-				{
-					if ( UpTime > LastUpdateDuration &&
-					     LastUpdateDuration > TimeSpan.FromHours ( 1 ) ||
-					     closed )
-					{
-						Client.WebSocket.Stop ( );
-						break;
-					}
-
-					await Task.Delay ( PollingRate, ct );
+					Client.WebSocket.Stop ( );
+					break;
 				}
+
+				await Task.Delay ( PollingRate, ct );
 			}
-			catch ( Exception e )
+		}
+
+		private void StartWebSocket ( )
+		{
+			var products = Enums.GetValues<ProductType> ( ).Except ( new[] {ProductType.Unknown} ).ToList ( );
+			var channels = new List<ChannelType> {ChannelType.Ticker};
+
+			Client.WebSocket.OnTickerReceived += ( sender,
+			                                       args ) =>
 			{
-				Logger.Error ( e );
-			}
+				var ticker = args.LastOrder;
+				Update ( ticker, ticker.ProductId );
+			};
+			Client.WebSocket.Start ( products, channels );
 		}
 
 		protected override void DeserializeData ( Ticker data,
@@ -83,7 +81,9 @@ namespace CryptoTickerBot.Core.Exchanges
 
 		public override Task StopReceivingAsync ( )
 		{
-			Client.WebSocket.Stop ( );
+			if ( Client.WebSocket.State != WebSocketState.Closed )
+				Client.WebSocket.Stop ( );
+
 			return base.StopReceivingAsync ( );
 		}
 	}

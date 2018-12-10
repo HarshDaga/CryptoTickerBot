@@ -63,7 +63,7 @@ namespace CryptoTickerBot.Core.Abstractions
 		                         string symbol ] =>
 			Markets[baseSymbol, symbol];
 
-		private CancellationTokenSource cts;
+		private CancellationTokenSource cts = new CancellationTokenSource ( );
 
 		protected CryptoExchangeBase ( CryptoExchangeId id )
 		{
@@ -100,6 +100,11 @@ namespace CryptoTickerBot.Core.Abstractions
 					  retryCount,
 					  span ) =>
 					{
+						if ( exception is TaskCanceledException ||
+						     exception is OperationCanceledException ||
+						     cts.IsCancellationRequested )
+							return Task.CompletedTask;
+
 						Logger.Error ( exception );
 						return Task.CompletedTask;
 					}
@@ -116,18 +121,19 @@ namespace CryptoTickerBot.Core.Abstractions
 			return Disposable.Create ( ( ) => Observers = Observers.Remove ( observer ) );
 		}
 
-		public virtual async Task StartReceivingAsync ( CancellationTokenSource tokenSource = null )
+		public virtual async Task StartReceivingAsync ( CancellationToken? token = null )
 		{
-			cts = tokenSource ?? new CancellationTokenSource ( );
+			cts = new CancellationTokenSource ( );
+			cts = CancellationTokenSource.CreateLinkedTokenSource ( token ?? CancellationToken.None, cts.Token );
 
-			await Policy.ExecuteAsync ( async ct =>
+			await Policy.ExecuteAsync ( async c =>
 			{
 				StartTime = DateTime.UtcNow;
 				IsStarted = true;
 				Logger.Debug ( $"Starting {Name,-12} receiver." );
 
 				ExchangeData = new ConcurrentDictionary<string, CryptoCoin> ( );
-				await GetExchangeDataAsync ( ct );
+				await GetExchangeDataAsync ( c );
 
 				IsStarted = false;
 				Logger.Debug ( $"{Name,-12} receiver terminated." );
@@ -137,7 +143,9 @@ namespace CryptoTickerBot.Core.Abstractions
 		public virtual async Task StopReceivingAsync ( )
 		{
 			cts.Cancel ( );
-			await Task.CompletedTask;
+
+			while ( IsStarted )
+				await Task.Delay ( 1 );
 		}
 
 		public void Unsubscribe ( IObserver<CryptoCoin> subscription )

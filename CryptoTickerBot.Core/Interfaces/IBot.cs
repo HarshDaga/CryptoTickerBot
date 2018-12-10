@@ -28,6 +28,7 @@ namespace CryptoTickerBot.Core.Interfaces
 		                  params CryptoExchangeId[] exchangeIds );
 
 		Task StopAsync ( );
+		void RestartExchangeMonitors ( );
 
 		bool ContainsService ( IBotService service );
 		Task Attach ( IBotService service );

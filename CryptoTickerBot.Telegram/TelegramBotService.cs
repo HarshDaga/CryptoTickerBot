@@ -22,5 +22,11 @@ namespace CryptoTickerBot.Telegram
 
 			return Task.CompletedTask;
 		}
+
+		public override Task StopAsync ( )
+		{
+			TelegramBot.Stop ( );
+			return Task.CompletedTask;
+		}
 	}
 }

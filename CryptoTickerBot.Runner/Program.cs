@@ -15,9 +15,9 @@ namespace CryptoTickerBot.Runner
 	public class Program
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
+		private static readonly ManualResetEvent QuitEvent = new ManualResetEvent ( false );
 
 		private static RunnerConfig RunnerConfig => ConfigManager<RunnerConfig>.Instance;
-		private static readonly ManualResetEvent QuitEvent = new ManualResetEvent ( false );
 
 		public static async Task Main ( )
 		{

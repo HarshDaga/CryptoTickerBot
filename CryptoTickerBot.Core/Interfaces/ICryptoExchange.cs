@@ -48,7 +48,7 @@ namespace CryptoTickerBot.Core.Interfaces
 		event OnUpdateDelegate Changed;
 		event OnUpdateDelegate Next;
 
-		Task StartReceivingAsync ( CancellationTokenSource cts = null );
+		Task StartReceivingAsync ( CancellationToken? ct = null );
 		Task StopReceivingAsync ( );
 
 		void Unsubscribe ( IObserver<CryptoCoin> subscription );

@@ -105,6 +105,11 @@ namespace CryptoTickerBot.GoogleSheets
 				if ( !Bot.Cts.IsCancellationRequested )
 					Logger.Warn ( tce );
 			}
+			catch ( OperationCanceledException oce )
+			{
+				if ( !Bot.Cts.IsCancellationRequested )
+					Logger.Warn ( oce );
+			}
 			catch ( Exception e )
 			{
 				if ( e is GoogleApiException gae && gae.Error?.Code == 429 )
