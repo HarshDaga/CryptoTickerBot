@@ -7,7 +7,7 @@ namespace CryptoTickerBot.Runner
 		public string ConfigFileName { get; } = "RunnerConfig";
 
 		public bool EnableConsoleService { get; set; } = false;
-		public bool EnableGoogleSheetsService { get; set; } = true;
+		public bool EnableGoogleSheetsService { get; set; } = false;
 		public bool EnableTelegramService { get; set; } = true;
 	}
 }

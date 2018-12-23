@@ -4,6 +4,8 @@ using JetBrains.Annotations;
 using Newtonsoft.Json;
 using NLog;
 
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+
 // ReSharper disable StaticMemberInGenericType
 
 namespace CryptoTickerBot.Data.Configs
@@ -27,7 +29,7 @@ namespace CryptoTickerBot.Data.Configs
 		private static readonly object FileLock;
 		public static T Instance { get; set; }
 
-		public static string FileName => $"{Instance.ConfigFileName}.json";
+		public static string FileName => Path.Combine ( "Configs", $"{Instance.ConfigFileName}.json" );
 
 		static ConfigManager ( )
 		{
