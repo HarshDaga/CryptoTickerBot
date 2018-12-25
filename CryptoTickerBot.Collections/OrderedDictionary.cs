@@ -246,6 +246,7 @@ namespace CryptoTickerBot.Collections
 		[ContractInvariantMethod]
 		private void ObjectInvariant ( )
 		{
+			// ReSharper disable once InvocationIsSkipped
 			Contract.Invariant ( fDictionary.Count == fKeys.Count,
 			                     "Unordered dictionary and ordered key list should be the same length." );
 		}

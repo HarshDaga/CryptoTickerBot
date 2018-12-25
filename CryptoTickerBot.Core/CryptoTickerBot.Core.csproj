@@ -13,11 +13,11 @@
     <PackageReference Include="ConfigureAwait.Fody" Version="2.1.4" />
     <PackageReference Include="Flurl" Version="2.8.0" />
     <PackageReference Include="Flurl.Http" Version="2.4.0" />
-    <PackageReference Include="Fody" Version="3.3.3">
+    <PackageReference Include="Fody" Version="3.3.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="GDAX.Api.ClientLibrary" Version="1.0.25" />
+    <PackageReference Include="GDAX.Api.ClientLibrary" Version="1.0.26" />
     <PackageReference Include="PurePusherClient" Version="1.1.0" />
     <PackageReference Include="PureWebSockets" Version="2.2.0" />
     <PackageReference Include="System.Reactive" Version="4.1.2" />

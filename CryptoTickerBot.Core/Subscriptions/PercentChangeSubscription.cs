@@ -21,6 +21,7 @@ namespace CryptoTickerBot.Core.Subscriptions
 		CryptoExchangeSubscriptionBase,
 		IEquatable<PercentChangeSubscription>
 	{
+		// ReSharper disable once UnusedMember.Local
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
 		[JsonConverter ( typeof ( StringEnumConverter ) )]

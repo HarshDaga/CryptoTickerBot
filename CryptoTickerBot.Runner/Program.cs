@@ -39,7 +39,7 @@ namespace CryptoTickerBot.Runner
 
 				service.Update += updaterService =>
 				{
-					Console.WriteLine ( $"Sheets Updated @ {service.LastUpdate}" );
+					Logger.Debug ( $"Sheets Updated @ {service.LastUpdate}" );
 					return Task.CompletedTask;
 				};
 
