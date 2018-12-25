@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using CryptoTickerBot.Collections.Persistent;
 using CryptoTickerBot.Collections.Persistent.Base;
@@ -13,6 +14,7 @@ namespace CryptoTickerBot.Telegram
 	public class TelegramBotData
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
+		public const string FolderName = "Data";
 
 		public PersistentSet<User> Users { get; }
 		public PersistentDictionary<int, UserRole> UserRoles { get; }
@@ -30,10 +32,13 @@ namespace CryptoTickerBot.Telegram
 
 		public TelegramBotData ( )
 		{
-			Users     = new PersistentSet<User> ( "TelegramBotUsers.json" );
-			UserRoles = new PersistentDictionary<int, UserRole> ( "TelegramUserRoles.json" );
+			Users = new PersistentSet<User> (
+				Path.Combine ( FolderName, "TelegramBotUsers.json" ) );
+			UserRoles = new PersistentDictionary<int, UserRole> (
+				Path.Combine ( FolderName, "TelegramUserRoles.json" ) );
 			PercentChangeSubscriptions =
-				new PersistentSet<TelegramPercentChangeSubscription> ( "TelegramPercentChangeSubscriptions.json" );
+				new PersistentSet<TelegramPercentChangeSubscription> (
+					Path.Combine ( FolderName, "TelegramPercentChangeSubscriptions.json" ) );
 
 			collections = new List<IPersistentCollection>
 			{

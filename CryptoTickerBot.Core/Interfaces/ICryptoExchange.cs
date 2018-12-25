@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using CryptoTickerBot.Collections;
 using CryptoTickerBot.Data.Domain;
 
+// ReSharper disable UnusedMemberInSuper.Global
+
 namespace CryptoTickerBot.Core.Interfaces
 {
 	public delegate Task OnUpdateDelegate ( ICryptoExchange exchange,

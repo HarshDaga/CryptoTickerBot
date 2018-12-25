@@ -17,23 +17,21 @@ namespace CryptoTickerBot.GoogleSheets
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 		public static readonly string[] Scopes = {SheetsService.Scope.Spreadsheets};
 
-		public static UserCredential GetCredentials ( )
+		public static UserCredential GetCredentials ( string clientSecretPath,
+		                                              string credentialsPath )
 		{
 			using ( var stream =
-				new FileStream ( "client_secret.json", FileMode.Open, FileAccess.Read ) )
+				new FileStream ( clientSecretPath, FileMode.Open, FileAccess.Read ) )
 			{
-				var credPath = Path.Combine (
-					Environment.GetFolderPath ( Environment.SpecialFolder.Personal ),
-					".credentials/sheets.googleapis.com-dotnet-quickstart.json"
-				);
+				credentialsPath = Path.GetFullPath ( credentialsPath );
 
 				var credential = GoogleWebAuthorizationBroker.AuthorizeAsync (
 					GoogleClientSecrets.Load ( stream ).Secrets,
 					Scopes,
 					"user",
 					CancellationToken.None,
-					new FileDataStore ( credPath, true ) ).Result;
-				Logger.Info ( "Credential file saved to: " + credPath );
+					new FileDataStore ( Path.GetFullPath ( credentialsPath ), true ) ).Result;
+				Logger.Info ( "Credential file saved to: " + credentialsPath );
 
 				return credential;
 			}

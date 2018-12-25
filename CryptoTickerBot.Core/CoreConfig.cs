@@ -7,11 +7,14 @@ using CryptoTickerBot.Data.Domain;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+
 namespace CryptoTickerBot.Core
 {
 	public class CoreConfig : IConfig
 	{
-		public string ConfigFileName { get; } = "CoreConfig";
+		public string ConfigFileName { get; } = "Core";
+		public string ConfigFolderName { get; } = "Configs";
 
 		public string FixerApiKey { get; set; }
 

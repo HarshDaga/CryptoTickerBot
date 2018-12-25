@@ -61,7 +61,10 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 			FlushInterval      = flushInterval;
 
 			if ( !Load ( ) )
+			{
 				Collection = new TCollection ( );
+				Save ( );
+			}
 
 			disposable = Observable.Interval ( FlushInterval ).Subscribe ( l => ForceSave ( ) );
 		}
@@ -121,7 +124,12 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 						                ( exception,
 						                  span ) =>
 							                OnError?.Invoke ( this, exception ) )
-						.Execute ( ( ) => File.WriteAllText ( FileName, json ) );
+						.Execute ( ( ) =>
+						{
+							var fileInfo = new FileInfo ( FileName );
+							fileInfo.Directory?.Create ( );
+							File.WriteAllText ( FileName, json );
+						} );
 
 					OnSave?.Invoke ( this );
 				}

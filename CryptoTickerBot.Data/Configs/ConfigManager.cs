@@ -29,7 +29,8 @@ namespace CryptoTickerBot.Data.Configs
 		private static readonly object FileLock;
 		public static T Instance { get; set; }
 
-		public static string FileName => Path.Combine ( "Configs", $"{Instance.ConfigFileName}.json" );
+		public static string FileName =>
+			Path.Combine ( Instance.ConfigFolderName ?? "Configs", $"{Instance.ConfigFileName}.json" );
 
 		static ConfigManager ( )
 		{

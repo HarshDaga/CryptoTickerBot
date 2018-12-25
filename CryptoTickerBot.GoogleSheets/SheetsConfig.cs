@@ -1,11 +1,14 @@
 ﻿using System;
 using CryptoTickerBot.Data.Configs;
 
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+
 namespace CryptoTickerBot.GoogleSheets
 {
 	public class SheetsConfig : IConfig
 	{
-		public string ConfigFileName { get; } = "SheetsConfig";
+		public string ConfigFileName { get; } = "Sheets";
+		public string ConfigFolderName { get; } = "Configs";
 
 		public string SpreadSheetId { get; set; }
 		public string SheetName { get; set; }

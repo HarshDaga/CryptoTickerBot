@@ -6,5 +6,7 @@ namespace CryptoTickerBot.Data.Configs
 	{
 		[JsonIgnore]
 		string ConfigFileName { get; }
+		[JsonIgnore]
+		string ConfigFolderName { get; }
 	}
 }

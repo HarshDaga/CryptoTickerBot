@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
@@ -19,6 +20,7 @@ namespace CryptoTickerBot.GoogleSheets
 	public class GoogleSheetsUpdaterService : BotServiceBase
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
+		public const string FolderName = "GoogleApi";
 
 		public SheetsConfig Config { get; }
 
@@ -32,13 +34,23 @@ namespace CryptoTickerBot.GoogleSheets
 		{
 			Config = config;
 
-			var credential = Utility.GetCredentials ( );
-
-			Service = new SheetsService ( new BaseClientService.Initializer
+			try
 			{
-				HttpClientInitializer = credential,
-				ApplicationName       = config.ApplicationName
-			} );
+				var credential = Utility.GetCredentials (
+					Path.Combine ( FolderName, "ClientSecret.json" ),
+					Path.Combine ( FolderName, "Credentials" )
+				);
+
+				Service = new SheetsService ( new BaseClientService.Initializer
+				{
+					HttpClientInitializer = credential,
+					ApplicationName       = config.ApplicationName
+				} );
+			}
+			catch ( Exception e )
+			{
+				Logger.Error ( e );
+			}
 		}
 
 		[UsedImplicitly]

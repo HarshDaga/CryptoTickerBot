@@ -1,11 +1,14 @@
 ﻿using System;
 using CryptoTickerBot.Data.Configs;
 
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+
 namespace CryptoTickerBot.Telegram
 {
 	public class TelegramBotConfig : IConfig
 	{
-		public string ConfigFileName { get; } = "TelegramBotConfig";
+		public string ConfigFileName { get; } = "TelegramBot";
+		public string ConfigFolderName { get; } = "Configs";
 
 		public string BotToken { get; set; }
 		public int OwnerId { get; set; }
