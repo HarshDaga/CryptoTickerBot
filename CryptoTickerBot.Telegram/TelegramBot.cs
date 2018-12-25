@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Interfaces;
@@ -13,8 +14,11 @@ using CryptoTickerBot.Telegram.Menus.Abstractions;
 using CryptoTickerBot.Telegram.Subscriptions;
 using EnumsNET;
 using Fody;
+using Humanizer;
+using Humanizer.Localisation;
 using NLog;
 using Polly;
+using Tababular;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types;
@@ -83,6 +87,7 @@ namespace CryptoTickerBot.Telegram
 				["/menu"] = ( "/menu", HandleMenuCommand ),
 				["/subscribe"] = ( "/subscribe [Exchange] [Percentage] [Silent=true/false] [Symbols]",
 				                   HandleSubscribeCommand ),
+				["/status"]  = ( "/status", HandleStatusCommand ),
 				["/restart"] = ( "/restart", HandleRestartCommand )
 			};
 		}
@@ -188,6 +193,30 @@ namespace CryptoTickerBot.Telegram
 			Data.AddOrUpdate ( existing );
 		}
 
+		public string GetStatusString ( )
+		{
+			var formatter = new TableFormatter ( );
+			var objects = Ctb.Exchanges.Values.Select (
+					exchange => new Dictionary<string, string>
+					{
+						["Exchange"]    = exchange.Name,
+						["Up Time"]     = exchange.UpTime.Humanize ( 2, minUnit: TimeUnit.Second ),
+						["Last Update"] = exchange.LastUpdateDuration.Humanize ( )
+					}
+				)
+				.Cast<IDictionary<string, string>> ( )
+				.ToList ( );
+
+			var builder = new StringBuilder ( );
+			builder
+				.AppendLine (
+					$"Running since {( DateTime.UtcNow - Ctb.StartTime ).Humanize ( 3, minUnit: TimeUnit.Second )}" )
+				.AppendLine ( "" )
+				.AppendLine ( formatter.FormatDictionaries ( objects ) );
+
+			return builder.ToString ( );
+		}
+
 		#endregion
 
 		#region Command Handlers
@@ -253,6 +282,13 @@ namespace CryptoTickerBot.Telegram
 			Ctb.RestartExchangeMonitors ( );
 			await Client.SendTextBlockAsync ( message.Chat,
 			                                  "Restarted exchange monitors",
+			                                  cancellationToken: CancellationToken );
+		}
+
+		private async Task HandleStatusCommand ( Message message )
+		{
+			await Client.SendTextBlockAsync ( message.Chat,
+			                                  GetStatusString ( ),
 			                                  cancellationToken: CancellationToken );
 		}
 

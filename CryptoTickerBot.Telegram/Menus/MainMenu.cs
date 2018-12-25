@@ -43,26 +43,7 @@ namespace CryptoTickerBot.Telegram.Menus
 
 		private async Task<TelegramKeyboardMenuBase> StatusHandler ( CallbackQuery query )
 		{
-			var formatter = new TableFormatter ( );
-			var objects = Ctb.Exchanges.Values.Select (
-					exchange => new Dictionary<string, string>
-					{
-						["Exchange"]    = exchange.Name,
-						["Up Time"]     = exchange.UpTime.Humanize ( 2, minUnit: TimeUnit.Second ),
-						["Last Update"] = exchange.LastUpdateDuration.Humanize ( )
-					}
-				)
-				.Cast<IDictionary<string, string>> ( )
-				.ToList ( );
-
-			var builder = new StringBuilder ( );
-			builder
-				.AppendLine (
-					$"Running since {( DateTime.UtcNow - Ctb.StartTime ).Humanize ( 3, minUnit: TimeUnit.Second )}" )
-				.AppendLine ( "" )
-				.AppendLine ( formatter.FormatDictionaries ( objects ) );
-
-			await SendTextBlockAsync ( builder.ToString ( ) );
+			await SendTextBlockAsync ( TelegramBot.GetStatusString ( ) );
 
 			return this;
 		}
