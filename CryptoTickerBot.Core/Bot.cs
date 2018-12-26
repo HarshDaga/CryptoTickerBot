@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using CryptoTickerBot.Core.Exchanges;
 using CryptoTickerBot.Core.Helpers;
 using CryptoTickerBot.Core.Interfaces;
+using CryptoTickerBot.Data.Configs;
 using CryptoTickerBot.Data.Domain;
 using EnumsNET;
 using JetBrains.Annotations;
@@ -169,6 +170,8 @@ namespace CryptoTickerBot.Core
 
 		private void InitExchanges ( )
 		{
+			ConfigManager<CoreConfig>.Load ( );
+
 			foreach ( var exchange in Exchanges.Values )
 			{
 				exchange.Next    += OnNext;
