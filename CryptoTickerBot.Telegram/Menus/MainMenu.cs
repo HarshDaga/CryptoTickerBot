@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using CryptoTickerBot.Telegram.Extensions;
 using CryptoTickerBot.Telegram.Menus.Abstractions;
-using Humanizer;
-using Humanizer.Localisation;
 using MoreLinq;
-using Tababular;
 using Telegram.Bot.Types;
 
 #pragma warning disable 1998
