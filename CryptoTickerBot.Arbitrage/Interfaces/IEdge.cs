@@ -4,8 +4,9 @@
 	{
 		INode From { get; }
 		INode To { get; }
-		double OriginalCost { get; }
+		decimal OriginalCost { get; }
 
 		double Weight { get; }
+		void CopyFrom ( IEdge edge );
 	}
 }

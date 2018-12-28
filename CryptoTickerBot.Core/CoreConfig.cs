@@ -31,11 +31,7 @@ namespace CryptoTickerBot.Core
 				SellFees       = 0.1m,
 				PollingRate    = TimeSpan.FromMilliseconds ( 1000 ),
 				CooldownPeriod = TimeSpan.FromSeconds ( 5 ),
-				SymbolMappings = new OrderedDictionary<string, string>
-				{
-					["BCC"] = "BCH"
-				},
-				BaseSymbols = new List<string> {"USDT", "BTC", "ETH", "BNB"}
+				BaseSymbols    = new List<string> {"USDT", "TUSD", "USDC", "PAX", "BTC", "ETH", "BNB", "XRP"}
 			},
 			new CryptoExchangeApiInfo
 			{
@@ -45,7 +41,7 @@ namespace CryptoTickerBot.Core
 				TickerUrl   = "wss://ws-feed.pro.coinbase.com",
 				BuyFees     = 0.3m,
 				SellFees    = 0.3m,
-				BaseSymbols = new List<string> {"BTC", "USD", "EUR", "GBP"}
+				BaseSymbols = new List<string> {"BTC", "USD", "EUR", "GBP", "USDC"}
 			},
 			new CryptoExchangeApiInfo
 			{

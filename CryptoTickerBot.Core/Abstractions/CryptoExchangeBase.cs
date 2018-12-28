@@ -88,7 +88,7 @@ namespace CryptoTickerBot.Core.Abstractions
 			CooldownPeriod = exchange.CooldownPeriod;
 			WithdrawalFees = new Dictionary<string, decimal> ( exchange.WithdrawalFees );
 			DepositFees    = new Dictionary<string, decimal> ( exchange.DepositFees );
-			Markets        = new Markets ( exchange.BaseSymbols );
+			Markets        = new Markets ( exchange );
 			SymbolMappings = exchange.SymbolMappings.Clone ( );
 
 			Policy = Policy
@@ -186,6 +186,25 @@ namespace CryptoTickerBot.Core.Abstractions
 				} );
 
 			return formatter.FormatObjects ( objects );
+		}
+
+		protected decimal GetAdjustedSellPrice ( CryptoCoin coin ) =>
+			coin.SellPrice * ( 1m - SellFees / 100m );
+
+		protected decimal GetAdjustedBuyPrice ( CryptoCoin coin ) =>
+			coin.BuyPrice * ( 1m + BuyFees / 100m );
+
+		protected (CryptoCoin coin, decimal price) GetCoin ( string symbol1,
+		                                                     string symbol2 )
+		{
+			var coin = ExchangeData.Values.FirstOrDefault ( x => x.Symbol == $"{symbol1}{symbol2}" ||
+			                                                     x.Symbol == $"{symbol2}{symbol1}" );
+			if ( coin is null )
+				return ( null, 0 );
+
+			return coin.Symbol.Equals ( $"{symbol1}{symbol2}" )
+				? ( coin, GetAdjustedSellPrice ( coin ) )
+				: ( coin, 1m / GetAdjustedBuyPrice ( coin ) );
 		}
 
 		protected abstract Task GetExchangeDataAsync ( CancellationToken ct );

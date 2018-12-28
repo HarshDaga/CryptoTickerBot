@@ -26,7 +26,7 @@ namespace CryptoTickerBot.Data.Domain
 		public decimal Average => ( BuyPrice + SellPrice ) / 2;
 
 		[JsonIgnore]
-		public decimal Spread => BuyPrice - SellPrice;
+		public decimal Spread => LowestAsk - HighestBid;
 
 		[JsonIgnore]
 		public decimal SpreadPercentage => Average != 0 ? Spread / Average : 0;

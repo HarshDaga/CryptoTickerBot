@@ -7,7 +7,7 @@ namespace CryptoTickerBot.Arbitrage.IntraExchange
 	{
 		public Edge ( INode from,
 		              INode to,
-		              double cost ) : base ( from, to, cost )
+		              decimal cost ) : base ( from, to, cost )
 		{
 		}
 	}

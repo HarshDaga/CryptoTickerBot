@@ -6,6 +6,7 @@ namespace CryptoTickerBot.Arbitrage.Interfaces
 	public interface ICycle<TNode> : IEquatable<ICycle<TNode>> where TNode : INode
 	{
 		IReadOnlyList<TNode> Path { get; }
+		IEnumerable<IEdge> Edges { get; }
 
 		int Length { get; }
 		double Weight { get; }

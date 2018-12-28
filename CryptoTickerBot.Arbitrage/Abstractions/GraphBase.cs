@@ -6,7 +6,7 @@ namespace CryptoTickerBot.Arbitrage.Abstractions
 {
 	public abstract class GraphBase<TNode> : IGraph<TNode> where TNode : class, INode
 	{
-		protected virtual ConcurrentDictionary<string, TNode> Nodes { get; set; } =
+		protected ConcurrentDictionary<string, TNode> Nodes { get; set; } =
 			new ConcurrentDictionary<string, TNode> ( );
 
 		IDictionary<string, TNode> IGraph<TNode>.Nodes => Nodes;
@@ -41,21 +41,31 @@ namespace CryptoTickerBot.Arbitrage.Abstractions
 
 		public virtual IEdge UpsertEdge ( string from,
 		                                  string to,
-		                                  double cost ) =>
+		                                  decimal cost ) =>
 			UpsertEdge ( from, to, cost, DefaultEdgeBuilder );
 
 		public virtual TEdge UpsertEdge<TEdge> ( string from,
 		                                         string to,
-		                                         double cost,
-		                                         EdgeBuilderDelegate<TNode, TEdge> edgeBuilder ) where TEdge : IEdge
+		                                         decimal cost,
+		                                         EdgeBuilderDelegate<TNode, TEdge> edgeBuilder )
+			where TEdge : class, IEdge
 		{
 			var nodeFrom = AddNode ( from );
 			var nodeTo = AddNode ( to );
 
 			var edge = edgeBuilder ( nodeFrom, nodeTo, cost );
-			nodeFrom.AddEdge ( edge );
+			if ( nodeFrom.AddOrUpdateEdge ( edge ) )
+				OnEdgeInsert ( nodeFrom, nodeTo );
+			else
+				OnEdgeUpdate ( nodeFrom, nodeTo );
 
 			return edge;
 		}
+
+		protected abstract void OnEdgeInsert ( TNode from,
+		                                       TNode to );
+
+		protected abstract void OnEdgeUpdate ( TNode from,
+		                                       TNode to );
 	}
 }

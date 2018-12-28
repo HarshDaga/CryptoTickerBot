@@ -15,17 +15,17 @@ namespace CryptoTickerBot.Arbitrage.Interfaces
 
 		IEdge UpsertEdge ( string from,
 		                   string to,
-		                   double cost );
+		                   decimal cost );
 
 		TEdge UpsertEdge<TEdge> ( string from,
 		                          string to,
-		                          double cost,
-		                          EdgeBuilderDelegate<TNode, TEdge> edgeBuilder ) where TEdge : IEdge;
+		                          decimal cost,
+		                          EdgeBuilderDelegate<TNode, TEdge> edgeBuilder ) where TEdge : class, IEdge;
 	}
 
 	public delegate TNode NodeBuilderDelegate<out TNode> ( string symbol );
 
 	public delegate TEdge EdgeBuilderDelegate<in TNode, out TEdge> ( TNode from,
 	                                                                 TNode to,
-	                                                                 double cost );
+	                                                                 decimal cost );
 }

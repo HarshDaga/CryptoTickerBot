@@ -11,7 +11,7 @@ namespace CryptoTickerBot.Arbitrage.Interfaces
 
 		IEdge this [ string symbol ] { get; }
 
-		void AddEdge ( IEdge edge );
+		bool AddOrUpdateEdge ( IEdge edge );
 		bool HasEdge ( string symbol );
 	}
 }

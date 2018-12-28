@@ -13,8 +13,8 @@ namespace CryptoTickerBot.Telegram
 {
 	public class TelegramBotData
 	{
-		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 		public const string FolderName = "Data";
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
 		public PersistentSet<User> Users { get; }
 		public PersistentDictionary<int, UserRole> UserRoles { get; }

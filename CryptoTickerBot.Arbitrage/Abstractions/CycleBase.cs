@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using CryptoTickerBot.Arbitrage.Interfaces;
+using MoreLinq;
 
 namespace CryptoTickerBot.Arbitrage.Abstractions
 {
 	public abstract class CycleBase<TNode> : ICycle<TNode> where TNode : INode
 	{
 		public List<TNode> Path { get; }
+		public IEnumerable<IEdge> Edges => Path.Window ( 2 ).Select ( x => x[0][x[1].Symbol] );
 		IReadOnlyList<TNode> ICycle<TNode>.Path => Path;
 		public int Length => Path.Count - 1;
-		public double Weight { get; protected set; }
+		public double Weight { get; protected set; } = double.PositiveInfinity;
 
 		protected CycleBase ( IEnumerable<TNode> path )
 		{

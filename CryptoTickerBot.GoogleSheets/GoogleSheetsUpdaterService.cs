@@ -19,8 +19,8 @@ namespace CryptoTickerBot.GoogleSheets
 	[ConfigureAwait ( false )]
 	public class GoogleSheetsUpdaterService : BotServiceBase
 	{
-		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 		public const string FolderName = "GoogleApi";
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
 		public SheetsConfig Config { get; }
 

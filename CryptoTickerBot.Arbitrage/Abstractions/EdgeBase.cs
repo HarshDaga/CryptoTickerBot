@@ -7,17 +7,22 @@ namespace CryptoTickerBot.Arbitrage.Abstractions
 	{
 		public virtual INode From { get; }
 		public virtual INode To { get; }
-		public double OriginalCost { get; }
+		public decimal OriginalCost { get; protected set; }
 
-		public virtual double Weight => -Math.Log ( OriginalCost );
+		public virtual double Weight => -Math.Log ( (double) OriginalCost );
 
 		protected EdgeBase ( INode from,
 		                     INode to,
-		                     double cost )
+		                     decimal cost )
 		{
 			From         = from;
 			To           = to;
 			OriginalCost = cost;
+		}
+
+		public virtual void CopyFrom ( IEdge edge )
+		{
+			OriginalCost = edge.OriginalCost;
 		}
 
 		public override string ToString ( ) => $"{From.Symbol} -> {To.Symbol}  {OriginalCost} {Weight}";

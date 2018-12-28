@@ -25,9 +25,16 @@ namespace CryptoTickerBot.Arbitrage.Abstractions
 			Symbol = symbol;
 		}
 
-		public void AddEdge ( IEdge edge )
+		public bool AddOrUpdateEdge ( IEdge edge )
 		{
+			if ( EdgeTable.TryGetValue ( edge.To.Symbol, out var existing ) )
+			{
+				existing.CopyFrom ( edge );
+				return false;
+			}
+
 			EdgeTable[edge.To.Symbol] = edge;
+			return true;
 		}
 
 		public bool HasEdge ( string symbol ) =>
