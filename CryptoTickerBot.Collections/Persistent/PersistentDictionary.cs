@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using CryptoTickerBot.Collections.Persistent.Base;
 using Newtonsoft.Json;
 
@@ -30,6 +31,13 @@ namespace CryptoTickerBot.Collections.Persistent
 		public PersistentDictionary ( string fileName,
 		                              JsonSerializerSettings serializerSettings )
 			: base ( fileName, serializerSettings )
+		{
+		}
+
+		public PersistentDictionary ( string fileName,
+		                              JsonSerializerSettings serializerSettings,
+		                              TimeSpan flushInterval )
+			: base ( fileName, serializerSettings, flushInterval )
 		{
 		}
 

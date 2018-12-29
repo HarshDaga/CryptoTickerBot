@@ -106,30 +106,37 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 			return result;
 		}
 
+		protected void OneTimeSave ( ref string json )
+		{
+			var fileInfo = new FileInfo ( FileName );
+			fileInfo.Directory?.Create ( );
+			File.WriteAllText ( FileName, json );
+		}
+
+		protected void InternalForceSave ( )
+		{
+			var json = JsonConvert.SerializeObject ( Collection );
+
+			Policy
+				.Handle<Exception> ( )
+				.WaitAndRetry ( MaxRetryAttempts,
+				                i => RetryInterval,
+				                ( exception,
+				                  span ) =>
+					                OnError?.Invoke ( this, exception ) )
+				.Execute ( ( ) => OneTimeSave ( ref json ) );
+		}
+
 		public void ForceSave ( )
 		{
 			if ( !saveRequested )
 				return;
 
-			var json = JsonConvert.SerializeObject ( Collection );
-
 			lock ( FileLock )
 			{
 				try
 				{
-					Policy
-						.Handle<Exception> ( )
-						.WaitAndRetry ( MaxRetryAttempts,
-						                i => RetryInterval,
-						                ( exception,
-						                  span ) =>
-							                OnError?.Invoke ( this, exception ) )
-						.Execute ( ( ) =>
-						{
-							var fileInfo = new FileInfo ( FileName );
-							fileInfo.Directory?.Create ( );
-							File.WriteAllText ( FileName, json );
-						} );
+					InternalForceSave ( );
 
 					OnSave?.Invoke ( this );
 				}
@@ -166,6 +173,7 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 
 		public void Dispose ( )
 		{
+			ForceSave ( );
 			disposable?.Dispose ( );
 		}
 
