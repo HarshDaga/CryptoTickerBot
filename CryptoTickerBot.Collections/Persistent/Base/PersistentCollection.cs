@@ -23,6 +23,8 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 			ObjectCreationHandling = ObjectCreationHandling.Replace
 		};
 
+		public static TimeSpan DefaultFlushInterval => TimeSpan.FromSeconds ( 1 );
+
 		protected TCollection Collection { get; set; }
 
 		public int Count => Collection.Count;
@@ -42,13 +44,13 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 		private IDisposable disposable;
 
 		protected PersistentCollection ( string fileName ) :
-			this ( fileName, DefaultSerializerSettings, TimeSpan.FromSeconds ( 1 ) )
+			this ( fileName, DefaultSerializerSettings, DefaultFlushInterval )
 		{
 		}
 
 		protected PersistentCollection ( string fileName,
 		                                 JsonSerializerSettings serializerSettings ) :
-			this ( fileName, serializerSettings, TimeSpan.FromSeconds ( 1 ) )
+			this ( fileName, serializerSettings, DefaultFlushInterval )
 		{
 		}
 
@@ -60,6 +62,8 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 			SerializerSettings = serializerSettings;
 			FlushInterval      = flushInterval;
 
+			OpenCollections.Data[fileName] = this;
+
 			if ( !Load ( ) )
 			{
 				Collection = new TCollection ( );
@@ -67,6 +71,24 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 			}
 
 			disposable = Observable.Interval ( FlushInterval ).Subscribe ( l => ForceSave ( ) );
+		}
+
+		protected static bool TryOpenCollection ( string fileName,
+		                                          out IPersistentCollection collection ) =>
+			OpenCollections.Data.TryGetValue ( fileName, out collection );
+
+		protected static TType GetOpenCollection<TType> ( string fileName )
+			where TType : PersistentCollection<T, TCollection>
+		{
+			if ( TryOpenCollection ( fileName, out var collection ) )
+			{
+				if ( collection is TType result )
+					return result;
+				throw new InvalidCastException (
+					$"{fileName} already has an open collection of type {collection.GetType ( )}" );
+			}
+
+			return null;
 		}
 
 		public event SaveDelegate OnSave;
@@ -174,6 +196,7 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 		public void Dispose ( )
 		{
 			ForceSave ( );
+			OpenCollections.Data.TryRemove ( FileName, out _ );
 			disposable?.Dispose ( );
 		}
 

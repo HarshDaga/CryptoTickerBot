@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using CryptoTickerBot.Collections.Persistent.Base;
-using Newtonsoft.Json;
 
 namespace CryptoTickerBot.Collections.Persistent
 {
@@ -23,22 +22,21 @@ namespace CryptoTickerBot.Collections.Persistent
 
 		public ICollection<TValue> Values => Collection.Values;
 
-		public PersistentDictionary ( string fileName )
-			: base ( fileName )
+		private PersistentDictionary ( string fileName,
+		                               TimeSpan flushInterval )
+			: base ( fileName, DefaultSerializerSettings, flushInterval )
 		{
 		}
 
-		public PersistentDictionary ( string fileName,
-		                              JsonSerializerSettings serializerSettings )
-			: base ( fileName, serializerSettings )
-		{
-		}
+		public static PersistentDictionary<TKey, TValue> Build ( string fileName ) =>
+			Build ( fileName, DefaultFlushInterval );
 
-		public PersistentDictionary ( string fileName,
-		                              JsonSerializerSettings serializerSettings,
-		                              TimeSpan flushInterval )
-			: base ( fileName, serializerSettings, flushInterval )
+		public static PersistentDictionary<TKey, TValue> Build ( string fileName,
+		                                                         TimeSpan flushInterval )
 		{
+			var collection = GetOpenCollection<PersistentDictionary<TKey, TValue>> ( fileName );
+
+			return collection ?? new PersistentDictionary<TKey, TValue> ( fileName, flushInterval );
 		}
 
 		public void Add ( TKey key,

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using CryptoTickerBot.Collections.Persistent.Base;
-using Newtonsoft.Json;
 
 namespace CryptoTickerBot.Collections.Persistent
 {
@@ -17,22 +16,21 @@ namespace CryptoTickerBot.Collections.Persistent
 			}
 		}
 
-		public PersistentList ( string fileName )
-			: base ( fileName )
+		private PersistentList ( string fileName,
+		                         TimeSpan flushInterval )
+			: base ( fileName, DefaultSerializerSettings, flushInterval )
 		{
 		}
 
-		public PersistentList ( string fileName,
-		                        JsonSerializerSettings serializerSettings )
-			: base ( fileName, serializerSettings )
-		{
-		}
+		public static PersistentList<T> Build ( string fileName ) =>
+			Build ( fileName, DefaultFlushInterval );
 
-		public PersistentList ( string fileName,
-		                        JsonSerializerSettings serializerSettings,
-		                        TimeSpan flushInterval )
-			: base ( fileName, serializerSettings, flushInterval )
+		public static PersistentList<T> Build ( string fileName,
+		                                        TimeSpan flushInterval )
 		{
+			var collection = GetOpenCollection<PersistentList<T>> ( fileName );
+
+			return collection ?? new PersistentList<T> ( fileName, flushInterval );
 		}
 
 		public int IndexOf ( T item ) => Collection.IndexOf ( item );

@@ -1,26 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using CryptoTickerBot.Collections.Persistent.Base;
-using Newtonsoft.Json;
 
 namespace CryptoTickerBot.Collections.Persistent
 {
 	public sealed class PersistentSet<T> : PersistentCollection<T, HashSet<T>>, ISet<T>
 	{
-		public PersistentSet ( string fileName ) : base ( fileName )
+		private PersistentSet ( string fileName,
+		                        TimeSpan flushInterval )
+			: base ( fileName, DefaultSerializerSettings, flushInterval )
 		{
 		}
 
-		public PersistentSet ( string fileName,
-		                       JsonSerializerSettings serializerSettings ) : base ( fileName, serializerSettings )
-		{
-		}
+		public static PersistentSet<T> Build ( string fileName ) =>
+			Build ( fileName, DefaultFlushInterval );
 
-		public PersistentSet ( string fileName,
-		                       JsonSerializerSettings serializerSettings,
-		                       TimeSpan flushInterval )
-			: base ( fileName, serializerSettings, flushInterval )
+		public static PersistentSet<T> Build ( string fileName,
+		                                       TimeSpan flushInterval )
 		{
+			var collection = GetOpenCollection<PersistentSet<T>> ( fileName );
+
+			return collection ?? new PersistentSet<T> ( fileName, flushInterval );
 		}
 
 		bool ISet<T>.Add ( T item )

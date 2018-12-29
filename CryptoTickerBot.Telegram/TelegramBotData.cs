@@ -32,12 +32,12 @@ namespace CryptoTickerBot.Telegram
 
 		public TelegramBotData ( )
 		{
-			Users = new PersistentSet<User> (
+			Users = PersistentSet<User>.Build (
 				Path.Combine ( FolderName, "TelegramBotUsers.json" ) );
-			UserRoles = new PersistentDictionary<int, UserRole> (
+			UserRoles = PersistentDictionary<int, UserRole>.Build (
 				Path.Combine ( FolderName, "TelegramUserRoles.json" ) );
 			PercentChangeSubscriptions =
-				new PersistentSet<TelegramPercentChangeSubscription> (
+				PersistentSet<TelegramPercentChangeSubscription>.Build (
 					Path.Combine ( FolderName, "TelegramPercentChangeSubscriptions.json" ) );
 
 			collections = new List<IPersistentCollection>
