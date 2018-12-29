@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JetBrains.DotMemoryUnit" Version="3.0.20171219.105559" />
+    <PackageReference Include="nunit" Version="3.11.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.12.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CryptoTickerBot.Arbitrage\CryptoTickerBot.Arbitrage.csproj" />
+    <ProjectReference Include="..\CryptoTickerBot.Collections\CryptoTickerBot.Collections.csproj" />
+    <ProjectReference Include="..\CryptoTickerBot.Core\CryptoTickerBot.Core.csproj" />
+    <ProjectReference Include="..\CryptoTickerBot.CUI\CryptoTickerBot.CUI.csproj" />
+    <ProjectReference Include="..\CryptoTickerBot.Data\CryptoTickerBot.Data.csproj" />
+    <ProjectReference Include="..\CryptoTickerBot.GoogleSheets\CryptoTickerBot.GoogleSheets.csproj" />
+    <ProjectReference Include="..\CryptoTickerBot.Runner\CryptoTickerBot.Runner.csproj" />
+    <ProjectReference Include="..\CryptoTickerBot.Telegram\CryptoTickerBot.Telegram.csproj" />
+  </ItemGroup>
+
+</Project>
