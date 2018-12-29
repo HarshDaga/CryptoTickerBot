@@ -11,7 +11,7 @@ using Newtonsoft.Json.Converters;
 
 namespace CryptoTickerBot.Core
 {
-	public class CoreConfig : IConfig
+	public class CoreConfig : IConfig<CoreConfig>
 	{
 		public string ConfigFileName { get; } = "Core";
 		public string ConfigFolderName { get; } = "Configs";
@@ -119,6 +119,12 @@ namespace CryptoTickerBot.Core
 				BaseSymbols    = new List<string> {"INR"}
 			}
 		};
+
+		public CoreConfig RestoreDefaults ( )
+		{
+			var result = new CoreConfig {FixerApiKey = FixerApiKey};
+			return result;
+		}
 
 		public class CryptoExchangeApiInfo
 		{

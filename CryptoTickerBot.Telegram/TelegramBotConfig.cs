@@ -5,7 +5,7 @@ using CryptoTickerBot.Data.Configs;
 
 namespace CryptoTickerBot.Telegram
 {
-	public class TelegramBotConfig : IConfig
+	public class TelegramBotConfig : IConfig<TelegramBotConfig>
 	{
 		public string ConfigFileName { get; } = "TelegramBot";
 		public string ConfigFolderName { get; } = "Configs";
@@ -14,5 +14,12 @@ namespace CryptoTickerBot.Telegram
 		public int OwnerId { get; set; }
 		public int RetryLimit { get; set; } = 5;
 		public TimeSpan RetryInterval { get; set; } = TimeSpan.FromSeconds ( 5 );
+
+		public TelegramBotConfig RestoreDefaults ( ) =>
+			new TelegramBotConfig
+			{
+				BotToken = BotToken,
+				OwnerId  = OwnerId
+			};
 	}
 }

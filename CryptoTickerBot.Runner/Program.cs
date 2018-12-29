@@ -8,8 +8,6 @@ using CryptoTickerBot.GoogleSheets;
 using CryptoTickerBot.Telegram;
 using NLog;
 
-//using CryptoTickerBot.GoogleSheets;
-
 namespace CryptoTickerBot.Runner
 {
 	public class Program
@@ -27,7 +25,6 @@ namespace CryptoTickerBot.Runner
 				QuitEvent.Set ( );
 				eArgs.Cancel = true;
 			};
-			//ConfigManager<CoreConfig>.Reset ( );
 
 			var bot = new Bot ( );
 

@@ -5,7 +5,7 @@ using CryptoTickerBot.Data.Configs;
 
 namespace CryptoTickerBot.GoogleSheets
 {
-	public class SheetsConfig : IConfig
+	public class SheetsConfig : IConfig<SheetsConfig>
 	{
 		public string ConfigFileName { get; } = "Sheets";
 		public string ConfigFolderName { get; } = "Configs";
@@ -20,5 +20,14 @@ namespace CryptoTickerBot.GoogleSheets
 		public int StartingRow { get; set; } = 5;
 		public char StartingColumn { get; set; } = 'A';
 		public int ExchangeRowGap { get; set; } = 3;
+
+		public SheetsConfig RestoreDefaults ( ) =>
+			new SheetsConfig
+			{
+				SpreadSheetId   = SpreadSheetId,
+				SheetName       = SheetName,
+				SheetId         = SheetId,
+				ApplicationName = ApplicationName
+			};
 	}
 }

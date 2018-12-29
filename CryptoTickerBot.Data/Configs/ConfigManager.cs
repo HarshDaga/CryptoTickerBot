@@ -19,15 +19,15 @@ namespace CryptoTickerBot.Data.Configs
 			ObjectCreationHandling = ObjectCreationHandling.Replace
 		};
 
-		public static T Get<T> ( ) where T : IConfig, new ( ) =>
+		public static T Get<T> ( ) where T : IConfig<T>, new ( ) =>
 			ConfigManager<T>.Instance;
 	}
 
-	public static class ConfigManager<T> where T : IConfig, new ( )
+	public static class ConfigManager<TConfig> where TConfig : IConfig<TConfig>, new ( )
 	{
 		[UsedImplicitly] private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 		private static readonly object FileLock;
-		public static T Instance { get; set; }
+		public static TConfig Instance { get; set; }
 
 		public static string FileName =>
 			Path.Combine ( Instance.ConfigFolderName ?? "Configs", $"{Instance.ConfigFileName}.json" );
@@ -35,7 +35,7 @@ namespace CryptoTickerBot.Data.Configs
 		static ConfigManager ( )
 		{
 			FileLock = new object ( );
-			Instance = new T ( );
+			Instance = new TConfig ( );
 			Load ( );
 			Save ( );
 		}
@@ -63,8 +63,25 @@ namespace CryptoTickerBot.Data.Configs
 				lock ( FileLock )
 				{
 					if ( File.Exists ( FileName ) )
-						Instance = JsonConvert.DeserializeObject<T> ( File.ReadAllText ( FileName ),
-						                                              ConfigManager.SerializerSettings );
+						Instance = JsonConvert.DeserializeObject<TConfig> ( File.ReadAllText ( FileName ),
+						                                                    ConfigManager.SerializerSettings );
+				}
+			}
+			catch ( Exception e )
+			{
+				Logger.Error ( e );
+			}
+		}
+
+		public static void RestoreDefaults ( )
+		{
+			try
+			{
+				Instance = Instance.RestoreDefaults ( );
+				lock ( FileLock )
+				{
+					File.WriteAllText ( FileName,
+					                    JsonConvert.SerializeObject ( Instance, ConfigManager.SerializerSettings ) );
 				}
 			}
 			catch ( Exception e )
@@ -83,7 +100,7 @@ namespace CryptoTickerBot.Data.Configs
 						return;
 
 					File.Delete ( FileName );
-					Instance = new T ( );
+					Instance = new TConfig ( );
 
 					File.WriteAllText ( FileName,
 					                    JsonConvert.SerializeObject ( Instance, ConfigManager.SerializerSettings ) );
