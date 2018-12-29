@@ -7,7 +7,6 @@ using System.Reactive.Disposables;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using CryptoTickerBot.Collections;
 using CryptoTickerBot.Core.Interfaces;
 using CryptoTickerBot.Data.Configs;
 using CryptoTickerBot.Data.Domain;
@@ -30,7 +29,7 @@ namespace CryptoTickerBot.Core.Abstractions
 		public string Name { get; }
 		public string Url { get; }
 		public string TickerUrl { get; protected set; }
-		public OrderedDictionary<string, string> SymbolMappings { get; protected set; }
+		public Dictionary<string, string> SymbolMappings { get; protected set; }
 		public CryptoExchangeId Id { get; }
 		public ImmutableHashSet<string> BaseSymbols => Markets.BaseSymbols;
 		public Markets Markets { get; protected set; }
@@ -89,7 +88,7 @@ namespace CryptoTickerBot.Core.Abstractions
 			WithdrawalFees = new Dictionary<string, decimal> ( exchange.WithdrawalFees );
 			DepositFees    = new Dictionary<string, decimal> ( exchange.DepositFees );
 			Markets        = new Markets ( exchange );
-			SymbolMappings = exchange.SymbolMappings.Clone ( );
+			SymbolMappings = new Dictionary<string, string> ( exchange.SymbolMappings );
 
 			Policy = Policy
 				.Handle<TaskCanceledException> ( )

@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.Diagnostics.Contracts;
 using System.Threading;
 using System.Threading.Tasks;
-using CryptoTickerBot.Collections;
 using CryptoTickerBot.Data.Domain;
 
 // ReSharper disable UnusedMemberInSuper.Global
@@ -20,7 +19,7 @@ namespace CryptoTickerBot.Core.Interfaces
 		string Name { get; }
 		string Url { get; }
 		string TickerUrl { get; }
-		OrderedDictionary<string, string> SymbolMappings { get; }
+		Dictionary<string, string> SymbolMappings { get; }
 		decimal BuyFees { get; }
 		decimal SellFees { get; }
 		TimeSpan PollingRate { get; }

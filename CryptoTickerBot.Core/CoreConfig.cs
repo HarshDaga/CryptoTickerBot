@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using CryptoTickerBot.Collections;
 using CryptoTickerBot.Data.Configs;
 using CryptoTickerBot.Data.Domain;
 using Newtonsoft.Json;
@@ -74,7 +73,7 @@ namespace CryptoTickerBot.Core
 				BuyFees        = 0.26m,
 				SellFees       = 0.26m,
 				CooldownPeriod = TimeSpan.FromSeconds ( 10 ),
-				SymbolMappings = new OrderedDictionary<string, string>
+				SymbolMappings = new Dictionary<string, string>
 				{
 					["ZUSD"] = "USD",
 					["ZEUR"] = "EUR",
@@ -137,8 +136,8 @@ namespace CryptoTickerBot.Core
 
 			public string TickerUrl { get; set; }
 
-			public OrderedDictionary<string, string> SymbolMappings { get; set; } =
-				new OrderedDictionary<string, string> ( );
+			public Dictionary<string, string> SymbolMappings { get; set; } =
+				new Dictionary<string, string> ( );
 
 			public List<string> BaseSymbols { get; set; } = new List<string> ( );
 
