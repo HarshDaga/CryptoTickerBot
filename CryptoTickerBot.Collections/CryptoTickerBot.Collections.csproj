@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -14,18 +14,6 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     <PackageReference Include="Polly" Version="6.1.2" />
     <PackageReference Include="System.Reactive" Version="4.1.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\..\..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\newtonsoft.json\11.0.2\lib\netstandard2.0\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="Polly">
-      <HintPath>..\..\..\..\..\.nuget\packages\polly\6.1.0\lib\netstandard2.0\Polly.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Reactive">
-      <HintPath>..\..\..\..\..\.nuget\packages\system.reactive\4.1.0\lib\netstandard2.0\System.Reactive.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>
