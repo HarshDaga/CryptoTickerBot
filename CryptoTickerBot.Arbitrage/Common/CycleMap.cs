@@ -1,13 +1,16 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using CryptoTickerBot.Arbitrage.Interfaces;
 
 namespace CryptoTickerBot.Arbitrage.Common
 {
+	using static ImmutableHashSet;
+
 	public class CycleMap<TNode> where TNode : INode
 	{
-		public HashSet<ICycle<TNode>> this [ TNode from,
-		                                     TNode to ]
+		public ImmutableHashSet<ICycle<TNode>> this [ TNode from,
+		                                              TNode to ]
 		{
 			get
 			{
@@ -15,40 +18,59 @@ namespace CryptoTickerBot.Arbitrage.Common
 					return null;
 				return dict.TryGetValue ( to, out var set ) ? set : null;
 			}
-			set
-			{
-				if ( !data.TryGetValue ( from, out var dict ) )
-				{
-					data[from] = new ConcurrentDictionary<TNode, HashSet<ICycle<TNode>>> {[to] = value};
-					return;
-				}
-
-				if ( dict.TryGetValue ( to, out var cycles ) )
-					cycles.UnionWith ( value );
-				else
-					dict[to] = value;
-			}
 		}
 
-		private readonly ConcurrentDictionary<TNode, ConcurrentDictionary<TNode, HashSet<ICycle<TNode>>>> data =
-			new ConcurrentDictionary<TNode, ConcurrentDictionary<TNode, HashSet<ICycle<TNode>>>> ( );
+		private readonly ConcurrentDictionary<TNode,
+			ConcurrentDictionary<TNode,
+				ImmutableHashSet<ICycle<TNode>>>> data
+			=
+			new ConcurrentDictionary<TNode,
+				ConcurrentDictionary<TNode,
+					ImmutableHashSet<ICycle<TNode>>>> ( );
 
 		public bool AddCycle ( TNode from,
 		                       TNode to,
-		                       ICycle<TNode> value )
+		                       ICycle<TNode> cycle )
 		{
 			if ( !data.TryGetValue ( from, out var dict ) )
 			{
-				data[from] = new ConcurrentDictionary<TNode, HashSet<ICycle<TNode>>>
-					{[to] = new HashSet<ICycle<TNode>> {value}};
+				data[from] = new ConcurrentDictionary<TNode, ImmutableHashSet<ICycle<TNode>>>
+					{[to] = ImmutableHashSet<ICycle<TNode>>.Empty.Add ( cycle )};
 				return true;
 			}
 
-			if ( dict.TryGetValue ( to, out var cycles ) )
-				return cycles.Add ( value );
+			if ( dict.TryGetValue ( to, out var storedCycles ) )
+			{
+				var builder = storedCycles.ToBuilder ( );
+				var result = builder.Add ( cycle );
+				dict[to] = builder.ToImmutable ( );
+				return result;
+			}
 
-			dict[to] = new HashSet<ICycle<TNode>> {value};
+			dict[to] = ImmutableHashSet<ICycle<TNode>>.Empty.Add ( cycle );
 			return true;
+		}
+
+		public void AddCycles ( TNode from,
+		                        TNode to,
+		                        IEnumerable<ICycle<TNode>> cycles )
+		{
+			if ( !data.TryGetValue ( from, out var dict ) )
+			{
+				data[from] = new ConcurrentDictionary<TNode, ImmutableHashSet<ICycle<TNode>>>
+					{[to] = cycles.ToImmutableHashSet ( )};
+				return;
+			}
+
+			if ( dict.TryGetValue ( to, out var storedCycles ) )
+			{
+				var builder = storedCycles.ToBuilder ( );
+				builder.UnionWith ( cycles );
+				dict[to] = builder.ToImmutable ( );
+				return;
+			}
+
+			dict[to] = cycles.ToImmutableHashSet ( );
 		}
 	}
 }
