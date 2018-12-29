@@ -13,7 +13,14 @@ namespace CryptoTickerBot.Arbitrage.IntraExchange
 	{
 		public CryptoExchangeId ExchangeId { get; }
 
-		public ISet<ICycle<Node>> Cycles { get; } = new HashSet<ICycle<Node>> ( );
+		public IList<ICycle<Node>> AllCycles
+		{
+			get
+			{
+				lock ( cycleLock )
+					return allCycles.ToList ( );
+			}
+		}
 
 		public CycleMap<Node> CycleMap { get; } = new CycleMap<Node> ( );
 
@@ -24,6 +31,7 @@ namespace CryptoTickerBot.Arbitrage.IntraExchange
 				new Edge ( from, to, cost );
 
 		private readonly object cycleLock = new object ( );
+		private readonly HashSet<ICycle<Node>> allCycles = new HashSet<ICycle<Node>> ( );
 
 		public Graph ( CryptoExchangeId exchangeId ) :
 			base ( symbol => new Node ( symbol ) )
@@ -78,7 +86,7 @@ namespace CryptoTickerBot.Arbitrage.IntraExchange
 			lock ( cycleLock )
 			{
 				var cycles = GetTriangularCycles ( ( from, to ) ).ToList ( );
-				Cycles.UnionWith ( cycles );
+				allCycles.UnionWith ( cycles );
 				UpdateCycleMap ( cycles );
 
 				foreach ( var cycle in cycles )

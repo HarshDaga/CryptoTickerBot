@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using CryptoTickerBot.Arbitrage.Interfaces;
 
 namespace CryptoTickerBot.Arbitrage.Common
@@ -18,7 +19,7 @@ namespace CryptoTickerBot.Arbitrage.Common
 			{
 				if ( !data.TryGetValue ( from, out var dict ) )
 				{
-					data[from] = new Dictionary<TNode, HashSet<ICycle<TNode>>> {[to] = value};
+					data[from] = new ConcurrentDictionary<TNode, HashSet<ICycle<TNode>>> {[to] = value};
 					return;
 				}
 
@@ -29,8 +30,8 @@ namespace CryptoTickerBot.Arbitrage.Common
 			}
 		}
 
-		private readonly Dictionary<TNode, Dictionary<TNode, HashSet<ICycle<TNode>>>> data =
-			new Dictionary<TNode, Dictionary<TNode, HashSet<ICycle<TNode>>>> ( );
+		private readonly ConcurrentDictionary<TNode, ConcurrentDictionary<TNode, HashSet<ICycle<TNode>>>> data =
+			new ConcurrentDictionary<TNode, ConcurrentDictionary<TNode, HashSet<ICycle<TNode>>>> ( );
 
 		public bool AddCycle ( TNode from,
 		                       TNode to,
@@ -38,7 +39,7 @@ namespace CryptoTickerBot.Arbitrage.Common
 		{
 			if ( !data.TryGetValue ( from, out var dict ) )
 			{
-				data[from] = new Dictionary<TNode, HashSet<ICycle<TNode>>>
+				data[from] = new ConcurrentDictionary<TNode, HashSet<ICycle<TNode>>>
 					{[to] = new HashSet<ICycle<TNode>> {value}};
 				return true;
 			}
