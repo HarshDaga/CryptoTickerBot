@@ -50,8 +50,6 @@ namespace CryptoTickerBot.UnitTests
 				list.AddWithoutSaving ( 1 );
 				Assert.That ( list.Count, Is.EqualTo ( 2 ) );
 			}
-
-			Assert.Pass ( );
 		}
 
 		[Test]
@@ -71,8 +69,6 @@ namespace CryptoTickerBot.UnitTests
 				Assert.That ( list.Count, Is.EqualTo ( 2 ) );
 				Assert.That ( list[1], Is.EqualTo ( 2 ) );
 			}
-
-			Assert.Pass ( );
 		}
 
 		[Test]

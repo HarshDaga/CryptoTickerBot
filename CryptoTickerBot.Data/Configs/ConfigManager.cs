@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.IO;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using NLog;
+
+// ReSharper disable InconsistentlySynchronizedField
 
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 
@@ -19,26 +22,41 @@ namespace CryptoTickerBot.Data.Configs
 			ObjectCreationHandling = ObjectCreationHandling.Replace
 		};
 
-		public static T Get<T> ( ) where T : IConfig<T>, new ( ) =>
-			ConfigManager<T>.Instance;
+		public static ImmutableHashSet<Type> InitializedConfigs { get; private set; } = ImmutableHashSet<Type>.Empty;
+
+		public static ImmutableHashSet<Type> SetInitialized<TConfig> ( )
+			where TConfig : IConfig<TConfig> =>
+			InitializedConfigs = InitializedConfigs.Add ( typeof ( TConfig ) );
 	}
 
 	public static class ConfigManager<TConfig> where TConfig : IConfig<TConfig>, new ( )
 	{
 		[UsedImplicitly] private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 		private static readonly object FileLock;
-		public static TConfig Instance { get; set; }
+		private static TConfig instance;
+
+		public static ref TConfig Instance => ref instance;
+
+		public static Exception LastError { get; private set; }
 
 		public static string FileName =>
-			Path.Combine ( Instance.ConfigFolderName ?? "Configs", $"{Instance.ConfigFileName}.json" );
+			Path.Combine ( instance.ConfigFolderName ?? "Configs", $"{instance.ConfigFileName}.json" );
 
 		static ConfigManager ( )
 		{
 			FileLock = new object ( );
-			Instance = new TConfig ( );
+			instance = new TConfig ( );
 			Load ( );
 			Save ( );
+
+			ConfigManager.SetInitialized<TConfig> ( );
 		}
+
+		public static void ClearLastError ( ) =>
+			LastError = null;
+
+		public static string Serialized =>
+			JsonConvert.SerializeObject ( instance, ConfigManager.SerializerSettings );
 
 		public static void Save ( )
 		{
@@ -46,12 +64,14 @@ namespace CryptoTickerBot.Data.Configs
 			{
 				lock ( FileLock )
 				{
-					File.WriteAllText ( FileName,
-					                    JsonConvert.SerializeObject ( Instance, ConfigManager.SerializerSettings ) );
+					if ( !Directory.Exists ( instance.ConfigFolderName ) )
+						Directory.CreateDirectory ( instance.ConfigFolderName );
+					File.WriteAllText ( FileName, Serialized );
 				}
 			}
 			catch ( Exception e )
 			{
+				LastError = e;
 				Logger.Error ( e );
 			}
 		}
@@ -63,12 +83,13 @@ namespace CryptoTickerBot.Data.Configs
 				lock ( FileLock )
 				{
 					if ( File.Exists ( FileName ) )
-						Instance = JsonConvert.DeserializeObject<TConfig> ( File.ReadAllText ( FileName ),
+						instance = JsonConvert.DeserializeObject<TConfig> ( File.ReadAllText ( FileName ),
 						                                                    ConfigManager.SerializerSettings );
 				}
 			}
 			catch ( Exception e )
 			{
+				LastError = e;
 				Logger.Error ( e );
 			}
 		}
@@ -77,15 +98,17 @@ namespace CryptoTickerBot.Data.Configs
 		{
 			try
 			{
-				Instance = Instance.RestoreDefaults ( );
+				instance = instance.RestoreDefaults ( );
 				lock ( FileLock )
 				{
-					File.WriteAllText ( FileName,
-					                    JsonConvert.SerializeObject ( Instance, ConfigManager.SerializerSettings ) );
+					if ( !Directory.Exists ( instance.ConfigFolderName ) )
+						Directory.CreateDirectory ( instance.ConfigFolderName );
+					File.WriteAllText ( FileName, Serialized );
 				}
 			}
 			catch ( Exception e )
 			{
+				LastError = e;
 				Logger.Error ( e );
 			}
 		}
@@ -96,18 +119,19 @@ namespace CryptoTickerBot.Data.Configs
 			{
 				lock ( FileLock )
 				{
-					if ( !File.Exists ( FileName ) )
-						return;
+					if ( File.Exists ( FileName ) )
+						File.Delete ( FileName );
 
-					File.Delete ( FileName );
-					Instance = new TConfig ( );
+					instance = new TConfig ( );
 
-					File.WriteAllText ( FileName,
-					                    JsonConvert.SerializeObject ( Instance, ConfigManager.SerializerSettings ) );
+					if ( !Directory.Exists ( instance.ConfigFolderName ) )
+						Directory.CreateDirectory ( instance.ConfigFolderName );
+					File.WriteAllText ( FileName, Serialized );
 				}
 			}
 			catch ( Exception e )
 			{
+				LastError = e;
 				Logger.Error ( e );
 			}
 		}

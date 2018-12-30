@@ -128,7 +128,7 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 			return result;
 		}
 
-		protected void OneTimeSave ( ref string json )
+		protected void OneTimeSave ( string json )
 		{
 			var fileInfo = new FileInfo ( FileName );
 			fileInfo.Directory?.Create ( );
@@ -146,7 +146,7 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 				                ( exception,
 				                  span ) =>
 					                OnError?.Invoke ( this, exception ) )
-				.Execute ( ( ) => OneTimeSave ( ref json ) );
+				.Execute ( ( ) => OneTimeSave ( json ) );
 		}
 
 		public void ForceSave ( )
