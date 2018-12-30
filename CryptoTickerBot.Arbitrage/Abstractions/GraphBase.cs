@@ -1,22 +1,17 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Immutable;
 using CryptoTickerBot.Arbitrage.Interfaces;
 
 namespace CryptoTickerBot.Arbitrage.Abstractions
 {
 	public abstract class GraphBase<TNode> : IGraph<TNode> where TNode : class, INode
 	{
-		protected ConcurrentDictionary<string, TNode> Nodes { get; set; } =
-			new ConcurrentDictionary<string, TNode> ( );
+		public ImmutableDictionary<string, TNode> Nodes { get; protected set; } =
+			ImmutableDictionary<string, TNode>.Empty;
 
-		IDictionary<string, TNode> IGraph<TNode>.Nodes => Nodes;
-		public virtual EdgeBuilderDelegate<TNode, IEdge> DefaultEdgeBuilder { get; protected set; }
+		public abstract EdgeBuilderDelegate<TNode, IEdge> DefaultEdgeBuilder { get; protected set; }
 
-		public TNode this [ string symbol ]
-		{
-			get => Nodes.TryGetValue ( symbol, out var value ) ? value : null;
-			set => Nodes[symbol] = value;
-		}
+		public TNode this [ string symbol ] =>
+			Nodes.TryGetValue ( symbol, out var value ) ? value : null;
 
 		public NodeBuilderDelegate<TNode> NodeBuilder { get; }
 
@@ -33,8 +28,8 @@ namespace CryptoTickerBot.Arbitrage.Abstractions
 			if ( Nodes.TryGetValue ( symbol, out var node ) )
 				return node;
 
-			node          = NodeBuilder ( symbol );
-			Nodes[symbol] = node;
+			node  = NodeBuilder ( symbol );
+			Nodes = Nodes.SetItem ( symbol, node );
 
 			return node;
 		}
@@ -59,7 +54,7 @@ namespace CryptoTickerBot.Arbitrage.Abstractions
 			else
 				OnEdgeUpdate ( nodeFrom, nodeTo );
 
-			return edge;
+			return nodeFrom[to] as TEdge;
 		}
 
 		protected abstract void OnEdgeInsert ( TNode from,

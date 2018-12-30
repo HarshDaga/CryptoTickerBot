@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Immutable;
 
 namespace CryptoTickerBot.Arbitrage.Interfaces
 {
 	public interface IGraph<TNode> where TNode : INode
 	{
-		IDictionary<string, TNode> Nodes { get; }
+		ImmutableDictionary<string, TNode> Nodes { get; }
 
 		TNode this [ string symbol ] { get; }
 		NodeBuilderDelegate<TNode> NodeBuilder { get; }

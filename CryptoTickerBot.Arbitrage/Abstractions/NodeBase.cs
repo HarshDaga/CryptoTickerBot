@@ -8,17 +8,16 @@ namespace CryptoTickerBot.Arbitrage.Abstractions
 	{
 		public string Symbol { get; }
 
-		protected Dictionary<string, IEdge> EdgeTable { get; set; } =
+		protected virtual IDictionary<string, IEdge> EdgeTableImpl { get; } =
 			new Dictionary<string, IEdge> ( );
 
-		IReadOnlyDictionary<string, IEdge> INode.EdgeTable => EdgeTable;
-		public IEnumerable<IEdge> Edges => EdgeTable.Values;
+		public IReadOnlyDictionary<string, IEdge> EdgeTable =>
+			EdgeTableImpl as IReadOnlyDictionary<string, IEdge>;
 
-		public IEdge this [ string symbol ]
-		{
-			get => EdgeTable.TryGetValue ( symbol, out var value ) ? value : null;
-			protected set => EdgeTable[symbol] = value;
-		}
+		public IEnumerable<IEdge> Edges => EdgeTableImpl.Values;
+
+		public IEdge this [ string symbol ] =>
+			EdgeTableImpl.TryGetValue ( symbol, out var value ) ? value : null;
 
 		protected NodeBase ( string symbol )
 		{
@@ -27,18 +26,21 @@ namespace CryptoTickerBot.Arbitrage.Abstractions
 
 		public bool AddOrUpdateEdge ( IEdge edge )
 		{
-			if ( EdgeTable.TryGetValue ( edge.To.Symbol, out var existing ) )
+			if ( !Equals ( edge.From ) )
+				return false;
+
+			if ( EdgeTableImpl.TryGetValue ( edge.To.Symbol, out var existing ) )
 			{
 				existing.CopyFrom ( edge );
 				return false;
 			}
 
-			EdgeTable[edge.To.Symbol] = edge;
+			EdgeTableImpl[edge.To.Symbol] = edge;
 			return true;
 		}
 
 		public bool HasEdge ( string symbol ) =>
-			EdgeTable.ContainsKey ( symbol );
+			EdgeTableImpl.ContainsKey ( symbol );
 
 		#region Auto Generated
 
@@ -49,20 +51,21 @@ namespace CryptoTickerBot.Arbitrage.Abstractions
 			return string.Equals ( Symbol, other.Symbol );
 		}
 
-		public int CompareTo ( INode other ) => 0;
-
-		public int CompareTo ( NodeBase other )
+		public int CompareTo ( INode other )
 		{
 			if ( ReferenceEquals ( this, other ) ) return 0;
 			if ( other is null ) return 1;
 			return string.Compare ( Symbol, other.Symbol, StringComparison.OrdinalIgnoreCase );
 		}
 
+		public int CompareTo ( NodeBase other ) =>
+			CompareTo ( other as INode );
+
 		public int CompareTo ( object obj )
 		{
 			if ( obj is null ) return 1;
 			if ( ReferenceEquals ( this, obj ) ) return 0;
-			return obj is NodeBase other
+			return obj is INode other
 				? CompareTo ( other )
 				: throw new ArgumentException ( $"Object must be of type {nameof ( NodeBase )}" );
 		}
@@ -91,7 +94,8 @@ namespace CryptoTickerBot.Arbitrage.Abstractions
 			return Equals ( (NodeBase) obj );
 		}
 
-		public override int GetHashCode ( ) => Symbol != null ? Symbol.GetHashCode ( ) : 0;
+		public override int GetHashCode ( ) =>
+			Symbol != null ? Symbol.GetHashCode ( ) : 0;
 
 		public static bool operator == ( NodeBase left,
 		                                 NodeBase right ) =>
@@ -101,7 +105,8 @@ namespace CryptoTickerBot.Arbitrage.Abstractions
 		                                 NodeBase right ) =>
 			!Equals ( left, right );
 
-		public override string ToString ( ) => $"{Symbol,-6} {EdgeTable.Count}";
+		public override string ToString ( ) =>
+			$"{Symbol,-6} {EdgeTableImpl.Count}";
 
 		#endregion
 	}

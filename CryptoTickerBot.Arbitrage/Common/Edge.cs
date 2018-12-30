@@ -1,7 +1,7 @@
 ﻿using CryptoTickerBot.Arbitrage.Abstractions;
 using CryptoTickerBot.Arbitrage.Interfaces;
 
-namespace CryptoTickerBot.Arbitrage.IntraExchange
+namespace CryptoTickerBot.Arbitrage.Common
 {
 	public class Edge : EdgeBase
 	{

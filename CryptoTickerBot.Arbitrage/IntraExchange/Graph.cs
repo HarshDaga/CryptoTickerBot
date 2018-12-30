@@ -41,43 +41,11 @@ namespace CryptoTickerBot.Arbitrage.IntraExchange
 
 		public event NegativeCycleFoundDelegate NegativeCycleFound;
 
-		public List<ICycle<Node>> GetAllTriangularCycles ( )
-		{
-			var cycles = new List<ICycle<Node>> ( );
-
-			var pairs = Nodes.Values
-				.Subsets ( 2 )
-				.SelectMany ( x => new[] {( x[0], x[1] ), ( x[1], x[0] )} )
-				.Where ( x => x.Item2.HasEdge ( x.Item1.Symbol ) )
-				.ToList ( );
-
-			foreach ( var pair in pairs )
-				cycles.AddRange ( GetTriangularCycles ( pair ) );
-
-			return cycles.Distinct ( ).ToList ( );
-		}
-
-		public static IEnumerable<ICycle<Node>> GetTriangularCycles ( (Node, Node) pair )
-		{
-			var (to, from) = pair;
-
-			if ( !to.HasEdge ( from.Symbol ) )
-				yield break;
-
-			var nodes = from.Edges
-				.Where ( x => x.To.EdgeTable.ContainsKey ( to.Symbol ) )
-				.Select ( x => x.To )
-				.OfType<Node> ( );
-
-			foreach ( var node in nodes )
-				yield return new Cycle ( from, node, to, from );
-		}
-
 		private void UpdateCycleMap ( IEnumerable<ICycle<Node>> cycles )
 		{
 			foreach ( var cycle in cycles )
 			foreach ( var pair in cycle.Path.Window ( 2 ) )
-				CycleMap.AddCycle ( pair[0], pair[1], cycle );
+				CycleMap.AddCycle ( pair[0].Symbol, pair[1].Symbol, cycle );
 		}
 
 		protected override void OnEdgeInsert ( Node from,
@@ -85,7 +53,7 @@ namespace CryptoTickerBot.Arbitrage.IntraExchange
 		{
 			lock ( cycleLock )
 			{
-				var cycles = GetTriangularCycles ( ( from, to ) ).ToList ( );
+				var cycles = ( from, to ).GetTriangularCycles ( ).ToList ( );
 				allCycles.UnionWith ( cycles );
 				UpdateCycleMap ( cycles );
 

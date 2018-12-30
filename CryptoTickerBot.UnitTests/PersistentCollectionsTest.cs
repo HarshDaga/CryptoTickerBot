@@ -8,6 +8,14 @@ namespace CryptoTickerBot.UnitTests
 	[TestFixture]
 	public class PersistentCollectionsTest
 	{
+		[SetUp]
+		public void Setup ( )
+		{
+			foreach ( var fileName in new[] {ListFileName, SetFileName, DictionaryFileName} )
+				if ( File.Exists ( fileName ) )
+					File.Delete ( fileName );
+		}
+
 		private const string ListFileName = "PersistentList.json";
 		private const string SetFileName = "PersistentSet.json";
 		private const string DictionaryFileName = "PersistentDictionary.json";
@@ -21,12 +29,18 @@ namespace CryptoTickerBot.UnitTests
 		private static PersistentDictionary<TKey, TValue> MakeDictionary<TKey, TValue> ( ) =>
 			PersistentDictionary<TKey, TValue>.Build ( DictionaryFileName );
 
-		[SetUp]
-		public void Setup ( )
+		[Test]
+		public void PersistentCollectionsAreUniquelyIdentifiedByFileName ( )
 		{
-			foreach ( var fileName in new[] {ListFileName, SetFileName, DictionaryFileName} )
-				if ( File.Exists ( fileName ) )
-					File.Delete ( fileName );
+			using ( var first = MakeList<int> ( ) )
+			using ( var second = MakeList<int> ( ) )
+			{
+				Assert.AreSame ( first, second );
+				Assert.Throws<InvalidCastException> ( ( ) => MakeList<string> ( ) );
+				Assert.Throws<InvalidCastException> ( ( ) => PersistentSet<char>.Build ( ListFileName ) );
+				Assert.DoesNotThrow ( ( ) => MakeSet<string> ( )?.Dispose ( ) );
+				Assert.DoesNotThrow ( ( ) => MakeDictionary<string, string> ( )?.Dispose ( ) );
+			}
 		}
 
 		[Test]
@@ -68,20 +82,6 @@ namespace CryptoTickerBot.UnitTests
 				list.Add ( 2 );
 				Assert.That ( list.Count, Is.EqualTo ( 2 ) );
 				Assert.That ( list[1], Is.EqualTo ( 2 ) );
-			}
-		}
-
-		[Test]
-		public void PersistentCollectionsAreUniquelyIdentifiedByFileName ( )
-		{
-			using ( var first = MakeList<int> ( ) )
-			using ( var second = MakeList<int> ( ) )
-			{
-				Assert.AreSame ( first, second );
-				Assert.Throws<InvalidCastException> ( ( ) => MakeList<string> ( ) );
-				Assert.Throws<InvalidCastException> ( ( ) => PersistentSet<char>.Build ( ListFileName ) );
-				Assert.DoesNotThrow ( ( ) => MakeSet<string> ( )?.Dispose ( ) );
-				Assert.DoesNotThrow ( ( ) => MakeDictionary<string, string> ( )?.Dispose ( ) );
 			}
 		}
 

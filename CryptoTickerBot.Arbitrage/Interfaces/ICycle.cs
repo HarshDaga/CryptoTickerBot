@@ -1,19 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace CryptoTickerBot.Arbitrage.Interfaces
 {
 	public interface ICycle<TNode> : IEquatable<ICycle<TNode>> where TNode : INode
 	{
-		IReadOnlyList<TNode> Path { get; }
-		IEnumerable<IEdge> Edges { get; }
+		ImmutableList<TNode> Path { get; }
+		ImmutableList<IEdge> Edges { get; }
 
 		int Length { get; }
 		double Weight { get; }
 
 		double UpdateWeight ( );
-
-		bool Contains ( TNode node1,
-		                TNode node2 );
 	}
 }

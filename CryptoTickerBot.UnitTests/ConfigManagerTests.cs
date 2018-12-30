@@ -12,6 +12,19 @@ namespace CryptoTickerBot.UnitTests
 	[TestFixture]
 	public class ConfigManagerTests
 	{
+		[SetUp]
+		public void Setup ( )
+		{
+			if ( Directory.Exists ( MockConfigFolderName ) )
+				Directory.Delete ( MockConfigFolderName, true );
+		}
+
+		[TearDown]
+		public void TearDown ( )
+		{
+			MockConfigManager.Reset ( );
+		}
+
 		public const string MockConfigFileName = "Mock";
 		public const string MockConfigFolderName = "Configs";
 
@@ -34,30 +47,30 @@ namespace CryptoTickerBot.UnitTests
 		private static string Serialize<T> ( T obj ) =>
 			JsonConvert.SerializeObject ( obj, ConfigManager.SerializerSettings );
 
-		[SetUp]
-		public void Setup ( )
-		{
-			if ( Directory.Exists ( MockConfigFolderName ) )
-				Directory.Delete ( MockConfigFolderName, true );
-		}
-
-		[TearDown]
-		public void TearDown ( )
-		{
-			MockConfigManager.Reset ( );
-		}
-
 		[Test]
-		[Order ( 1 )]
-		public void GettingConfigInstanceCreatesCorrectFileOnDisk ( )
+		public void ConfigFileInUseSetsAppropriateError ( )
 		{
-			Warn.If ( ConfigManager.InitializedConfigs.Contains ( typeof ( MockConfig ) ) );
+			MockConfigManager.ClearLastError ( );
+			Assert.IsNull ( MockConfigManager.LastError );
+			Directory.CreateDirectory ( MockConfigFolderName );
+			using ( File.Create ( ConfigPath ) )
+			{
+				Assert.DoesNotThrow ( MockConfigManager.Load );
+				Assert.IsInstanceOf<IOException> ( MockConfigManager.LastError );
+				MockConfigManager.ClearLastError ( );
 
-			var _ = MockConfigManager.Instance;
-			Assert.AreEqual ( MockConfigManager.FileName, ConfigPath );
-			Warn.Unless ( File.Exists ( ConfigPath ) );
+				Assert.DoesNotThrow ( MockConfigManager.Save );
+				Assert.IsInstanceOf<IOException> ( MockConfigManager.LastError );
+				MockConfigManager.ClearLastError ( );
 
-			Warn.Unless ( ConfigManager.InitializedConfigs.Contains ( typeof ( MockConfig ) ) );
+				Assert.DoesNotThrow ( MockConfigManager.Reset );
+				Assert.IsInstanceOf<IOException> ( MockConfigManager.LastError );
+				MockConfigManager.ClearLastError ( );
+
+				Assert.DoesNotThrow ( MockConfigManager.RestoreDefaults );
+				Assert.IsInstanceOf<IOException> ( MockConfigManager.LastError );
+				MockConfigManager.ClearLastError ( );
+			}
 		}
 
 		[Test]
@@ -89,18 +102,6 @@ namespace CryptoTickerBot.UnitTests
 		}
 
 		[Test]
-		public void ConfigSaveWritesDataToDisk ( )
-		{
-			var config = MockConfigManager.Instance;
-
-			config.SomeSecretKey = 0xDEAD;
-			Assert.AreEqual ( config.SomeSecretKey, 0xDEAD );
-
-			MockConfigManager.Save ( );
-			Assert.AreEqual ( Serialize ( config ), File.ReadAllText ( ConfigPath ) );
-		}
-
-		[Test]
 		public void ConfigLoadOverwritesDataFromDisk ( )
 		{
 			ref var config = ref MockConfigManager.Instance;
@@ -122,21 +123,24 @@ namespace CryptoTickerBot.UnitTests
 		}
 
 		[Test]
-		public void ConfigRestoreDefaultsOverwritesOnlyChosenMembers ( )
+		public void ConfigManagerRespectsSerializerSettings ( )
 		{
-			ref var config = ref MockConfigManager.Instance;
+			var settings = new JsonSerializerSettings
+			{
+				Formatting        = Formatting.None,
+				NullValueHandling = NullValueHandling.Include
+			};
 
-			Assert.AreEqual ( config.IntValueWithDefault, 42 );
-			Assert.AreEqual ( config.SomeSecretKey, default ( int ) );
+			var original = ConfigManager.SerializerSettings;
 
-			config.SomeSecretKey       = 0xDEAD;
-			config.IntValueWithDefault = 10;
-			Assert.AreEqual ( config.IntValueWithDefault, 10 );
-			Assert.AreEqual ( config.SomeSecretKey, 0xDEAD );
+			ConfigManager.SerializerSettings = settings;
+			var config = MockConfigManager.Instance;
+			MockConfigManager.Save ( );
 
-			MockConfigManager.RestoreDefaults ( );
-			Assert.AreEqual ( config.IntValueWithDefault, 42 );
-			Assert.AreEqual ( config.SomeSecretKey, 0xDEAD );
+			Assert.AreEqual ( JsonConvert.SerializeObject ( config, settings ),
+			                  MockConfigManager.Serialized );
+
+			ConfigManager.SerializerSettings = original;
 		}
 
 		[Test]
@@ -158,50 +162,46 @@ namespace CryptoTickerBot.UnitTests
 		}
 
 		[Test]
-		public void ConfigFileInUseSetsAppropriateError ( )
+		public void ConfigRestoreDefaultsOverwritesOnlyChosenMembers ( )
 		{
-			MockConfigManager.ClearLastError ( );
-			Assert.IsNull ( MockConfigManager.LastError );
-			Directory.CreateDirectory ( MockConfigFolderName );
-			using ( File.Create ( ConfigPath ) )
-			{
-				Assert.DoesNotThrow ( MockConfigManager.Load );
-				Assert.IsInstanceOf<IOException> ( MockConfigManager.LastError );
-				MockConfigManager.ClearLastError ( );
+			ref var config = ref MockConfigManager.Instance;
 
-				Assert.DoesNotThrow ( MockConfigManager.Save );
-				Assert.IsInstanceOf<IOException> ( MockConfigManager.LastError );
-				MockConfigManager.ClearLastError ( );
+			Assert.AreEqual ( config.IntValueWithDefault, 42 );
+			Assert.AreEqual ( config.SomeSecretKey, default ( int ) );
 
-				Assert.DoesNotThrow ( MockConfigManager.Reset );
-				Assert.IsInstanceOf<IOException> ( MockConfigManager.LastError );
-				MockConfigManager.ClearLastError ( );
+			config.SomeSecretKey       = 0xDEAD;
+			config.IntValueWithDefault = 10;
+			Assert.AreEqual ( config.IntValueWithDefault, 10 );
+			Assert.AreEqual ( config.SomeSecretKey, 0xDEAD );
 
-				Assert.DoesNotThrow ( MockConfigManager.RestoreDefaults );
-				Assert.IsInstanceOf<IOException> ( MockConfigManager.LastError );
-				MockConfigManager.ClearLastError ( );
-			}
+			MockConfigManager.RestoreDefaults ( );
+			Assert.AreEqual ( config.IntValueWithDefault, 42 );
+			Assert.AreEqual ( config.SomeSecretKey, 0xDEAD );
 		}
 
 		[Test]
-		public void ConfigManagerRespectsSerializerSettings ( )
+		public void ConfigSaveWritesDataToDisk ( )
 		{
-			var settings = new JsonSerializerSettings
-			{
-				Formatting        = Formatting.None,
-				NullValueHandling = NullValueHandling.Include
-			};
-
-			var original = ConfigManager.SerializerSettings;
-
-			ConfigManager.SerializerSettings = settings;
 			var config = MockConfigManager.Instance;
+
+			config.SomeSecretKey = 0xDEAD;
+			Assert.AreEqual ( config.SomeSecretKey, 0xDEAD );
+
 			MockConfigManager.Save ( );
+			Assert.AreEqual ( Serialize ( config ), File.ReadAllText ( ConfigPath ) );
+		}
 
-			Assert.AreEqual ( JsonConvert.SerializeObject ( config, settings ),
-			                  MockConfigManager.Serialized );
+		[Test]
+		[Order ( 1 )]
+		public void GettingConfigInstanceCreatesCorrectFileOnDisk ( )
+		{
+			Warn.If ( ConfigManager.InitializedConfigs.Contains ( typeof ( MockConfig ) ) );
 
-			ConfigManager.SerializerSettings = original;
+			var _ = MockConfigManager.Instance;
+			Assert.AreEqual ( MockConfigManager.FileName, ConfigPath );
+			Warn.Unless ( File.Exists ( ConfigPath ) );
+
+			Warn.Unless ( ConfigManager.InitializedConfigs.Contains ( typeof ( MockConfig ) ) );
 		}
 	}
 }

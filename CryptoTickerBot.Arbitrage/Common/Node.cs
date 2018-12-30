@@ -1,6 +1,6 @@
 ﻿using CryptoTickerBot.Arbitrage.Abstractions;
 
-namespace CryptoTickerBot.Arbitrage.IntraExchange
+namespace CryptoTickerBot.Arbitrage.Common
 {
 	public class Node : NodeBase
 	{

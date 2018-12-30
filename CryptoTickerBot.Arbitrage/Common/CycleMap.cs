@@ -9,8 +9,8 @@ namespace CryptoTickerBot.Arbitrage.Common
 
 	public class CycleMap<TNode> where TNode : INode
 	{
-		public ImmutableHashSet<ICycle<TNode>> this [ TNode from,
-		                                              TNode to ]
+		public ImmutableHashSet<ICycle<TNode>> this [ string from,
+		                                              string to ]
 		{
 			get
 			{
@@ -20,21 +20,25 @@ namespace CryptoTickerBot.Arbitrage.Common
 			}
 		}
 
-		private readonly ConcurrentDictionary<TNode,
-			ConcurrentDictionary<TNode,
+		public ImmutableHashSet<ICycle<TNode>> this [ INode from,
+		                                              INode to ] =>
+			this[from.Symbol, to.Symbol];
+
+		private readonly ConcurrentDictionary<string,
+			ConcurrentDictionary<string,
 				ImmutableHashSet<ICycle<TNode>>>> data
 			=
-			new ConcurrentDictionary<TNode,
-				ConcurrentDictionary<TNode,
+			new ConcurrentDictionary<string,
+				ConcurrentDictionary<string,
 					ImmutableHashSet<ICycle<TNode>>>> ( );
 
-		public bool AddCycle ( TNode from,
-		                       TNode to,
+		public bool AddCycle ( string from,
+		                       string to,
 		                       ICycle<TNode> cycle )
 		{
 			if ( !data.TryGetValue ( from, out var dict ) )
 			{
-				data[from] = new ConcurrentDictionary<TNode, ImmutableHashSet<ICycle<TNode>>>
+				data[from] = new ConcurrentDictionary<string, ImmutableHashSet<ICycle<TNode>>>
 					{[to] = ImmutableHashSet<ICycle<TNode>>.Empty.Add ( cycle )};
 				return true;
 			}
@@ -51,13 +55,13 @@ namespace CryptoTickerBot.Arbitrage.Common
 			return true;
 		}
 
-		public void AddCycles ( TNode from,
-		                        TNode to,
+		public void AddCycles ( string from,
+		                        string to,
 		                        IEnumerable<ICycle<TNode>> cycles )
 		{
 			if ( !data.TryGetValue ( from, out var dict ) )
 			{
-				data[from] = new ConcurrentDictionary<TNode, ImmutableHashSet<ICycle<TNode>>>
+				data[from] = new ConcurrentDictionary<string, ImmutableHashSet<ICycle<TNode>>>
 					{[to] = cycles.ToImmutableHashSet ( )};
 				return;
 			}
