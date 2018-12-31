@@ -59,7 +59,7 @@ namespace CryptoTickerBot.UnitTests
 			JsonConvert.SerializeObject ( obj, ConfigManager.SerializerSettings );
 
 		[Test]
-		public void ConfigFileInUseSetsAppropriateError ( )
+		public void ConfigFileInUseShouldSetAppropriateError ( )
 		{
 			MockConfigManager.ClearLastError ( );
 			Assert.IsNull ( MockConfigManager.LastError );
@@ -75,6 +75,8 @@ namespace CryptoTickerBot.UnitTests
 				MockConfigManager.ClearLastError ( );
 
 				Assert.DoesNotThrow ( MockConfigManager.Reset );
+				if ( !File.Exists ( ConfigPath ) )
+					Assert.Inconclusive ( );
 				Assert.IsInstanceOf<IOException> ( MockConfigManager.LastError );
 				MockConfigManager.ClearLastError ( );
 
