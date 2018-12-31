@@ -8,7 +8,6 @@ using CryptoTickerBot.Core.Interfaces;
 using CryptoTickerBot.Data.Domain;
 using CryptoTickerBot.Telegram.Extensions;
 using EnumsNET;
-using Fody;
 using MoreLinq.Extensions;
 using NLog;
 using Telegram.Bot;
@@ -22,7 +21,6 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 {
 	internal delegate Task<TelegramKeyboardMenuBase> QueryHandlerDelegate ( CallbackQuery query );
 
-	[ConfigureAwait ( false )]
 	internal abstract class TelegramKeyboardMenuBase : ITelegramKeyboardMenu
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
@@ -78,19 +76,20 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 		                       StringComparison comparison = StringComparison.OrdinalIgnoreCase ) =>
 			Labels.Any ( x => x.Any ( y => y.Equals ( label, comparison ) ) );
 
-		public async Task<Message> Display ( )
+		public async Task<Message> DisplayAsync ( )
 		{
 			var title = Chat.Type == ChatType.Private ? Title : $"{User}:\n{Title}";
 
-			return MenuMessage = await SendTextBlockAsync ( title, replyMarkup: Keyboard );
+			return MenuMessage = await SendTextBlockAsync ( title, replyMarkup: Keyboard ).ConfigureAwait ( false );
 		}
 
-		public async Task DeleteMenu ( )
+		public async Task DeleteMenuAsync ( )
 		{
 			try
 			{
 				if ( MenuMessage != null )
-					await Client.DeleteMessageAsync ( Chat, MenuMessage.MessageId, CancellationToken );
+					await Client.DeleteMessageAsync ( Chat, MenuMessage.MessageId, CancellationToken )
+						.ConfigureAwait ( false );
 			}
 			catch ( Exception e )
 			{
@@ -105,31 +104,33 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 				await Client
 					.AnswerCallbackQueryAsync ( query.Id,
 					                            "This is not your menu!",
-					                            cancellationToken: CancellationToken );
+					                            cancellationToken: CancellationToken ).ConfigureAwait ( false );
 				return this;
 			}
 
 			if ( ButtonPopups.TryGetValue ( query.Data, out var popupMessage ) )
 				await Client
-					.AnswerCallbackQueryAsync ( query.Id, popupMessage, cancellationToken: CancellationToken );
+					.AnswerCallbackQueryAsync ( query.Id, popupMessage, cancellationToken: CancellationToken )
+					.ConfigureAwait ( false );
 			else
 				await Client
-					.AnswerCallbackQueryAsync ( query.Id, cancellationToken: CancellationToken );
+					.AnswerCallbackQueryAsync ( query.Id, cancellationToken: CancellationToken )
+					.ConfigureAwait ( false );
 
 			if ( !Handlers.TryGetValue ( query.Data, out var handler ) )
 				return this;
 
 			try
 			{
-				var menu = await handler ( query );
-				return await SwitchTo ( menu );
+				var menu = await handler ( query ).ConfigureAwait ( false );
+				return await SwitchToAsync ( menu ).ConfigureAwait ( false );
 			}
 			catch ( Exception e )
 			{
 				Logger.Error ( e );
 			}
 
-			return await SwitchTo ( null );
+			return await SwitchToAsync ( null ).ConfigureAwait ( false );
 		}
 
 		public virtual async Task HandleMessageAsync ( Message message )
@@ -156,22 +157,22 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 			Keyboard = Labels?.ToInlineKeyboardMarkup ( );
 		}
 
-		protected async Task<TelegramKeyboardMenuBase> SwitchTo ( TelegramKeyboardMenuBase menu )
+		protected async Task<TelegramKeyboardMenuBase> SwitchToAsync ( TelegramKeyboardMenuBase menu )
 		{
 			if ( ReferenceEquals ( menu, this ) && LastId == Id )
 				return this;
 
-			await DeleteMenu ( );
+			await DeleteMenuAsync ( ).ConfigureAwait ( false );
 
 			if ( menu != null )
-				await menu.Display ( );
+				await menu.DisplayAsync ( ).ConfigureAwait ( false );
 
 			return menu;
 		}
 
-		protected async Task<TelegramKeyboardMenuBase> BackHandler ( CallbackQuery query ) => Parent;
+		protected async Task<TelegramKeyboardMenuBase> BackHandlerAsync ( CallbackQuery query ) => Parent;
 
-		protected async Task<TelegramKeyboardMenuBase> DummyHandler ( CallbackQuery query ) => this;
+		protected async Task<TelegramKeyboardMenuBase> DummyHandlerAsync ( CallbackQuery query ) => this;
 
 		#region Send Message
 
@@ -187,25 +188,26 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 			                                                  disableWebPagePreview, disableNotification,
 			                                                  replyToMessageId,
 			                                                  replyMarkup,
-			                                                  CancellationToken );
+			                                                  CancellationToken ).ConfigureAwait ( false );
 
 		protected async Task<Message> RequestReplyAsync (
 			string text,
 			bool disableWebPagePreview = false,
-			bool disableNotification = true,
-			IReplyMarkup replyMarkup = null
+			bool disableNotification = true
 		) =>
 			LastMessage = await Client.SendTextMessageAsync ( Chat,
 			                                                  text.ToMarkdown ( ), ParseMode.Markdown,
 			                                                  disableWebPagePreview, disableNotification,
 			                                                  0,
 			                                                  new ForceReplyMarkup ( ),
-			                                                  CancellationToken );
+			                                                  CancellationToken ).ConfigureAwait ( false );
 
 		protected async Task<Message> SendOptionsAsync<T> ( string text,
 		                                                    IEnumerable<T> options,
-		                                                    int batchSize ) =>
-			LastMessage = await Client.SendOptionsAsync ( Chat, User, text, options.Batch ( 2 ), CancellationToken );
+		                                                    int batchSize = 2 ) =>
+			LastMessage = await Client
+				.SendOptionsAsync ( Chat, User, text, options.Batch ( batchSize ), CancellationToken )
+				.ConfigureAwait ( false );
 
 		#endregion
 
@@ -217,16 +219,16 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 
 			Message message;
 			while ( !messages.TryDequeue ( out message ) )
-				await Task.Delay ( 100, CancellationToken );
+				await Task.Delay ( 100, CancellationToken ).ConfigureAwait ( false );
 
 			return message;
 		}
 
 		protected async Task<bool?> ReadBoolAsync ( string text )
 		{
-			await SendOptionsAsync ( text, new[] {"yes", "no"}, 2 );
+			await SendOptionsAsync ( text, new[] {"yes", "no"} ).ConfigureAwait ( false );
 
-			var message = await ReadMessageAsync ( );
+			var message = await ReadMessageAsync ( ).ConfigureAwait ( false );
 
 			if ( new[] {"true", "y", "yes"}.Contains ( message.Text.ToLower ( ) ) )
 				return true;
@@ -237,14 +239,14 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 			return null;
 		}
 
-		protected async Task<decimal> ReadPercentage ( decimal @default = -1 )
+		protected async Task<decimal> ReadPercentageAsync ( decimal @default = -1 )
 		{
-			var message = await ReadMessageAsync ( );
+			var message = await ReadMessageAsync ( ).ConfigureAwait ( false );
 
 			if ( decimal.TryParse ( message.Text.Trim ( '%' ), out var percentage ) )
 				return percentage / 100m;
 
-			await SendTextBlockAsync ( $"{message.Text} is not a valid percentage value" );
+			await SendTextBlockAsync ( $"{message.Text} is not a valid percentage value" ).ConfigureAwait ( false );
 
 			return @default;
 		}
@@ -255,25 +257,25 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 				.Intersect ( exchangeIds )
 				.Select ( x => x.ToString ( ) );
 
-			await SendOptionsAsync ( "Select Exchange", exchanges, 2 );
+			await SendOptionsAsync ( "Select Exchange", exchanges ).ConfigureAwait ( false );
 
-			var message = await ReadMessageAsync ( );
+			var message = await ReadMessageAsync ( ).ConfigureAwait ( false );
 			if ( Enums.TryParse ( message.Text, out CryptoExchangeId exchangeId ) )
 				return exchangeId;
 
-			await SendTextBlockAsync ( $"{message.Text} is not a known exchange" );
+			await SendTextBlockAsync ( $"{message.Text} is not a known exchange" ).ConfigureAwait ( false );
 
 			return null;
 		}
 
 		protected async Task<CryptoExchangeId?> ReadExchangeIdAsync ( ) =>
-			await ReadExchangeIdAsync ( TelegramBot.Ctb.Exchanges.Keys );
+			await ReadExchangeIdAsync ( TelegramBot.Ctb.Exchanges.Keys ).ConfigureAwait ( false );
 
 		protected async Task<List<string>> ReadSymbolsAsync ( )
 		{
-			await RequestReplyAsync ( "Enter the symbols" );
+			await RequestReplyAsync ( "Enter the symbols" ).ConfigureAwait ( false );
 
-			var message = await ReadMessageAsync ( );
+			var message = await ReadMessageAsync ( ).ConfigureAwait ( false );
 
 			return message.Text
 				.Split ( " ,".ToCharArray ( ), StringSplitOptions.RemoveEmptyEntries )

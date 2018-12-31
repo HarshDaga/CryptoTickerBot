@@ -18,7 +18,7 @@ namespace CryptoTickerBot.Telegram
 			TelegramBot = new TelegramBot ( TelegramBotConfig, Bot );
 
 			TelegramBot.Ctb.Start += async bot =>
-				await TelegramBot.StartAsync ( );
+				await TelegramBot.StartAsync ( ).ConfigureAwait ( false );
 
 			return Task.CompletedTask;
 		}

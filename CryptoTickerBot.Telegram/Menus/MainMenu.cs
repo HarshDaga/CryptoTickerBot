@@ -29,33 +29,33 @@ namespace CryptoTickerBot.Telegram.Menus
 
 		private void AddHandlers ( )
 		{
-			Handlers["status"]               = StatusHandler;
-			Handlers["exchange info"]        = ExchangeInfoHandler;
-			Handlers["manage subscriptions"] = ManageSubscriptionsHandler;
-			Handlers["exit"]                 = BackHandler;
+			Handlers["status"]               = StatusHandlerAsync;
+			Handlers["exchange info"]        = ExchangeInfoHandlerAsync;
+			Handlers["manage subscriptions"] = ManageSubscriptionsHandlerAsync;
+			Handlers["exit"]                 = BackHandlerAsync;
 		}
 
-		private async Task<TelegramKeyboardMenuBase> StatusHandler ( CallbackQuery query )
+		private async Task<TelegramKeyboardMenuBase> StatusHandlerAsync ( CallbackQuery query )
 		{
-			await SendTextBlockAsync ( TelegramBot.GetStatusString ( ) );
+			await SendTextBlockAsync ( TelegramBot.GetStatusString ( ) ).ConfigureAwait ( false );
 
 			return this;
 		}
 
-		private async Task<TelegramKeyboardMenuBase> ExchangeInfoHandler ( CallbackQuery query )
+		private async Task<TelegramKeyboardMenuBase> ExchangeInfoHandlerAsync ( CallbackQuery query )
 		{
-			var exchangeId = await ReadExchangeIdAsync ( );
+			var exchangeId = await ReadExchangeIdAsync ( ).ConfigureAwait ( false );
 			if ( exchangeId is null )
 				return this;
 
 			Ctb.TryGetExchange ( exchangeId.Value, out var exchange );
 
-			await SendTextBlockAsync ( exchange.GetSummary ( ) );
+			await SendTextBlockAsync ( exchange.GetSummary ( ) ).ConfigureAwait ( false );
 
 			return this;
 		}
 
-		private async Task<TelegramKeyboardMenuBase> ManageSubscriptionsHandler ( CallbackQuery query ) =>
+		private async Task<TelegramKeyboardMenuBase> ManageSubscriptionsHandlerAsync ( CallbackQuery query ) =>
 			new ManageSubscriptionsMenu ( TelegramBot, User, Chat, this );
 	}
 }

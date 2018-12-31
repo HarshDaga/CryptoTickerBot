@@ -19,8 +19,8 @@ namespace CryptoTickerBot.CUI
 			StyleSheet.AddStyle ( @"Lowest Ask = (0|[1-9][\d,]*)?(\.\d+)?(?<=\d)", Color.OrangeRed );
 		}
 
-		public override Task OnChanged ( ICryptoExchange exchange,
-		                                 CryptoCoin coin )
+		public override Task OnChangedAsync ( ICryptoExchange exchange,
+		                                      CryptoCoin coin )
 		{
 			lock ( consoleLock )
 			{

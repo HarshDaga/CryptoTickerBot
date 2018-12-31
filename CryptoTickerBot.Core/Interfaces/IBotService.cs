@@ -10,13 +10,13 @@ namespace CryptoTickerBot.Core.Interfaces
 		IBot Bot { get; }
 		bool IsAttached { get; }
 
-		Task AttachTo ( IBot bot );
-		Task Detach ( );
+		Task AttachToAsync ( IBot bot );
+		Task DetachAsync ( );
 
-		Task OnNext ( ICryptoExchange exchange,
-		              CryptoCoin coin );
+		Task OnNextAsync ( ICryptoExchange exchange,
+		                   CryptoCoin coin );
 
-		Task OnChanged ( ICryptoExchange exchange,
-		                 CryptoCoin coin );
+		Task OnChangedAsync ( ICryptoExchange exchange,
+		                      CryptoCoin coin );
 	}
 }

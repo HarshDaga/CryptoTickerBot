@@ -31,9 +31,9 @@ namespace CryptoTickerBot.Core.Interfaces
 		void RestartExchangeMonitors ( );
 
 		bool ContainsService ( IBotService service );
-		Task Attach ( IBotService service );
-		Task Detach ( IBotService service );
-		Task DetachAll<T> ( ) where T : IBotService;
+		Task AttachAsync ( IBotService service );
+		Task DetachAsync ( IBotService service );
+		Task DetachAllAsync<T> ( ) where T : IBotService;
 
 		bool TryGetExchange ( CryptoExchangeId exchangeId,
 		                      out ICryptoExchange exchange );

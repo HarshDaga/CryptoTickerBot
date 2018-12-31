@@ -11,39 +11,39 @@ namespace CryptoTickerBot.Core.Abstractions
 		public IBot Bot { get; protected set; }
 		public bool IsAttached { get; protected set; }
 
-		public virtual async Task AttachTo ( IBot bot )
+		public virtual async Task AttachToAsync ( IBot bot )
 		{
 			if ( !bot.ContainsService ( this ) )
 			{
-				await bot.Attach ( this );
+				await bot.AttachAsync ( this ).ConfigureAwait ( false );
 				return;
 			}
 
 			Bot        = bot;
 			IsAttached = true;
 
-			await StartAsync ( );
+			await StartAsync ( ).ConfigureAwait ( false );
 		}
 
-		public virtual async Task Detach ( )
+		public virtual async Task DetachAsync ( )
 		{
 			if ( Bot.ContainsService ( this ) )
 			{
-				await Bot.Detach ( this );
+				await Bot.DetachAsync ( this ).ConfigureAwait ( false );
 				return;
 			}
 
 			IsAttached = false;
 
-			await StopAsync ( );
+			await StopAsync ( ).ConfigureAwait ( false );
 		}
 
-		public virtual Task OnNext ( ICryptoExchange exchange,
-		                             CryptoCoin coin ) =>
+		public virtual Task OnNextAsync ( ICryptoExchange exchange,
+		                                  CryptoCoin coin ) =>
 			Task.CompletedTask;
 
-		public virtual Task OnChanged ( ICryptoExchange exchange,
-		                                CryptoCoin coin ) =>
+		public virtual Task OnChangedAsync ( ICryptoExchange exchange,
+		                                     CryptoCoin coin ) =>
 			Task.CompletedTask;
 
 		public virtual void Dispose ( )

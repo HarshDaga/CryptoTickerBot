@@ -9,14 +9,12 @@ using System.Timers;
 using CryptoTickerBot.Data.Configs;
 using CryptoTickerBot.Data.Extensions;
 using Flurl.Http;
-using Fody;
 using Newtonsoft.Json;
 using NLog;
 using Polly;
 
 namespace CryptoTickerBot.Core.Helpers
 {
-	[ConfigureAwait ( false )]
 	public static class FiatConverter
 	{
 		public static readonly string TickerUrl = "http://data.fixer.io/api/latest";
@@ -69,7 +67,7 @@ namespace CryptoTickerBot.Core.Helpers
 				                       ctx ) => Logger.Error ( exception, $"Retry attemp #{retryCount}" ) );
 		}
 
-		public static async Task<Timer> StartMonitor ( )
+		public static async Task<Timer> StartMonitorAsync ( )
 		{
 			if ( IsRunning )
 				return Timer;
@@ -79,10 +77,11 @@ namespace CryptoTickerBot.Core.Helpers
 			Timer.Disposed += ( sender,
 			                    args ) => IsRunning = false;
 
-			await TryFetchRates ( );
+			await TryFetchRatesAsync ( ).ConfigureAwait ( false );
 
 			Timer.Elapsed += ( sender,
-			                   args ) => Task.Run ( async ( ) => await TryFetchRates ( ) );
+			                   args ) =>
+				Task.Run ( async ( ) => await TryFetchRatesAsync ( ).ConfigureAwait ( false ) );
 			Timer.Start ( );
 
 			return Timer;
@@ -94,11 +93,11 @@ namespace CryptoTickerBot.Core.Helpers
 			Timer?.Dispose ( );
 		}
 
-		public static async Task TryFetchRates ( )
+		public static async Task TryFetchRatesAsync ( )
 		{
 			try
 			{
-				await Policy.ExecuteAsync ( FetchRates );
+				await Policy.ExecuteAsync ( FetchRatesAsync ).ConfigureAwait ( false );
 			}
 			catch ( Exception e )
 			{
@@ -107,9 +106,9 @@ namespace CryptoTickerBot.Core.Helpers
 			}
 		}
 
-		private static async Task FetchRates ( )
+		private static async Task FetchRatesAsync ( )
 		{
-			var json = await TickerUrl.GetStringAsync ( );
+			var json = await TickerUrl.GetStringAsync ( ).ConfigureAwait ( false );
 			var data = JsonConvert.DeserializeObject<dynamic> ( json );
 			UsdTo =
 				JsonConvert.DeserializeObject<Dictionary<string, decimal>> ( data.rates.ToString ( ) );

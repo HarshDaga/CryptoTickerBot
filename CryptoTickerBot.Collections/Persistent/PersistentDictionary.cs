@@ -28,17 +28,6 @@ namespace CryptoTickerBot.Collections.Persistent
 		{
 		}
 
-		public static PersistentDictionary<TKey, TValue> Build ( string fileName ) =>
-			Build ( fileName, DefaultFlushInterval );
-
-		public static PersistentDictionary<TKey, TValue> Build ( string fileName,
-		                                                         TimeSpan flushInterval )
-		{
-			var collection = GetOpenCollection<PersistentDictionary<TKey, TValue>> ( fileName );
-
-			return collection ?? new PersistentDictionary<TKey, TValue> ( fileName, flushInterval );
-		}
-
 		public void Add ( TKey key,
 		                  TValue value )
 		{
@@ -59,5 +48,16 @@ namespace CryptoTickerBot.Collections.Persistent
 		public bool TryGetValue ( TKey key,
 		                          out TValue value ) =>
 			Collection.TryGetValue ( key, out value );
+
+		public static PersistentDictionary<TKey, TValue> Build ( string fileName ) =>
+			Build ( fileName, DefaultFlushInterval );
+
+		public static PersistentDictionary<TKey, TValue> Build ( string fileName,
+		                                                         TimeSpan flushInterval )
+		{
+			var collection = GetOpenCollection<PersistentDictionary<TKey, TValue>> ( fileName );
+
+			return collection ?? new PersistentDictionary<TKey, TValue> ( fileName, flushInterval );
+		}
 	}
 }

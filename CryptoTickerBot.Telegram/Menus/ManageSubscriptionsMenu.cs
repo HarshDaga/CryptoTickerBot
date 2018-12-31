@@ -28,23 +28,23 @@ namespace CryptoTickerBot.Telegram.Menus
 
 		private void AddHandlers ( )
 		{
-			Handlers["add subscription"]  = AddSubscriptionHandler;
-			Handlers["edit subscription"] = EditSubscriptionHandler;
-			Handlers["back"]              = BackHandler;
+			Handlers["add subscription"]  = AddSubscriptionHandlerAsync;
+			Handlers["edit subscription"] = EditSubscriptionHandlerAsync;
+			Handlers["back"]              = BackHandlerAsync;
 		}
 
-		private async Task<TelegramKeyboardMenuBase> AddSubscriptionHandler ( CallbackQuery query )
+		private async Task<TelegramKeyboardMenuBase> AddSubscriptionHandlerAsync ( CallbackQuery query )
 		{
-			var exchangeId = await ReadExchangeIdAsync ( );
+			var exchangeId = await ReadExchangeIdAsync ( ).ConfigureAwait ( false );
 			if ( exchangeId is null )
 				return this;
 
-			var threshold = await ReadThresholdAsync ( );
+			var threshold = await ReadThresholdAsync ( ).ConfigureAwait ( false );
 			if ( threshold == -1 )
 				return this;
 
-			var isSilent = await ReadBoolAsync ( "Keep Silent?" ) ?? false;
-			var symbols = await ReadSymbolsAsync ( );
+			var isSilent = await ReadBoolAsync ( "Keep Silent?" ).ConfigureAwait ( false ) ?? false;
+			var symbols = await ReadSymbolsAsync ( ).ConfigureAwait ( false );
 
 			var subscription = new TelegramPercentChangeSubscription (
 				Chat,
@@ -55,12 +55,12 @@ namespace CryptoTickerBot.Telegram.Menus
 				symbols
 			);
 
-			await TelegramBot.AddOrUpdateSubscription ( subscription );
+			await TelegramBot.AddOrUpdateSubscriptionAsync ( subscription ).ConfigureAwait ( false );
 
 			return this;
 		}
 
-		private async Task<TelegramKeyboardMenuBase> EditSubscriptionHandler ( CallbackQuery query )
+		private async Task<TelegramKeyboardMenuBase> EditSubscriptionHandlerAsync ( CallbackQuery query )
 		{
 			var subscriptions = TelegramBot.Data.PercentChangeSubscriptions
 				.Where ( x => x.ChatId.Identifier == Chat.Id && x.User == User )
@@ -68,7 +68,7 @@ namespace CryptoTickerBot.Telegram.Menus
 
 			if ( !subscriptions.Any ( ) )
 			{
-				await SendTextBlockAsync ( "There are no subscriptions to edit" );
+				await SendTextBlockAsync ( "There are no subscriptions to edit" ).ConfigureAwait ( false );
 				return this;
 			}
 
@@ -76,7 +76,7 @@ namespace CryptoTickerBot.Telegram.Menus
 				await ReadExchangeIdAsync ( subscriptions
 					                            .Select ( x => x.ExchangeId )
 					                            .Distinct ( )
-				);
+				).ConfigureAwait ( false );
 			if ( exchangeId is null )
 				return this;
 
@@ -85,7 +85,8 @@ namespace CryptoTickerBot.Telegram.Menus
 			if ( subscriptions.Count == 1 )
 				return new EditSubscriptionMenu ( TelegramBot, subscriptions[0], this );
 
-			var threshold = await ReadThresholdAsync ( subscriptions.Select ( x => x.Threshold ) );
+			var threshold = await ReadThresholdAsync ( subscriptions.Select ( x => x.Threshold ) )
+				.ConfigureAwait ( false );
 			if ( threshold == -1 )
 				return this;
 
@@ -98,20 +99,20 @@ namespace CryptoTickerBot.Telegram.Menus
 
 		private async Task<decimal> ReadThresholdAsync ( )
 		{
-			await RequestReplyAsync ( "Enter the threshold%" );
+			await RequestReplyAsync ( "Enter the threshold%" ).ConfigureAwait ( false );
 
-			return await ReadPercentage ( );
+			return await ReadPercentageAsync ( ).ConfigureAwait ( false );
 		}
 
 		private async Task<decimal> ReadThresholdAsync ( IEnumerable<decimal> thresholds )
 		{
 			var list = thresholds.ToList ( );
 			await SendOptionsAsync (
-				$"{"subscription".ToQuantity ( list.Count )} found\nChoose threshold%",
-				list.Select ( x => $"{x:P}" ),
-				2 );
+					$"{"subscription".ToQuantity ( list.Count )} found\nChoose threshold%",
+					list.Select ( x => $"{x:P}" ) )
+				.ConfigureAwait ( false );
 
-			return await ReadPercentage ( );
+			return await ReadPercentageAsync ( ).ConfigureAwait ( false );
 		}
 	}
 }

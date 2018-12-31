@@ -4,12 +4,10 @@ using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
 using CryptoTickerBot.Data.Domain;
 using Flurl.Http;
-using Fody;
 using Newtonsoft.Json;
 
 namespace CryptoTickerBot.Core.Exchanges
 {
-	[ConfigureAwait ( false )]
 	public class ZebpayExchange : CryptoExchangeBase<ZebpayExchange.TickerDatum>
 	{
 		public static readonly string[] Symbols =
@@ -25,21 +23,21 @@ namespace CryptoTickerBot.Core.Exchanges
 
 		protected override async Task GetExchangeDataAsync ( CancellationToken ct )
 		{
-			await FetchAll ( TimeSpan.FromSeconds ( 2 ), ct );
+			await FetchAllAsync ( TimeSpan.FromSeconds ( 2 ), ct ).ConfigureAwait ( false );
 
 			while ( !ct.IsCancellationRequested )
-				await FetchAll ( PollingRate, ct );
+				await FetchAllAsync ( PollingRate, ct ).ConfigureAwait ( false );
 		}
 
-		private async Task FetchAll ( TimeSpan frequency,
-		                              CancellationToken ct )
+		private async Task FetchAllAsync ( TimeSpan frequency,
+		                                   CancellationToken ct )
 		{
 			foreach ( var symbol in Symbols )
 			{
 				var url = $"{TickerUrl}{symbol}/inr/";
-				var data = await url.GetJsonAsync<TickerDatum> ( ct );
+				var data = await url.GetJsonAsync<TickerDatum> ( ct ).ConfigureAwait ( false );
 				Update ( data, $"{symbol}INR" );
-				await Task.Delay ( frequency, ct );
+				await Task.Delay ( frequency, ct ).ConfigureAwait ( false );
 			}
 		}
 

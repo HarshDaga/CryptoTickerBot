@@ -27,7 +27,7 @@ namespace CryptoTickerBot.Telegram.Extensions
 			{
 				return await client.SendTextMessageAsync ( chatId, text, parseMode, disableWebPagePreview,
 				                                           disableNotification, replyToMessageId, replyMarkup,
-				                                           cancellationToken );
+				                                           cancellationToken ).ConfigureAwait ( false );
 			}
 			catch ( TaskCanceledException )
 			{
@@ -51,7 +51,7 @@ namespace CryptoTickerBot.Telegram.Extensions
 				                                                  disableWebPagePreview, disableNotification,
 				                                                  replyToMessageId,
 				                                                  replyMarkup,
-				                                                  cancellationToken );
+				                                                  cancellationToken ).ConfigureAwait ( false );
 			}
 			catch ( TaskCanceledException )
 			{
@@ -74,7 +74,7 @@ namespace CryptoTickerBot.Telegram.Extensions
 				                                           disableWebPagePreview, disableNotification,
 				                                           replyToMessageId,
 				                                           replyMarkup,
-				                                           cancellationToken );
+				                                           cancellationToken ).ConfigureAwait ( false );
 		}
 
 		public static async Task<Message> SendOptionsAsync<T> ( this TelegramBotClient client,
@@ -92,7 +92,8 @@ namespace CryptoTickerBot.Telegram.Extensions
 			                                                  text,
 			                                                  disableNotification: true,
 			                                                  replyMarkup: keyboard,
-			                                                  cancellationToken: cancellationToken );
+			                                                  cancellationToken: cancellationToken )
+				.ConfigureAwait ( false );
 		}
 
 		public static async Task<Message> SendOptionsAsync<T> ( this TelegramBotClient client,
@@ -101,7 +102,8 @@ namespace CryptoTickerBot.Telegram.Extensions
 		                                                        IEnumerable<T> options,
 		                                                        int batchSize = 2,
 		                                                        CancellationToken cancellationToken = default ) =>
-			await client.SendOptionsAsync ( chatId, text, options.Batch ( batchSize ), cancellationToken );
+			await client.SendOptionsAsync ( chatId, text, options.Batch ( batchSize ), cancellationToken )
+				.ConfigureAwait ( false );
 
 		public static async Task<Message> SendOptionsAsync<T> ( this TelegramBotClient client,
 		                                                        ChatId chatId,
@@ -116,7 +118,8 @@ namespace CryptoTickerBot.Telegram.Extensions
 			                                                  text,
 			                                                  disableNotification: true,
 			                                                  replyMarkup: keyboard,
-			                                                  cancellationToken: cancellationToken );
+			                                                  cancellationToken: cancellationToken )
+				.ConfigureAwait ( false );
 		}
 
 		public static async Task<Message> SendOptionsAsync<T> ( this TelegramBotClient client,
@@ -134,7 +137,8 @@ namespace CryptoTickerBot.Telegram.Extensions
 			                                                  $"{user}\n{text}",
 			                                                  disableNotification: true,
 			                                                  replyMarkup: keyboard,
-			                                                  cancellationToken: cancellationToken );
+			                                                  cancellationToken: cancellationToken )
+				.ConfigureAwait ( false );
 		}
 	}
 }

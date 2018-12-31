@@ -53,7 +53,7 @@ namespace CryptoTickerBot.Core.Exchanges
 					break;
 				}
 
-				await Task.Delay ( PollingRate, ct );
+				await Task.Delay ( PollingRate, ct ).ConfigureAwait ( false );
 			}
 		}
 

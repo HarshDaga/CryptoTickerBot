@@ -23,8 +23,8 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 		bool Contains ( string label,
 		                StringComparison comparison = StringComparison.OrdinalIgnoreCase );
 
-		Task DeleteMenu ( );
-		Task<Message> Display ( );
+		Task DeleteMenuAsync ( );
+		Task<Message> DisplayAsync ( );
 		Task HandleMessageAsync ( Message message );
 		Task<TelegramKeyboardMenuBase> HandleQueryAsync ( CallbackQuery query );
 		void SetParentMenu ( TelegramKeyboardMenuBase menu );

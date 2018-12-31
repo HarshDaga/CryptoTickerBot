@@ -6,13 +6,11 @@ using CryptoTickerBot.Core.Abstractions;
 using CryptoTickerBot.Core.Helpers;
 using CryptoTickerBot.Data.Converters;
 using CryptoTickerBot.Data.Domain;
-using Fody;
 using Newtonsoft.Json;
 using NLog;
 
 namespace CryptoTickerBot.Core.Exchanges
 {
-	[ConfigureAwait ( false )]
 	public class KoinexExchange : CryptoExchangeBase<KoinexExchange.KoinexCoin>
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
@@ -27,7 +25,7 @@ namespace CryptoTickerBot.Core.Exchanges
 			{
 				try
 				{
-					var json = await Utility.DownloadWebPageAsync ( TickerUrl );
+					var json = await Utility.DownloadWebPageAsync ( TickerUrl ).ConfigureAwait ( false );
 					var data = JsonConvert.DeserializeObject<KoinexTicker> ( json );
 
 					foreach ( var kp in data.Stats.Inr )
@@ -38,7 +36,7 @@ namespace CryptoTickerBot.Core.Exchanges
 					Logger.Error ( e );
 				}
 
-				await Task.Delay ( PollingRate, ct );
+				await Task.Delay ( PollingRate, ct ).ConfigureAwait ( false );
 			}
 		}
 

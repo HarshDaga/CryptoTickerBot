@@ -8,7 +8,6 @@ using CryptoTickerBot.Data.Domain;
 using CryptoTickerBot.Data.Extensions;
 using CryptoTickerBot.Data.Helpers;
 using CryptoTickerBot.Telegram.Extensions;
-using Fody;
 using Humanizer;
 using Humanizer.Localisation;
 using Newtonsoft.Json;
@@ -18,7 +17,6 @@ using Telegram.Bot.Types.Enums;
 
 namespace CryptoTickerBot.Telegram.Subscriptions
 {
-	[ConfigureAwait ( false )]
 	public class TelegramPercentChangeSubscription :
 		PercentChangeSubscription,
 		IEquatable<TelegramPercentChangeSubscription>
@@ -66,11 +64,13 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 			$"Silent: {IsSilent}\n" +
 			$"{nameof ( Symbols )}: {Symbols.Humanize ( )}";
 
-		public async Task Start ( TelegramBot telegramBot,
-		                          bool isBeingCreated = false )
+		public async Task StartAsync ( TelegramBot telegramBot,
+		                               bool isBeingCreated = false )
 		{
 			TelegramBot = telegramBot;
-			Chat        = await TelegramBot.Client.GetChatAsync ( ChatId, CancellationToken );
+			Chat = await TelegramBot.Client
+				.GetChatAsync ( ChatId, CancellationToken )
+				.ConfigureAwait ( false );
 
 			if ( !TelegramBot.Ctb.TryGetExchange ( ExchangeId, out var exchange ) )
 				return;
@@ -81,18 +81,19 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 				await TelegramBot.Client.SendTextBlockAsync ( ChatId,
 				                                              $"Created subscription:\n{Summary ( )}",
 				                                              disableNotification: IsSilent,
-				                                              cancellationToken: CancellationToken );
+				                                              cancellationToken: CancellationToken )
+					.ConfigureAwait ( false );
 		}
 
-		public async Task Resume ( TelegramBot telegramBot ) =>
-			await Start ( telegramBot );
+		public async Task ResumeAsync ( TelegramBot telegramBot ) =>
+			await StartAsync ( telegramBot ).ConfigureAwait ( false );
 
 		public bool IsSimilarTo ( TelegramPercentChangeSubscription subscription ) =>
 			User.Equals ( subscription.User ) &&
 			ChatId.Identifier == subscription.ChatId.Identifier &&
 			ExchangeId == subscription.ExchangeId;
 
-		public async Task MergeWith ( TelegramPercentChangeSubscription subscription )
+		public async Task MergeWithAsync ( TelegramPercentChangeSubscription subscription )
 		{
 			IsSilent = subscription.IsSilent;
 			AddSymbols ( subscription.Symbols );
@@ -101,11 +102,12 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 				.SendTextBlockAsync ( ChatId,
 				                      $"Merged with subscription:\n{Summary ( )}",
 				                      disableNotification: IsSilent,
-				                      cancellationToken: CancellationToken );
+				                      cancellationToken: CancellationToken )
+				.ConfigureAwait ( false );
 		}
 
-		protected override async Task OnTrigger ( CryptoCoin old,
-		                                          CryptoCoin current )
+		protected override async Task OnTriggerAsync ( CryptoCoin old,
+		                                               CryptoCoin current )
 		{
 			Logger.Debug (
 				$"{Id} Invoked subscription for {User} @ {current.Rate:N} {current.Symbol} {Exchange.Name}"
@@ -124,7 +126,8 @@ namespace CryptoTickerBot.Telegram.Subscriptions
 				.SendTextBlockAsync ( ChatId,
 				                      builder.ToString ( ),
 				                      disableNotification: IsSilent,
-				                      cancellationToken: CancellationToken );
+				                      cancellationToken: CancellationToken )
+				.ConfigureAwait ( false );
 		}
 
 		#region Equality Members

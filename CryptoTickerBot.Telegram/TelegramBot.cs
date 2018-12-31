@@ -13,7 +13,6 @@ using CryptoTickerBot.Telegram.Menus;
 using CryptoTickerBot.Telegram.Menus.Abstractions;
 using CryptoTickerBot.Telegram.Subscriptions;
 using EnumsNET;
-using Fody;
 using Humanizer;
 using Humanizer.Localisation;
 using NLog;
@@ -32,7 +31,6 @@ namespace CryptoTickerBot.Telegram
 {
 	public delegate Task CommandHandlerDelegate ( Message message );
 
-	[ConfigureAwait ( false )]
 	public class TelegramBot
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
@@ -84,11 +82,11 @@ namespace CryptoTickerBot.Telegram
 
 			commandHandlers = new Dictionary<string, (string, CommandHandlerDelegate)>
 			{
-				["/menu"] = ( "/menu", HandleMenuCommand ),
+				["/menu"] = ( "/menu", HandleMenuCommandAsync ),
 				["/subscribe"] = ( "/subscribe [Exchange] [Percentage] [Silent=true/false] [Symbols]",
-				                   HandleSubscribeCommand ),
-				["/status"]  = ( "/status", HandleStatusCommand ),
-				["/restart"] = ( "/restart", HandleRestartCommand )
+				                   HandleSubscribeCommandAsync ),
+				["/status"]  = ( "/status", HandleStatusCommandAsync ),
+				["/restart"] = ( "/restart", HandleRestartCommandAsync )
 			};
 		}
 
@@ -100,13 +98,13 @@ namespace CryptoTickerBot.Telegram
 				await Policy
 					.ExecuteAsync ( async ( ) =>
 					{
-						Self = await Client.GetMeAsync ( CancellationToken );
+						Self = await Client.GetMeAsync ( CancellationToken ).ConfigureAwait ( false );
 						Logger.Info ( $"Hello! My name is {Self.FirstName}" );
 
 						Client.StartReceiving ( cancellationToken: CancellationToken );
-					} );
+					} ).ConfigureAwait ( false );
 
-				await ResumeSubscriptions ( );
+				await ResumeSubscriptionsAsync ( ).ConfigureAwait ( false );
 			}
 			catch ( Exception e )
 			{
@@ -122,7 +120,7 @@ namespace CryptoTickerBot.Telegram
 
 		#region Helpers
 
-		private async Task ResumeSubscriptions ( )
+		private async Task ResumeSubscriptionsAsync ( )
 		{
 			foreach ( var subscription in Data.PercentChangeSubscriptions )
 			{
@@ -134,7 +132,7 @@ namespace CryptoTickerBot.Telegram
 					return Task.CompletedTask;
 				};
 
-				await subscription.Resume ( this );
+				await subscription.ResumeAsync ( this ).ConfigureAwait ( false );
 			}
 		}
 
@@ -146,19 +144,19 @@ namespace CryptoTickerBot.Telegram
 				menuStates[menu.Id] = menu;
 		}
 
-		private async Task<bool> MenuTextInput ( Message message )
+		private async Task<bool> MenuTextInputAsync ( Message message )
 		{
 			foreach ( var menu in GetOpenMenus ( message.From, message.Chat ) )
-				await menu.HandleMessageAsync ( message );
+				await menu.HandleMessageAsync ( message ).ConfigureAwait ( false );
 
 			return true;
 		}
 
-		private async Task CloseExistingMenus ( User user )
+		private async Task CloseExistingMenusAsync ( User user )
 		{
 			foreach ( var menu in menuStates.Values.Where ( x => x != null && x.User == user ).ToList ( ) )
 			{
-				await menu.DeleteMenu ( );
+				await menu.DeleteMenuAsync ( ).ConfigureAwait ( false );
 				menuStates.TryRemove ( menu.Id, out _ );
 			}
 		}
@@ -172,7 +170,7 @@ namespace CryptoTickerBot.Telegram
 				yield return menu;
 		}
 
-		public async Task AddOrUpdateSubscription ( TelegramPercentChangeSubscription subscription )
+		public async Task AddOrUpdateSubscriptionAsync ( TelegramPercentChangeSubscription subscription )
 		{
 			var list = Data.GetPercentChangeSubscriptions ( x => x.IsSimilarTo ( subscription ) );
 
@@ -184,12 +182,12 @@ namespace CryptoTickerBot.Telegram
 				                                old,
 				                                current ) =>
 					Data.AddOrUpdate ( sub as TelegramPercentChangeSubscription );
-				await subscription.Start ( this, true );
+				await subscription.StartAsync ( this, true ).ConfigureAwait ( false );
 
 				return;
 			}
 
-			await existing.MergeWith ( subscription );
+			await existing.MergeWithAsync ( subscription ).ConfigureAwait ( false );
 			Data.AddOrUpdate ( existing );
 		}
 
@@ -221,18 +219,18 @@ namespace CryptoTickerBot.Telegram
 
 		#region Command Handlers
 
-		private async Task HandleMenuCommand ( Message message )
+		private async Task HandleMenuCommandAsync ( Message message )
 		{
 			var from = message.From;
 
-			await CloseExistingMenus ( message.From );
+			await CloseExistingMenusAsync ( message.From ).ConfigureAwait ( false );
 
 			var menu = new MainMenu ( this, from, message.Chat );
-			await menu.Display ( );
+			await menu.DisplayAsync ( ).ConfigureAwait ( false );
 			menuStates[menu.Id] = menu;
 		}
 
-		private async Task HandleSubscribeCommand ( Message message )
+		private async Task HandleSubscribeCommandAsync ( Message message )
 		{
 			var from = message.From;
 			message.ExtractCommand ( Self, out var command, out var parameters );
@@ -241,7 +239,7 @@ namespace CryptoTickerBot.Telegram
 			{
 				await Client.SendTextBlockAsync ( message.Chat,
 				                                  $"Usage:\n{commandHandlers[command].usage}",
-				                                  cancellationToken: CancellationToken );
+				                                  cancellationToken: CancellationToken ).ConfigureAwait ( false );
 				return;
 			}
 
@@ -249,7 +247,7 @@ namespace CryptoTickerBot.Telegram
 			{
 				await Client.SendTextBlockAsync ( message.Chat,
 				                                  $"{parameters[0]} is not a valid Exchange name",
-				                                  cancellationToken: CancellationToken );
+				                                  cancellationToken: CancellationToken ).ConfigureAwait ( false );
 				return;
 			}
 
@@ -257,7 +255,7 @@ namespace CryptoTickerBot.Telegram
 			{
 				await Client.SendTextBlockAsync ( message.Chat,
 				                                  $"{parameters[1]} is not a valid percentage value",
-				                                  cancellationToken: CancellationToken );
+				                                  cancellationToken: CancellationToken ).ConfigureAwait ( false );
 				return;
 			}
 
@@ -274,22 +272,22 @@ namespace CryptoTickerBot.Telegram
 					.Select ( x => x.Trim ( ' ', ',' ) )
 			);
 
-			await AddOrUpdateSubscription ( subscription );
+			await AddOrUpdateSubscriptionAsync ( subscription ).ConfigureAwait ( false );
 		}
 
-		private async Task HandleRestartCommand ( Message message )
+		private async Task HandleRestartCommandAsync ( Message message )
 		{
 			Ctb.RestartExchangeMonitors ( );
 			await Client.SendTextBlockAsync ( message.Chat,
 			                                  "Restarted exchange monitors",
-			                                  cancellationToken: CancellationToken );
+			                                  cancellationToken: CancellationToken ).ConfigureAwait ( false );
 		}
 
-		private async Task HandleStatusCommand ( Message message )
+		private async Task HandleStatusCommandAsync ( Message message )
 		{
 			await Client.SendTextBlockAsync ( message.Chat,
 			                                  GetStatusString ( ),
-			                                  cancellationToken: CancellationToken );
+			                                  cancellationToken: CancellationToken ).ConfigureAwait ( false );
 		}
 
 		#endregion
@@ -308,8 +306,9 @@ namespace CryptoTickerBot.Telegram
 					await Client
 						.AnswerCallbackQueryAsync ( query.Id,
 						                            "Menu was closed!",
-						                            cancellationToken: Ctb.Cts.Token );
-					await Client.DeleteMessageAsync ( query.Message.Chat, query.Message.MessageId, Ctb.Cts.Token );
+						                            cancellationToken: Ctb.Cts.Token ).ConfigureAwait ( false );
+					await Client.DeleteMessageAsync ( query.Message.Chat, query.Message.MessageId, Ctb.Cts.Token )
+						.ConfigureAwait ( false );
 				}
 				catch ( Exception e )
 				{
@@ -322,7 +321,7 @@ namespace CryptoTickerBot.Telegram
 			if ( menu == null )
 				return;
 
-			menu = await menu.HandleQueryAsync ( query );
+			menu = await menu.HandleQueryAsync ( query ).ConfigureAwait ( false );
 			UpdateMenuState ( query.Message.MessageId, menu );
 		}
 
@@ -356,7 +355,7 @@ namespace CryptoTickerBot.Telegram
 						inlineQueryResults,
 						0,
 						cancellationToken: CancellationToken
-					);
+					).ConfigureAwait ( false );
 			}
 			catch ( Exception exception )
 			{
@@ -382,11 +381,11 @@ namespace CryptoTickerBot.Telegram
 
 				if ( commandHandlers.TryGetValue ( command, out var tuple ) )
 				{
-					await tuple.handler ( message );
+					await tuple.handler ( message ).ConfigureAwait ( false );
 					return;
 				}
 
-				await MenuTextInput ( message );
+				await MenuTextInputAsync ( message ).ConfigureAwait ( false );
 			}
 			catch ( Exception exception )
 			{

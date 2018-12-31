@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using System.Threading.Tasks;
 using Colorful;
 using CryptoTickerBot.Core;
@@ -45,6 +46,7 @@ namespace CryptoTickerBot.Runner
 			return true;
 		}
 
+		[SuppressMessage ( "ReSharper", "AsyncConverter.AsyncMethodNamingHighlighting" )]
 		public static async Task Main ( )
 		{
 			Console.CancelKeyPress += ( sender,
@@ -71,19 +73,19 @@ namespace CryptoTickerBot.Runner
 					return Task.CompletedTask;
 				};
 
-				await bot.Attach ( service );
+				await bot.AttachAsync ( service ).ConfigureAwait ( false );
 			}
 
 			if ( RunnerConfig.EnableConsoleService )
-				await bot.Attach ( new ConsolePrintService ( ) );
+				await bot.AttachAsync ( new ConsolePrintService ( ) ).ConfigureAwait ( false );
 
 			if ( RunnerConfig.EnableTelegramService )
 			{
 				var teleService = new TelegramBotService ( ConfigManager<TelegramBotConfig>.Instance );
-				await bot.Attach ( teleService );
+				await bot.AttachAsync ( teleService ).ConfigureAwait ( false );
 			}
 
-			await bot.StartAsync ( );
+			await bot.StartAsync ( ).ConfigureAwait ( false );
 
 			QuitEvent.WaitOne ( );
 		}

@@ -4,12 +4,10 @@ using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
 using CryptoTickerBot.Data.Domain;
 using Flurl.Http;
-using Fody;
 using Newtonsoft.Json;
 
 namespace CryptoTickerBot.Core.Exchanges
 {
-	[ConfigureAwait ( false )]
 	public class CoinDeltaExchange : CryptoExchangeBase<CoinDeltaExchange.CoinDeltaCoin>
 	{
 		public CoinDeltaExchange ( ) : base ( CryptoExchangeId.CoinDelta )
@@ -20,7 +18,7 @@ namespace CryptoTickerBot.Core.Exchanges
 		{
 			while ( !ct.IsCancellationRequested )
 			{
-				var data = await TickerUrl.GetJsonAsync<List<CoinDeltaCoin>> ( ct );
+				var data = await TickerUrl.GetJsonAsync<List<CoinDeltaCoin>> ( ct ).ConfigureAwait ( false );
 
 				foreach ( var datum in data )
 				{
@@ -28,7 +26,7 @@ namespace CryptoTickerBot.Core.Exchanges
 					Update ( datum, market.ToUpper ( ) );
 				}
 
-				await Task.Delay ( PollingRate, ct );
+				await Task.Delay ( PollingRate, ct ).ConfigureAwait ( false );
 			}
 		}
 

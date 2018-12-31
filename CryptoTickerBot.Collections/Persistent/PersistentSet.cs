@@ -12,17 +12,6 @@ namespace CryptoTickerBot.Collections.Persistent
 		{
 		}
 
-		public static PersistentSet<T> Build ( string fileName ) =>
-			Build ( fileName, DefaultFlushInterval );
-
-		public static PersistentSet<T> Build ( string fileName,
-		                                       TimeSpan flushInterval )
-		{
-			var collection = GetOpenCollection<PersistentSet<T>> ( fileName );
-
-			return collection ?? new PersistentSet<T> ( fileName, flushInterval );
-		}
-
 		bool ISet<T>.Add ( T item )
 		{
 			var result = Collection.Add ( item );
@@ -61,6 +50,17 @@ namespace CryptoTickerBot.Collections.Persistent
 		public void UnionWith ( IEnumerable<T> other )
 		{
 			Collection.UnionWith ( other );
+		}
+
+		public static PersistentSet<T> Build ( string fileName ) =>
+			Build ( fileName, DefaultFlushInterval );
+
+		public static PersistentSet<T> Build ( string fileName,
+		                                       TimeSpan flushInterval )
+		{
+			var collection = GetOpenCollection<PersistentSet<T>> ( fileName );
+
+			return collection ?? new PersistentSet<T> ( fileName, flushInterval );
 		}
 
 		public bool AddOrUpdate ( T item )

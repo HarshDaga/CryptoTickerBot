@@ -43,6 +43,9 @@ namespace CryptoTickerBot.Data.Configs
 		public static string FileName =>
 			Path.Combine ( instance.ConfigFolderName ?? "Configs", $"{instance.ConfigFileName}.json" );
 
+		public static string Serialized =>
+			JsonConvert.SerializeObject ( instance, ConfigManager.SerializerSettings );
+
 		static ConfigManager ( )
 		{
 			FileLock = new object ( );
@@ -55,9 +58,6 @@ namespace CryptoTickerBot.Data.Configs
 
 		public static void ClearLastError ( ) =>
 			LastError = null;
-
-		public static string Serialized =>
-			JsonConvert.SerializeObject ( instance, ConfigManager.SerializerSettings );
 
 		public static bool Validate ( out IList<Exception> exceptions ) =>
 			instance.Validate ( out exceptions );

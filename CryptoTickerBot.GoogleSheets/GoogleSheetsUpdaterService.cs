@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
 using CryptoTickerBot.Core.Interfaces;
 using CryptoTickerBot.Data.Domain;
-using Fody;
 using Google;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
@@ -16,7 +15,6 @@ using NLog;
 
 namespace CryptoTickerBot.GoogleSheets
 {
-	[ConfigureAwait ( false )]
 	public class GoogleSheetsUpdaterService : BotServiceBase
 	{
 		public const string FolderName = "GoogleApi";
@@ -56,8 +54,8 @@ namespace CryptoTickerBot.GoogleSheets
 		[UsedImplicitly]
 		public event UpdateDelegate Update;
 
-		public override async Task OnChanged ( ICryptoExchange exchange,
-		                                       CryptoCoin coin )
+		public override async Task OnChangedAsync ( ICryptoExchange exchange,
+		                                            CryptoCoin coin )
 		{
 			if ( DateTime.UtcNow - LastUpdate < Config.UpdateFrequency )
 				return;
@@ -66,7 +64,7 @@ namespace CryptoTickerBot.GoogleSheets
 			try
 			{
 				var valueRanges = GetValueRangeToUpdate ( );
-				await UpdateSheet ( valueRanges );
+				await UpdateSheetAsync ( valueRanges ).ConfigureAwait ( false );
 			}
 			catch ( Exception e )
 			{
@@ -74,7 +72,7 @@ namespace CryptoTickerBot.GoogleSheets
 			}
 		}
 
-		private async Task ClearSheet ( )
+		private async Task ClearSheetAsync ( )
 		{
 			var requestBody = new BatchUpdateSpreadsheetRequest
 			{
@@ -93,22 +91,22 @@ namespace CryptoTickerBot.GoogleSheets
 
 			var request = Service.Spreadsheets.BatchUpdate ( requestBody, Config.SpreadSheetId );
 
-			await request.ExecuteAsync ( Bot.Cts.Token );
+			await request.ExecuteAsync ( Bot.Cts.Token ).ConfigureAwait ( false );
 		}
 
-		private async Task UpdateSheet ( ValueRange valueRange )
+		private async Task UpdateSheetAsync ( ValueRange valueRange )
 		{
 			try
 			{
 				if ( valueRange.Values.Count != previousCount )
-					await ClearSheet ( );
+					await ClearSheetAsync ( ).ConfigureAwait ( false );
 				previousCount = valueRange.Values.Count;
 
 				var request = Service.Spreadsheets.Values.Update ( valueRange, Config.SpreadSheetId, valueRange.Range );
 				request.ValueInputOption =
 					SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
 
-				await request.ExecuteAsync ( Bot.Cts.Token );
+				await request.ExecuteAsync ( Bot.Cts.Token ).ConfigureAwait ( false );
 
 				Update?.Invoke ( this );
 			}
@@ -127,7 +125,7 @@ namespace CryptoTickerBot.GoogleSheets
 				if ( e is GoogleApiException gae && gae.Error?.Code == 429 )
 				{
 					Logger.Warn ( gae, "Too many Google Api requests. Cooling down." );
-					await Task.Delay ( Config.CooldownPeriod, Bot.Cts.Token );
+					await Task.Delay ( Config.CooldownPeriod, Bot.Cts.Token ).ConfigureAwait ( false );
 				}
 				else
 				{

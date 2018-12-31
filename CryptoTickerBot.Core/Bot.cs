@@ -80,20 +80,20 @@ namespace CryptoTickerBot.Core
 
 			Cts       = cts ?? new CancellationTokenSource ( );
 			IsRunning = true;
-			await FiatConverter.StartMonitor ( );
+			await FiatConverter.StartMonitorAsync ( ).ConfigureAwait ( false );
 
 			Exchanges = ImmutableDictionary<CryptoExchangeId, ICryptoExchange>.Empty
 				.AddRange ( AllExchanges.Where ( x => exchangeIds.Contains ( x.Key ) ) );
 
 			InitExchanges ( );
 
-			Cts.Token.Register ( async ( ) => await StopAsync ( ) );
+			Cts.Token.Register ( async ( ) => await StopAsync ( ).ConfigureAwait ( false ) );
 
 			Start?.Invoke ( this );
 		}
 
 		public async Task StartAsync ( CancellationTokenSource cts = null ) =>
-			await StartAsync ( cts, AllExchanges.Keys.ToArray ( ) );
+			await StartAsync ( cts, AllExchanges.Keys.ToArray ( ) ).ConfigureAwait ( false );
 
 		public async Task StopAsync ( )
 		{
@@ -110,7 +110,7 @@ namespace CryptoTickerBot.Core
 			var services = Services.ToList ( );
 
 			foreach ( var service in services )
-				await Detach ( service );
+				await DetachAsync ( service ).ConfigureAwait ( false );
 
 			Terminate?.Invoke ( this );
 		}
@@ -127,30 +127,30 @@ namespace CryptoTickerBot.Core
 		public bool ContainsService ( IBotService service ) =>
 			Services.Contains ( service );
 
-		public async Task Attach ( IBotService service )
+		public async Task AttachAsync ( IBotService service )
 		{
 			if ( ContainsService ( service ) )
 				return;
 
 			Services = Services.Add ( service );
-			await service.AttachTo ( this );
+			await service.AttachToAsync ( this ).ConfigureAwait ( false );
 		}
 
-		public async Task Detach ( IBotService service )
+		public async Task DetachAsync ( IBotService service )
 		{
 			if ( !ContainsService ( service ) )
 				return;
 
 			Services = Services.Remove ( service );
-			await service.Detach ( );
+			await service.DetachAsync ( ).ConfigureAwait ( false );
 		}
 
-		public async Task DetachAll<T> ( ) where T : IBotService
+		public async Task DetachAllAsync<T> ( ) where T : IBotService
 		{
 			var services = Services.OfType<T> ( ).ToList ( );
 
 			foreach ( var service in services )
-				await Detach ( service );
+				await DetachAsync ( service ).ConfigureAwait ( false );
 		}
 
 		public bool TryGetExchange ( CryptoExchangeId exchangeId,
@@ -174,8 +174,8 @@ namespace CryptoTickerBot.Core
 
 			foreach ( var exchange in Exchanges.Values )
 			{
-				exchange.Next    += OnNext;
-				exchange.Changed += OnChanged;
+				exchange.Next    += OnNextAsync;
+				exchange.Changed += OnChangedAsync;
 
 				//CompareTable.AddExchange ( exchange );
 
@@ -185,19 +185,19 @@ namespace CryptoTickerBot.Core
 			IsInitialized = true;
 		}
 
-		private async Task OnNext ( ICryptoExchange exchange,
-		                            CryptoCoin coin )
+		private async Task OnNextAsync ( ICryptoExchange exchange,
+		                                 CryptoCoin coin )
 		{
 			foreach ( var service in Services )
-				await service.OnNext ( exchange, coin );
+				await service.OnNextAsync ( exchange, coin ).ConfigureAwait ( false );
 			Next?.Invoke ( exchange, coin );
 		}
 
-		private async Task OnChanged ( ICryptoExchange exchange,
-		                               CryptoCoin coin )
+		private async Task OnChangedAsync ( ICryptoExchange exchange,
+		                                    CryptoCoin coin )
 		{
 			foreach ( var service in Services )
-				await service.OnChanged ( exchange, coin );
+				await service.OnChangedAsync ( exchange, coin ).ConfigureAwait ( false );
 			Changed?.Invoke ( exchange, coin );
 		}
 	}

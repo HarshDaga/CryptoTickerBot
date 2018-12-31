@@ -73,24 +73,6 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 			disposable = Observable.Interval ( FlushInterval ).Subscribe ( l => ForceSave ( ) );
 		}
 
-		protected static bool TryOpenCollection ( string fileName,
-		                                          out IPersistentCollection collection ) =>
-			OpenCollections.Data.TryGetValue ( fileName, out collection );
-
-		protected static TType GetOpenCollection<TType> ( string fileName )
-			where TType : PersistentCollection<T, TCollection>
-		{
-			if ( TryOpenCollection ( fileName, out var collection ) )
-			{
-				if ( collection is TType result )
-					return result;
-				throw new InvalidCastException (
-					$"{fileName} already has an open collection of type {collection.GetType ( )}" );
-			}
-
-			return null;
-		}
-
 		public event SaveDelegate OnSave;
 		public event LoadDelegate OnLoad;
 		public event ErrorDelegate OnError;
@@ -126,27 +108,6 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 			Save ( );
 
 			return result;
-		}
-
-		protected void OneTimeSave ( string json )
-		{
-			var fileInfo = new FileInfo ( FileName );
-			fileInfo.Directory?.Create ( );
-			File.WriteAllText ( FileName, json );
-		}
-
-		protected void InternalForceSave ( )
-		{
-			var json = JsonConvert.SerializeObject ( Collection );
-
-			Policy
-				.Handle<Exception> ( )
-				.WaitAndRetry ( MaxRetryAttempts,
-				                i => RetryInterval,
-				                ( exception,
-				                  span ) =>
-					                OnError?.Invoke ( this, exception ) )
-				.Execute ( ( ) => OneTimeSave ( json ) );
 		}
 
 		public void ForceSave ( )
@@ -198,6 +159,45 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 			ForceSave ( );
 			OpenCollections.Data.TryRemove ( FileName, out _ );
 			disposable?.Dispose ( );
+		}
+
+		protected static bool TryOpenCollection ( string fileName,
+		                                          out IPersistentCollection collection ) =>
+			OpenCollections.Data.TryGetValue ( fileName, out collection );
+
+		protected static TType GetOpenCollection<TType> ( string fileName )
+			where TType : PersistentCollection<T, TCollection>
+		{
+			if ( TryOpenCollection ( fileName, out var collection ) )
+			{
+				if ( collection is TType result )
+					return result;
+				throw new InvalidCastException (
+					$"{fileName} already has an open collection of type {collection.GetType ( )}" );
+			}
+
+			return null;
+		}
+
+		protected void OneTimeSave ( string json )
+		{
+			var fileInfo = new FileInfo ( FileName );
+			fileInfo.Directory?.Create ( );
+			File.WriteAllText ( FileName, json );
+		}
+
+		protected void InternalForceSave ( )
+		{
+			var json = JsonConvert.SerializeObject ( Collection );
+
+			Policy
+				.Handle<Exception> ( )
+				.WaitAndRetry ( MaxRetryAttempts,
+				                i => RetryInterval,
+				                ( exception,
+				                  span ) =>
+					                OnError?.Invoke ( this, exception ) )
+				.Execute ( ( ) => OneTimeSave ( json ) );
 		}
 
 		public virtual void AddWithoutSaving ( T item )

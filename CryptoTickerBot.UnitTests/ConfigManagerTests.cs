@@ -59,18 +59,6 @@ namespace CryptoTickerBot.UnitTests
 			JsonConvert.SerializeObject ( obj, ConfigManager.SerializerSettings );
 
 		[Test]
-		public void ConfigValidateTest ( )
-		{
-			var config = MockConfigManager.Instance;
-			Assert.AreEqual ( config.SomeSecretKey, 0 );
-			Assert.False ( config.Validate ( out var exceptions ) );
-			Assert.AreEqual ( exceptions.Count, 1 );
-			var ae = exceptions[0] as ArgumentException;
-			Assert.NotNull ( ae );
-			Assert.AreEqual ( ae.ParamName, nameof ( MockConfig.SomeSecretKey ) );
-		}
-
-		[Test]
 		public void ConfigFileInUseSetsAppropriateError ( )
 		{
 			MockConfigManager.ClearLastError ( );
@@ -212,6 +200,18 @@ namespace CryptoTickerBot.UnitTests
 
 			MockConfigManager.Save ( );
 			Assert.AreEqual ( Serialize ( config ), File.ReadAllText ( ConfigPath ) );
+		}
+
+		[Test]
+		public void ConfigValidateTest ( )
+		{
+			var config = MockConfigManager.Instance;
+			Assert.AreEqual ( config.SomeSecretKey, 0 );
+			Assert.False ( config.Validate ( out var exceptions ) );
+			Assert.AreEqual ( exceptions.Count, 1 );
+			var ae = exceptions[0] as ArgumentException;
+			Assert.NotNull ( ae );
+			Assert.AreEqual ( ae.ParamName, nameof ( MockConfig.SomeSecretKey ) );
 		}
 
 		[Test]

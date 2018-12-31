@@ -22,17 +22,6 @@ namespace CryptoTickerBot.Collections.Persistent
 		{
 		}
 
-		public static PersistentList<T> Build ( string fileName ) =>
-			Build ( fileName, DefaultFlushInterval );
-
-		public static PersistentList<T> Build ( string fileName,
-		                                        TimeSpan flushInterval )
-		{
-			var collection = GetOpenCollection<PersistentList<T>> ( fileName );
-
-			return collection ?? new PersistentList<T> ( fileName, flushInterval );
-		}
-
 		public int IndexOf ( T item ) => Collection.IndexOf ( item );
 
 		public void Insert ( int index,
@@ -46,6 +35,17 @@ namespace CryptoTickerBot.Collections.Persistent
 		{
 			Collection.RemoveAt ( index );
 			Save ( );
+		}
+
+		public static PersistentList<T> Build ( string fileName ) =>
+			Build ( fileName, DefaultFlushInterval );
+
+		public static PersistentList<T> Build ( string fileName,
+		                                        TimeSpan flushInterval )
+		{
+			var collection = GetOpenCollection<PersistentList<T>> ( fileName );
+
+			return collection ?? new PersistentList<T> ( fileName, flushInterval );
 		}
 	}
 }

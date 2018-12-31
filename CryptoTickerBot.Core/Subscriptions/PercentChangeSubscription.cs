@@ -9,21 +9,15 @@ using CryptoTickerBot.Core.Interfaces;
 using CryptoTickerBot.Data.Domain;
 using CryptoTickerBot.Data.Extensions;
 using CryptoTickerBot.Data.Helpers;
-using Fody;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using NLog;
 
 namespace CryptoTickerBot.Core.Subscriptions
 {
-	[ConfigureAwait ( false )]
 	public class PercentChangeSubscription :
 		CryptoExchangeSubscriptionBase,
 		IEquatable<PercentChangeSubscription>
 	{
-		// ReSharper disable once UnusedMember.Local
-		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
-
 		[JsonConverter ( typeof ( StringEnumConverter ) )]
 		public CryptoExchangeId ExchangeId { get; }
 
@@ -83,13 +77,13 @@ namespace CryptoTickerBot.Core.Subscriptions
 				var previous = LastSignificantPrice[coin.Symbol].Clone ( );
 				LastSignificantPrice[coin.Symbol] = coin.Clone ( );
 
-				await OnTrigger ( previous.Clone ( ), coin.Clone ( ) );
+				await OnTriggerAsync ( previous.Clone ( ), coin.Clone ( ) ).ConfigureAwait ( false );
 				Trigger?.Invoke ( this, previous.Clone ( ), coin.Clone ( ) );
 			}
 		}
 
-		protected virtual Task OnTrigger ( CryptoCoin old,
-		                                   CryptoCoin current ) =>
+		protected virtual Task OnTriggerAsync ( CryptoCoin old,
+		                                        CryptoCoin current ) =>
 			Task.CompletedTask;
 
 		#region Equality Members

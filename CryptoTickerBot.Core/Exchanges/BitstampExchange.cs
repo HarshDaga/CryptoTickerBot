@@ -26,12 +26,13 @@ namespace CryptoTickerBot.Core.Exchanges
 		{
 		}
 
-		private async Task FetchInitialData ( CancellationToken ct )
+		private async Task FetchInitialDataAsync ( CancellationToken ct )
 		{
 			foreach ( var asset in Assets )
 			{
 				var datum = await $"{TickerEndpoint}{asset.UrlSymbol}/"
-					.GetJsonAsync<TickerDatum> ( ct );
+					.GetJsonAsync<TickerDatum> ( ct )
+					.ConfigureAwait ( false );
 
 				var symbol = asset.Name.Replace ( "/", "" );
 				symbol = CleanAndExtractSymbol ( symbol );
@@ -43,16 +44,18 @@ namespace CryptoTickerBot.Core.Exchanges
 				OnNext ( ExchangeData[symbol] );
 				OnChanged ( ExchangeData[symbol] );
 
-				await Task.Delay ( PollingRate, ct );
+				await Task.Delay ( PollingRate, ct ).ConfigureAwait ( false );
 			}
 		}
 
 		protected override async Task GetExchangeDataAsync ( CancellationToken ct )
 		{
 			var closed = false;
-			Assets = await TradingPairsEndpoint.GetJsonAsync<List<BitstampAsset>> ( ct );
+			Assets = await TradingPairsEndpoint
+				.GetJsonAsync<List<BitstampAsset>> ( ct )
+				.ConfigureAwait ( false );
 
-			await FetchInitialData ( ct );
+			await FetchInitialDataAsync ( ct ).ConfigureAwait ( false );
 
 			Client = new PurePusherClient ( TickerUrl, new PurePusherClientOptions
 			{
@@ -86,7 +89,7 @@ namespace CryptoTickerBot.Core.Exchanges
 					break;
 				}
 
-				await Task.Delay ( PollingRate, ct );
+				await Task.Delay ( PollingRate, ct ).ConfigureAwait ( false );
 			}
 		}
 
