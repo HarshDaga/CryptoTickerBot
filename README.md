@@ -43,7 +43,8 @@ You can also create your own instance by compiling the source and creating the a
 - *[Telegram Bot](https://telegram.org/blog/bot-revolution) Integration*
 
    Price change alerts and a keyboard menu in [Telegram](https://telegram.org/) that can be accessed in personal as well as group chats.
-   Subscription alerts can be set to be silent in preferences. 
+   Subscription alerts can be set to silent in preferences.
+   
    ![Subscription creation](https://media.giphy.com/media/AFggFCTxuV1mNq1ShZ/giphy.gif)
 - *[Google Sheets](https://www.google.com/sheets/about/) Integration*
 
