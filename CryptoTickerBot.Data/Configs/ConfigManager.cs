@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using JetBrains.Annotations;
@@ -57,6 +58,9 @@ namespace CryptoTickerBot.Data.Configs
 
 		public static string Serialized =>
 			JsonConvert.SerializeObject ( instance, ConfigManager.SerializerSettings );
+
+		public static bool Validate ( out IList<Exception> exceptions ) =>
+			instance.Validate ( out exceptions );
 
 		public static void Save ( )
 		{

@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace CryptoTickerBot.Data.Configs
 {
@@ -9,6 +11,8 @@ namespace CryptoTickerBot.Data.Configs
 
 		[JsonIgnore]
 		string ConfigFolderName { get; }
+
+		bool Validate ( out IList<Exception> exceptions );
 
 		TConfig RestoreDefaults ( );
 	}

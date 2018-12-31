@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -40,12 +41,34 @@ namespace CryptoTickerBot.UnitTests
 			public List<string> ListWithDefaultValues { get; set; } = new List<string> {"One", "Two", "Three"};
 			public int SomeSecretKey { get; set; }
 
+			public bool Validate ( out IList<Exception> exceptions )
+			{
+				exceptions = new List<Exception> ( );
+
+				if ( SomeSecretKey == 0 )
+					exceptions.Add ( new ArgumentException ( "Secret Key not set", nameof ( SomeSecretKey ) ) );
+
+				return !exceptions.Any ( );
+			}
+
 			public MockConfig RestoreDefaults ( ) =>
 				new MockConfig {SomeSecretKey = SomeSecretKey};
 		}
 
 		private static string Serialize<T> ( T obj ) =>
 			JsonConvert.SerializeObject ( obj, ConfigManager.SerializerSettings );
+
+		[Test]
+		public void ConfigValidateTest ( )
+		{
+			var config = MockConfigManager.Instance;
+			Assert.AreEqual ( config.SomeSecretKey, 0 );
+			Assert.False ( config.Validate ( out var exceptions ) );
+			Assert.AreEqual ( exceptions.Count, 1 );
+			var ae = exceptions[0] as ArgumentException;
+			Assert.NotNull ( ae );
+			Assert.AreEqual ( ae.ParamName, nameof ( MockConfig.SomeSecretKey ) );
+		}
 
 		[Test]
 		public void ConfigFileInUseSetsAppropriateError ( )

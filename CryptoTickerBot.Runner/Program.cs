@@ -17,6 +17,34 @@ namespace CryptoTickerBot.Runner
 
 		private static RunnerConfig RunnerConfig => ConfigManager<RunnerConfig>.Instance;
 
+		private static bool HasExceptions<TConfig> ( ) where TConfig : IConfig<TConfig>, new ( )
+		{
+			if ( ConfigManager<TConfig>.Validate ( out var exceptions ) )
+				return false;
+
+			foreach ( var exception in exceptions )
+				Logger.Error ( exception );
+
+			return true;
+		}
+
+		private static bool ValidateConfigs ( )
+		{
+			if ( HasExceptions<CoreConfig> ( ) )
+				return false;
+
+			if ( HasExceptions<RunnerConfig> ( ) )
+				return false;
+
+			if ( RunnerConfig.EnableGoogleSheetsService && HasExceptions<SheetsConfig> ( ) )
+				return false;
+
+			if ( RunnerConfig.EnableTelegramService && HasExceptions<TelegramBotConfig> ( ) )
+				return false;
+
+			return true;
+		}
+
 		public static async Task Main ( )
 		{
 			Console.CancelKeyPress += ( sender,
@@ -25,6 +53,9 @@ namespace CryptoTickerBot.Runner
 				QuitEvent.Set ( );
 				eArgs.Cancel = true;
 			};
+
+			if ( !ValidateConfigs ( ) )
+				return;
 
 			var bot = new Bot ( );
 

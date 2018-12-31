@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using CryptoTickerBot.Data.Configs;
 using CryptoTickerBot.Data.Domain;
 using Newtonsoft.Json;
@@ -118,6 +119,16 @@ namespace CryptoTickerBot.Core
 				BaseSymbols    = new List<string> {"INR"}
 			}
 		};
+
+		public bool Validate ( out IList<Exception> exceptions )
+		{
+			exceptions = new List<Exception> ( );
+
+			if ( string.IsNullOrEmpty ( FixerApiKey ) )
+				exceptions.Add ( new ArgumentException ( "Fixer API Key missing", nameof ( FixerApiKey ) ) );
+
+			return !exceptions.Any ( );
+		}
 
 		public CoreConfig RestoreDefaults ( )
 		{

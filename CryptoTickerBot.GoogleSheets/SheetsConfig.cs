@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using CryptoTickerBot.Data.Configs;
 
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
@@ -29,5 +31,19 @@ namespace CryptoTickerBot.GoogleSheets
 				SheetId         = SheetId,
 				ApplicationName = ApplicationName
 			};
+
+		public bool Validate ( out IList<Exception> exceptions )
+		{
+			exceptions = new List<Exception> ( );
+
+			if ( string.IsNullOrEmpty ( SpreadSheetId ) )
+				exceptions.Add ( new ArgumentException ( "SpreadSheet ID missing", nameof ( SpreadSheetId ) ) );
+			if ( string.IsNullOrEmpty ( SheetName ) )
+				exceptions.Add ( new ArgumentException ( "SheetName missing", nameof ( SheetName ) ) );
+			if ( string.IsNullOrEmpty ( ApplicationName ) )
+				exceptions.Add ( new ArgumentException ( "Application Name missing", nameof ( ApplicationName ) ) );
+
+			return !exceptions.Any ( );
+		}
 	}
 }
