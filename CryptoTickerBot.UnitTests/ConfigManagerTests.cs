@@ -73,21 +73,11 @@ namespace CryptoTickerBot.UnitTests
 				Assert.DoesNotThrow ( MockConfigManager.Save );
 				Assert.IsInstanceOf<IOException> ( MockConfigManager.LastError );
 				MockConfigManager.ClearLastError ( );
-
-				Assert.DoesNotThrow ( MockConfigManager.Reset );
-				if ( !File.Exists ( ConfigPath ) )
-					Assert.Inconclusive ( );
-				Assert.IsInstanceOf<IOException> ( MockConfigManager.LastError );
-				MockConfigManager.ClearLastError ( );
-
-				Assert.DoesNotThrow ( MockConfigManager.RestoreDefaults );
-				Assert.IsInstanceOf<IOException> ( MockConfigManager.LastError );
-				MockConfigManager.ClearLastError ( );
 			}
 		}
 
 		[Test]
-		public void ConfigHasDefaultValuesOnCreation ( )
+		public void ConfigShouldHaveDefaultValuesOnCreation ( )
 		{
 			var config = MockConfigManager.Instance;
 			Assert.AreEqual ( config.IntValueWithDefault, 42 );
@@ -97,7 +87,7 @@ namespace CryptoTickerBot.UnitTests
 		}
 
 		[Test]
-		public void ConfigInstanceReturnsByRef ( )
+		public void ConfigInstanceShouldReturnByRef ( )
 		{
 			ref var config1 = ref MockConfigManager.Instance;
 
@@ -115,7 +105,7 @@ namespace CryptoTickerBot.UnitTests
 		}
 
 		[Test]
-		public void ConfigLoadOverwritesDataFromDisk ( )
+		public void ConfigLoadShouldOverwriteDataFromDisk ( )
 		{
 			ref var config = ref MockConfigManager.Instance;
 
@@ -136,7 +126,7 @@ namespace CryptoTickerBot.UnitTests
 		}
 
 		[Test]
-		public void ConfigManagerRespectsSerializerSettings ( )
+		public void ConfigManagerShouldRespectSerializerSettings ( )
 		{
 			var settings = new JsonSerializerSettings
 			{
@@ -157,7 +147,7 @@ namespace CryptoTickerBot.UnitTests
 		}
 
 		[Test]
-		public void ConfigResetOverwritesEverything ( )
+		public void ConfigResetShouldOverwriteEverything ( )
 		{
 			ref var config = ref MockConfigManager.Instance;
 
@@ -175,7 +165,7 @@ namespace CryptoTickerBot.UnitTests
 		}
 
 		[Test]
-		public void ConfigRestoreDefaultsOverwritesOnlyChosenMembers ( )
+		public void ConfigRestoreDefaultsShouldOverwriteOnlyChosenMembers ( )
 		{
 			ref var config = ref MockConfigManager.Instance;
 
@@ -193,7 +183,7 @@ namespace CryptoTickerBot.UnitTests
 		}
 
 		[Test]
-		public void ConfigSaveWritesDataToDisk ( )
+		public void ConfigSaveShouldWriteDataToDisk ( )
 		{
 			var config = MockConfigManager.Instance;
 
@@ -218,7 +208,7 @@ namespace CryptoTickerBot.UnitTests
 
 		[Test]
 		[Order ( 1 )]
-		public void GettingConfigInstanceCreatesCorrectFileOnDisk ( )
+		public void GetConfigInstanceShouldCreateCorrectFileOnDisk ( )
 		{
 			Warn.If ( ConfigManager.InitializedConfigs.Contains ( typeof ( MockConfig ) ) );
 

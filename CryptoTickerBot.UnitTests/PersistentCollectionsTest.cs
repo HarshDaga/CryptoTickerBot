@@ -30,7 +30,7 @@ namespace CryptoTickerBot.UnitTests
 			PersistentDictionary<TKey, TValue>.Build ( DictionaryFileName );
 
 		[Test]
-		public void PersistentCollectionsAreUniquelyIdentifiedByFileName ( )
+		public void PersistentCollectionsShouldBeUniquelyIdentifiedByFileName ( )
 		{
 			using ( var first = MakeList<int> ( ) )
 			using ( var second = MakeList<int> ( ) )
@@ -44,7 +44,7 @@ namespace CryptoTickerBot.UnitTests
 		}
 
 		[Test]
-		public void PersistentListCreatesFileWithCorrectName ( )
+		public void PersistentListShouldCreateFileWithCorrectName ( )
 		{
 			using ( var list = MakeList<int> ( ) )
 			{
@@ -54,7 +54,7 @@ namespace CryptoTickerBot.UnitTests
 		}
 
 		[Test]
-		public void PersistentListPersistsDataInMemory ( )
+		public void PersistentListShouldPersistDataInMemory ( )
 		{
 			using ( var list = MakeList<int> ( ) )
 			{
@@ -67,7 +67,7 @@ namespace CryptoTickerBot.UnitTests
 		}
 
 		[Test]
-		public void PersistentListPersistsDataOnDisk ( )
+		public void PersistentListShouldPersistDataOnDisk ( )
 		{
 			using ( var list = MakeList<int> ( ) )
 			{
@@ -86,7 +86,7 @@ namespace CryptoTickerBot.UnitTests
 		}
 
 		[Test]
-		public void PersistentSetFollowsSetLogic ( )
+		public void PersistentSetShouldFollowSetLogic ( )
 		{
 			using ( var set = MakeSet<int> ( ) )
 			{
