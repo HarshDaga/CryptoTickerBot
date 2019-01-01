@@ -1,3 +1,4 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/8322eb18478140a89e778555c67b4c41)](https://app.codacy.com/app/HarshDaga/CryptoTickerBot?utm_source=github.com&utm_medium=referral&utm_content=HarshDaga/CryptoTickerBot&utm_campaign=Badge_Grade_Dashboard)
 [![Build status](https://ci.appveyor.com/api/projects/status/lme9yn9rx8642i1l/branch/master?svg=true)](https://ci.appveyor.com/project/DevilDaga/cryptotickerbot/branch/master) [![Build Status](https://travis-ci.com/HarshDaga/CryptoTickerBot.svg?branch=master)](https://travis-ci.com/HarshDaga/CryptoTickerBot)
 
 # Crypto Ticker Bot
