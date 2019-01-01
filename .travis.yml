@@ -4,9 +4,12 @@ sudo: required
 dist: xenial
 dotnet: 2.2
 script:
-    - dotnet restore
-    - dotnet build
-    - dotnet test CryptoTickerBot.UnitTests
+- dotnet restore
+- dotnet build
+- dotnet test CryptoTickerBot.UnitTests
 global:
-    - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true
-    - DOTNET_CLI_TELEMETRY_OPTOUT=1
+- DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true
+- DOTNET_CLI_TELEMETRY_OPTOUT=1
+notifications:
+  slack:
+    secure: Nd4AAHKwcxeF7T8ieUYzZ4dWyv9gSYeC4XPc8ajrZEWy7v73L15QSoOjELXgGUpnzXjs8ptTT+k61TADiT6UlV/iE5gY/S2tp1tZwDR3oWMZT7BMBRMNWFUakA8tQc4T9u+35isGC60Kc3Qb3fZt3JsABOmAbacHAt58FK6oGmZecMVzTZj62XrYpG6izornhEX891knNetnGI3tcZnaKaQSBM01WeSkzJOkRT2EypFfiNBzHXiwSuXL7rv6enR9gtJBPWlZyjKLgqs/8BoS0TrTbMZ6E7lWBe0WytMx62/ORo1RMh+smNOPOs8sl6xwmr+TWm1oDGix95x+AQ21tLdXX3paxnixpsRueLRTtN1xe6OqrAHXOsjh550CAedqlGGbdDZIwelZNw8kwaxBqGhUsr3P30BuC130JxFkvQxW7fidINVWtpbuHa30qzfXYNxr0fSS7Fr2VOYMpxrhclejTbxSu3V10oDO7S28/ovgtvWyRfZM9AfsGIDW+g33/GuIml2IrmPfME6tsx0fT+Ct3zNP3wJOvyoMkNLvC2tzwjQj2PaYW8lD+xmOXai7foPckoatRos1dY3VXp/Rbual5sWB/5sGL2jgwnlvo2xEzZP0kzbmRIWA4fejxGPmHdf2cCeFufQyGF7x8J0jiDxCqOTd11n575T/AAoCRv8=
