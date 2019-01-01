@@ -1,4 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/lme9yn9rx8642i1l/branch/master?svg=true)](https://ci.appveyor.com/project/DevilDaga/cryptotickerbot/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/lme9yn9rx8642i1l/branch/master?svg=true)](https://ci.appveyor.com/project/DevilDaga/cryptotickerbot/branch/master) [![Build Status](https://travis-ci.com/HarshDaga/CryptoTickerBot.svg?branch=master)](https://travis-ci.com/HarshDaga/CryptoTickerBot)
 
 # Crypto Ticker Bot
 
@@ -15,40 +15,34 @@ You can also create your own instance by compiling the source and creating the a
 
 ### Prerequisites
 
-- .NET Core 2.2 SDK
-- API Key from [Fixer](https://fixer.io/product). The free one will do
-- [Google Sheets API](https://console.developers.google.com/apis/library/sheets.googleapis.com) if Google Sheets target is desired
-- [Telegram Bot Token](https://telegram.me/botfather) if Telegram target is desired
+  - .NET Core 2.2 SDK
+  - API Key from [Fixer](https://fixer.io/product). The free one will do
+  - [Google Sheets API](https://console.developers.google.com/apis/library/sheets.googleapis.com) if Google Sheets target is desired
+  - [Telegram Bot Token](https://telegram.me/botfather) if Telegram target is desired
 
 ## Supported Exchanges
 
-- [Binance](https://www.binance.com/)
-- [Coinbase](https://www.coinbase.com/)
-- [CoinDelta](https://coindelta.com/)
-- [Koinex](https://koinex.in/)
-- [Kraken](https://www.kraken.com/)
-- [Bitstamp](https://www.bitstamp.net/)
+  - [Binance](https://www.binance.com/)
+  - [Coinbase](https://www.coinbase.com/)
+  - [CoinDelta](https://coindelta.com/)
+  - [Koinex](https://koinex.in/)
+  - [Kraken](https://www.kraken.com/)
+  - [Bitstamp](https://www.bitstamp.net/)
 
 ## Features
 
-- *Price Change Alert*
-
-   A subscription that gets invoked for every **N** percent change in the last traded price of a coin.
-- *[Triangular Arbitrage](https://en.wikipedia.org/wiki/Triangular_arbitrage)*
-
-   For all active exchanges, all possible triangular arbitrage opportunities are discovered and reported as soon as the coin prices get updated.
-- *Console Target*
-
-   If enabled, all incoming coin values are displayed on the console.
-- *[Telegram Bot](https://telegram.org/blog/bot-revolution) Integration*
-
-   Price change alerts and a keyboard menu in [Telegram](https://telegram.org/) that can be accessed in personal as well as group chats.
-   Subscription alerts can be set to silent in preferences.
-   
-   ![Subscription creation](https://media.giphy.com/media/AFggFCTxuV1mNq1ShZ/giphy.gif)
-- *[Google Sheets](https://www.google.com/sheets/about/) Integration*
-
-   Fundamental data of all coins in all active exchanges is sorted and stored into a Google spreadsheet every given interval.
+  - ### Price Change Alert
+      A subscription that gets invoked for every **N** percent change in the last traded price of a coin.
+  - ### [Triangular Arbitrage](https://en.wikipedia.org/wiki/Triangular_arbitrage)
+      For all active exchanges, all possible triangular arbitrage opportunities are discovered and reported as soon as the coin prices get updated.
+  - ### Console Target
+      If enabled, all incoming coin values are displayed on the console.
+  - ### [Telegram Bot](https://telegram.org/blog/bot-revolution) Integration
+      Price change alerts and a keyboard menu in [Telegram](https://telegram.org/) that can be accessed in personal as well as group chats. Subscription alerts can be set to silent in preferences.
+      
+      ![Subscription creation](https://media.giphy.com/media/AFggFCTxuV1mNq1ShZ/giphy.gif)
+  - ### [Google Sheets](https://www.google.com/sheets/about/) Integration
+      Fundamental data of all coins in all active exchanges is sorted and stored into a Google spreadsheet every given interval.
 
 ## Running the tests
 
@@ -106,4 +100,3 @@ See also the list of [contributors](https://github.com/HarshDaga/CryptoTickerBot
 ## License
 
 This project is licensed under the GNU General Public License - see the [LICENSE](LICENSE) file for details.
-
