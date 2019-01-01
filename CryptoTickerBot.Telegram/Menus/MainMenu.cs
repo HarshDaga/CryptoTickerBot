@@ -32,17 +32,17 @@ namespace CryptoTickerBot.Telegram.Menus
 			Handlers["status"]               = StatusHandlerAsync;
 			Handlers["exchange info"]        = ExchangeInfoHandlerAsync;
 			Handlers["manage subscriptions"] = ManageSubscriptionsHandlerAsync;
-			Handlers["exit"]                 = BackHandlerAsync;
+			Handlers["exit"]                 = BackHandler;
 		}
 
-		private async Task<TelegramKeyboardMenuBase> StatusHandlerAsync ( CallbackQuery query )
+		private async Task<ITelegramKeyboardMenu> StatusHandlerAsync ( CallbackQuery query )
 		{
 			await SendTextBlockAsync ( TelegramBot.GetStatusString ( ) ).ConfigureAwait ( false );
 
 			return this;
 		}
 
-		private async Task<TelegramKeyboardMenuBase> ExchangeInfoHandlerAsync ( CallbackQuery query )
+		private async Task<ITelegramKeyboardMenu> ExchangeInfoHandlerAsync ( CallbackQuery query )
 		{
 			var exchangeId = await ReadExchangeIdAsync ( ).ConfigureAwait ( false );
 			if ( exchangeId is null )
@@ -55,7 +55,7 @@ namespace CryptoTickerBot.Telegram.Menus
 			return this;
 		}
 
-		private async Task<TelegramKeyboardMenuBase> ManageSubscriptionsHandlerAsync ( CallbackQuery query ) =>
+		private async Task<ITelegramKeyboardMenu> ManageSubscriptionsHandlerAsync ( CallbackQuery query ) =>
 			new ManageSubscriptionsMenu ( TelegramBot, User, Chat, this );
 	}
 }

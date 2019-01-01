@@ -13,7 +13,7 @@ namespace CryptoTickerBot.Telegram.Menus
 
 		public EditSubscriptionMenu ( TelegramBot telegramBot,
 		                              TelegramPercentChangeSubscription subscription,
-		                              TelegramKeyboardMenuBase parent = null ) :
+		                              ITelegramKeyboardMenu parent = null ) :
 			base ( telegramBot, subscription.User, subscription.Chat, "Edit Subscription", parent: parent )
 		{
 			Subscription = subscription;
@@ -34,10 +34,10 @@ namespace CryptoTickerBot.Telegram.Menus
 			Handlers["add symbols"]         = AddSymbolsHandlerAsync;
 			Handlers["remove symbols"]      = RemoveSymbolsHandlerAsync;
 			Handlers["delete"]              = DeleteHandlerAsync;
-			Handlers["back"]                = BackHandlerAsync;
+			Handlers["back"]                = BackHandler;
 		}
 
-		private async Task<TelegramKeyboardMenuBase> UpdateSubscriptionAsync ( )
+		private async Task<ITelegramKeyboardMenu> UpdateSubscriptionAsync ( )
 		{
 			TelegramBot.Data.AddOrUpdate ( Subscription );
 
@@ -46,14 +46,14 @@ namespace CryptoTickerBot.Telegram.Menus
 			return this;
 		}
 
-		private async Task<TelegramKeyboardMenuBase> ChangeSilenceModeHandlerAsync ( CallbackQuery query )
+		private async Task<ITelegramKeyboardMenu> ChangeSilenceModeHandlerAsync ( CallbackQuery query )
 		{
 			Subscription.IsSilent = await ReadBoolAsync ( "Keep Silent?" ).ConfigureAwait ( false ) ?? false;
 
 			return await UpdateSubscriptionAsync ( ).ConfigureAwait ( false );
 		}
 
-		private async Task<TelegramKeyboardMenuBase> ChangeThresholdHandlerAsync ( CallbackQuery query )
+		private async Task<ITelegramKeyboardMenu> ChangeThresholdHandlerAsync ( CallbackQuery query )
 		{
 			await RequestReplyAsync ( "Enter the threshold%" ).ConfigureAwait ( false );
 
@@ -66,7 +66,7 @@ namespace CryptoTickerBot.Telegram.Menus
 			return await UpdateSubscriptionAsync ( ).ConfigureAwait ( false );
 		}
 
-		private async Task<TelegramKeyboardMenuBase> AddSymbolsHandlerAsync ( CallbackQuery query )
+		private async Task<ITelegramKeyboardMenu> AddSymbolsHandlerAsync ( CallbackQuery query )
 		{
 			var symbols = await ReadSymbolsAsync ( ).ConfigureAwait ( false );
 			Subscription.AddSymbols ( symbols );
@@ -74,7 +74,7 @@ namespace CryptoTickerBot.Telegram.Menus
 			return await UpdateSubscriptionAsync ( ).ConfigureAwait ( false );
 		}
 
-		private async Task<TelegramKeyboardMenuBase> RemoveSymbolsHandlerAsync ( CallbackQuery query )
+		private async Task<ITelegramKeyboardMenu> RemoveSymbolsHandlerAsync ( CallbackQuery query )
 		{
 			var symbols = await ReadSymbolsAsync ( ).ConfigureAwait ( false );
 			Subscription.RemoveSymbols ( symbols );
@@ -82,7 +82,7 @@ namespace CryptoTickerBot.Telegram.Menus
 			return await UpdateSubscriptionAsync ( ).ConfigureAwait ( false );
 		}
 
-		private async Task<TelegramKeyboardMenuBase> DeleteHandlerAsync ( CallbackQuery query )
+		private async Task<ITelegramKeyboardMenu> DeleteHandlerAsync ( CallbackQuery query )
 		{
 			Subscription.Stop ( );
 			TelegramBot.Data.PercentChangeSubscriptions.Remove ( Subscription );

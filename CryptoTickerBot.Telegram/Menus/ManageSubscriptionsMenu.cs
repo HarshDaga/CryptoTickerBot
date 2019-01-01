@@ -14,7 +14,7 @@ namespace CryptoTickerBot.Telegram.Menus
 		public ManageSubscriptionsMenu ( TelegramBot telegramBot,
 		                                 User user,
 		                                 Chat chat,
-		                                 TelegramKeyboardMenuBase parent = null ) :
+		                                 ITelegramKeyboardMenu parent = null ) :
 			base ( telegramBot, user, chat, "Manage Subscriptions", parent: parent )
 		{
 			Labels = new[] {"add subscription", "edit subscription"}
@@ -30,10 +30,10 @@ namespace CryptoTickerBot.Telegram.Menus
 		{
 			Handlers["add subscription"]  = AddSubscriptionHandlerAsync;
 			Handlers["edit subscription"] = EditSubscriptionHandlerAsync;
-			Handlers["back"]              = BackHandlerAsync;
+			Handlers["back"]              = BackHandler;
 		}
 
-		private async Task<TelegramKeyboardMenuBase> AddSubscriptionHandlerAsync ( CallbackQuery query )
+		private async Task<ITelegramKeyboardMenu> AddSubscriptionHandlerAsync ( CallbackQuery query )
 		{
 			var exchangeId = await ReadExchangeIdAsync ( ).ConfigureAwait ( false );
 			if ( exchangeId is null )
@@ -60,7 +60,7 @@ namespace CryptoTickerBot.Telegram.Menus
 			return this;
 		}
 
-		private async Task<TelegramKeyboardMenuBase> EditSubscriptionHandlerAsync ( CallbackQuery query )
+		private async Task<ITelegramKeyboardMenu> EditSubscriptionHandlerAsync ( CallbackQuery query )
 		{
 			var subscriptions = TelegramBot.Data.PercentChangeSubscriptions
 				.Where ( x => x.ChatId.Identifier == Chat.Id && x.User == User )

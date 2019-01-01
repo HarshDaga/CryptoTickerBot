@@ -19,7 +19,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace CryptoTickerBot.Telegram.Menus.Abstractions
 {
-	internal delegate Task<TelegramKeyboardMenuBase> QueryHandlerDelegate ( CallbackQuery query );
+	internal delegate Task<ITelegramKeyboardMenu> QueryHandlerDelegate ( CallbackQuery query );
 
 	internal abstract class TelegramKeyboardMenuBase : ITelegramKeyboardMenu
 	{
@@ -31,7 +31,7 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 		public string Title { get; }
 		public IEnumerable<IEnumerable<string>> Labels { get; protected set; }
 		public InlineKeyboardMarkup Keyboard { get; protected set; }
-		public TelegramKeyboardMenuBase Parent { get; protected set; }
+		public ITelegramKeyboardMenu Parent { get; protected set; }
 
 		protected IBot Ctb => TelegramBot.Ctb;
 		protected TelegramBotClient Client => TelegramBot.Client;
@@ -54,20 +54,20 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 		                                     User user,
 		                                     Chat chat,
 		                                     string title,
-		                                     IEnumerable<IList<string>> labels = null,
-		                                     TelegramKeyboardMenuBase parent = null )
+		                                     IEnumerable<IEnumerable<string>> labels = null,
+		                                     ITelegramKeyboardMenu parent = null )
 		{
 			TelegramBot = telegramBot;
 			User        = user;
 			Chat        = chat;
 			Title       = title;
 			Parent      = parent;
-			Labels      = labels?.ToList ( );
+			Labels      = labels?.Select ( x => x.ToList ( ) ).ToList ( );
 
 			BuildKeyboard ( );
 		}
 
-		public void SetParentMenu ( TelegramKeyboardMenuBase menu )
+		public void SetParentMenu ( ITelegramKeyboardMenu menu )
 		{
 			Parent = menu;
 		}
@@ -97,7 +97,7 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 			}
 		}
 
-		public virtual async Task<TelegramKeyboardMenuBase> HandleQueryAsync ( CallbackQuery query )
+		public virtual async Task<ITelegramKeyboardMenu> HandleQueryAsync ( CallbackQuery query )
 		{
 			if ( query.From != User )
 			{
@@ -123,14 +123,14 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 			try
 			{
 				var menu = await handler ( query ).ConfigureAwait ( false );
-				return await SwitchToAsync ( menu ).ConfigureAwait ( false );
+				return await SwitchToMenuAsync ( menu ).ConfigureAwait ( false );
 			}
 			catch ( Exception e )
 			{
 				Logger.Error ( e );
 			}
 
-			return await SwitchToAsync ( null ).ConfigureAwait ( false );
+			return await SwitchToMenuAsync ( null ).ConfigureAwait ( false );
 		}
 
 		public virtual async Task HandleMessageAsync ( Message message )
@@ -145,11 +145,8 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 
 		protected void AddWideLabel ( string label )
 		{
-			Labels = Enumerable.Append (
-					Labels,
-					new[] {label}
-				)
-				.ToList ( );
+			var labels = new List<List<string>> ( Labels.Select ( x => x.ToList ( ) ) ) {new List<string> {label}};
+			Labels = labels;
 		}
 
 		protected void BuildKeyboard ( )
@@ -157,7 +154,7 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 			Keyboard = Labels?.ToInlineKeyboardMarkup ( );
 		}
 
-		protected async Task<TelegramKeyboardMenuBase> SwitchToAsync ( TelegramKeyboardMenuBase menu )
+		public async Task<ITelegramKeyboardMenu> SwitchToMenuAsync ( ITelegramKeyboardMenu menu )
 		{
 			if ( ReferenceEquals ( menu, this ) && LastId == Id )
 				return this;
@@ -170,9 +167,9 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 			return menu;
 		}
 
-		protected async Task<TelegramKeyboardMenuBase> BackHandlerAsync ( CallbackQuery query ) => Parent;
+		protected QueryHandlerDelegate BackHandler => async query => Parent;
 
-		protected async Task<TelegramKeyboardMenuBase> DummyHandlerAsync ( CallbackQuery query ) => this;
+		protected QueryHandlerDelegate DummyHandler => async query => this;
 
 		#region Send Message
 
@@ -183,24 +180,28 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 			bool disableNotification = true,
 			IReplyMarkup replyMarkup = null
 		) =>
-			LastMessage = await Client.SendTextMessageAsync ( Chat,
-			                                                  text.ToMarkdown ( ), ParseMode.Markdown,
-			                                                  disableWebPagePreview, disableNotification,
-			                                                  replyToMessageId,
-			                                                  replyMarkup,
-			                                                  CancellationToken ).ConfigureAwait ( false );
+			LastMessage = await Client
+				.SendTextMessageAsync ( Chat,
+				                        text.ToMarkdown ( ), ParseMode.Markdown,
+				                        disableWebPagePreview, disableNotification,
+				                        replyToMessageId,
+				                        replyMarkup,
+				                        CancellationToken )
+				.ConfigureAwait ( false );
 
 		protected async Task<Message> RequestReplyAsync (
 			string text,
 			bool disableWebPagePreview = false,
 			bool disableNotification = true
 		) =>
-			LastMessage = await Client.SendTextMessageAsync ( Chat,
-			                                                  text.ToMarkdown ( ), ParseMode.Markdown,
-			                                                  disableWebPagePreview, disableNotification,
-			                                                  0,
-			                                                  new ForceReplyMarkup ( ),
-			                                                  CancellationToken ).ConfigureAwait ( false );
+			LastMessage = await Client
+				.SendTextMessageAsync ( Chat,
+				                        text.ToMarkdown ( ), ParseMode.Markdown,
+				                        disableWebPagePreview, disableNotification,
+				                        0,
+				                        new ForceReplyMarkup ( ),
+				                        CancellationToken )
+				.ConfigureAwait ( false );
 
 		protected async Task<Message> SendOptionsAsync<T> ( string text,
 		                                                    IEnumerable<T> options,

@@ -15,7 +15,7 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 		int LastId { get; }
 		Message LastMessage { get; }
 		Message MenuMessage { get; }
-		TelegramKeyboardMenuBase Parent { get; }
+		ITelegramKeyboardMenu Parent { get; }
 		TelegramBot TelegramBot { get; }
 		string Title { get; }
 		User User { get; }
@@ -25,8 +25,9 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 
 		Task DeleteMenuAsync ( );
 		Task<Message> DisplayAsync ( );
+		Task<ITelegramKeyboardMenu> SwitchToMenuAsync ( ITelegramKeyboardMenu menu );
 		Task HandleMessageAsync ( Message message );
-		Task<TelegramKeyboardMenuBase> HandleQueryAsync ( CallbackQuery query );
-		void SetParentMenu ( TelegramKeyboardMenuBase menu );
+		Task<ITelegramKeyboardMenu> HandleQueryAsync ( CallbackQuery query );
+		void SetParentMenu ( ITelegramKeyboardMenu menu );
 	}
 }
