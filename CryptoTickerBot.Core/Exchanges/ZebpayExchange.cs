@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
@@ -10,12 +11,15 @@ namespace CryptoTickerBot.Core.Exchanges
 {
 	public class ZebpayExchange : CryptoExchangeBase<ZebpayExchange.TickerDatum>
 	{
-		public static readonly string[] Symbols =
-		{
-			"BTC", "TUSD", "ETH", "BCH", "LTC", "XRP", "EOS", "OMG",
-			"TRX", "GNT", "ZRX", "REP", "KNC", "BAT", "AE", "ZIL",
-			"CMT", "NCASH", "BTG"
-		};
+		public static readonly ImmutableList<string> Symbols =
+			ImmutableList<string>.Empty.AddRange (
+				new[]
+				{
+					"BTC", "TUSD", "ETH", "BCH", "LTC", "XRP", "EOS", "OMG",
+					"TRX", "GNT", "ZRX", "REP", "KNC", "BAT", "AE", "ZIL",
+					"CMT", "NCASH", "BTG"
+				}
+			);
 
 		public ZebpayExchange ( ) : base ( CryptoExchangeId.Zebpay )
 		{

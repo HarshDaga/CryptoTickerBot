@@ -34,15 +34,15 @@ namespace CryptoTickerBot.UnitTests.ArbitrageTests
 				ConnectNodes ( nodeMap[from], nodeMap[to], cost );
 		}
 
-		public static Cycle GetCycle ( Dictionary<string, Node> nodeMap,
-		                               params string[] symbols )
+		public static Cycle<Node> GetCycle ( Dictionary<string, Node> nodeMap,
+		                                     params string[] symbols )
 		{
 			var nodes = new List<Node> ( symbols.Length );
 			foreach ( var symbol in symbols )
 				if ( nodeMap.TryGetValue ( symbol, out var node ) )
 					nodes.Add ( node );
 
-			return new Cycle ( nodes );
+			return new Cycle<Node> ( nodes );
 		}
 
 		[Test]

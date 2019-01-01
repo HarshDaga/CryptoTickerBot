@@ -34,8 +34,7 @@ namespace CryptoTickerBot.Core.Exchanges
 					.GetJsonAsync<TickerDatum> ( ct )
 					.ConfigureAwait ( false );
 
-				var symbol = asset.Name.Replace ( "/", "" );
-				symbol = CleanAndExtractSymbol ( symbol );
+				var symbol = CleanAndExtractSymbol ( asset.Name.Replace ( "/", "" ) );
 				ExchangeData[symbol] =
 					new CryptoCoin ( symbol, datum.Bid, datum.Ask, datum.Last, datum.Timestamp );
 				Markets.AddOrUpdate ( ExchangeData[symbol] );

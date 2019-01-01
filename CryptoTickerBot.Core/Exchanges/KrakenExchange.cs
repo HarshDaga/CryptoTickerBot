@@ -16,8 +16,8 @@ namespace CryptoTickerBot.Core.Exchanges
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
 		public KrakenAssetPairs Assets { get; private set; }
-		public readonly string TradableAssetPairsEndpoint;
-		public readonly string TickerEndpoint;
+		public string TradableAssetPairsEndpoint { get; }
+		public string TickerEndpoint { get; }
 
 		protected readonly Policy RetryPolicy;
 

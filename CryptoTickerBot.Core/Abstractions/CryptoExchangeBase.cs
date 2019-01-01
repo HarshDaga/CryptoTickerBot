@@ -185,6 +185,12 @@ namespace CryptoTickerBot.Core.Abstractions
 			return formatter.FormatObjects ( objects );
 		}
 
+		public void Dispose ( )
+		{
+			Dispose ( true );
+			GC.SuppressFinalize ( this );
+		}
+
 		protected decimal GetAdjustedSellPrice ( CryptoCoin coin ) =>
 			coin.SellPrice * ( 1m - SellFees / 100m );
 
@@ -209,11 +215,11 @@ namespace CryptoTickerBot.Core.Abstractions
 		protected virtual string CleanAndExtractSymbol ( string symbol )
 		{
 			symbol = Regex.Replace ( symbol, @"[\\\/-]", "" );
-			symbol = SymbolMappings.Aggregate ( symbol, ( current,
-			                                              mapping ) =>
-				                                    current.Replace ( mapping.Key, mapping.Value ) );
+			var cleaned = SymbolMappings.Aggregate ( symbol, ( current,
+			                                                   mapping ) =>
+				                                         current.Replace ( mapping.Key, mapping.Value ) );
 
-			return symbol;
+			return cleaned;
 		}
 
 		protected virtual void Update ( T data,
@@ -254,5 +260,10 @@ namespace CryptoTickerBot.Core.Abstractions
 
 		public override string ToString ( ) =>
 			$"{Name,-12} {UpTime:hh\\:mm\\:ss} {LastUpdateDuration:hh\\:mm\\:ss} {LastChangeDuration:hh\\:mm\\:ss}";
+
+		protected virtual void Dispose ( bool disposing )
+		{
+			if ( disposing ) cts?.Dispose ( );
+		}
 	}
 }

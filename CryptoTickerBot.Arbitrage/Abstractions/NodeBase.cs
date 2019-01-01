@@ -97,14 +97,6 @@ namespace CryptoTickerBot.Arbitrage.Abstractions
 		public override int GetHashCode ( ) =>
 			Symbol != null ? Symbol.GetHashCode ( ) : 0;
 
-		public static bool operator == ( NodeBase left,
-		                                 NodeBase right ) =>
-			Equals ( left, right );
-
-		public static bool operator != ( NodeBase left,
-		                                 NodeBase right ) =>
-			!Equals ( left, right );
-
 		public override string ToString ( ) =>
 			$"{Symbol,-6} {EdgeTableImpl.Count}";
 

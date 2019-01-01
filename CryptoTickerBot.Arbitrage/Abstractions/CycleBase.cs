@@ -53,22 +53,6 @@ namespace CryptoTickerBot.Arbitrage.Abstractions
 				                  node ) => current ^ node.GetHashCode ( ) );
 		}
 
-		public static bool operator == ( CycleBase<TNode> left,
-		                                 ICycle<TNode> right ) =>
-			Equals ( left, right );
-
-		public static bool operator != ( CycleBase<TNode> left,
-		                                 ICycle<TNode> right ) =>
-			!Equals ( left, right );
-
-		public static bool operator == ( ICycle<TNode> left,
-		                                 CycleBase<TNode> right ) =>
-			Equals ( left, right );
-
-		public static bool operator != ( ICycle<TNode> left,
-		                                 CycleBase<TNode> right ) =>
-			!Equals ( left, right );
-
 		#endregion
 	}
 }

@@ -59,8 +59,8 @@ namespace CryptoTickerBot.Data.Configs
 		public static void ClearLastError ( ) =>
 			LastError = null;
 
-		public static bool Validate ( out IList<Exception> exceptions ) =>
-			instance.Validate ( out exceptions );
+		public static bool TryValidate ( out IList<Exception> exceptions ) =>
+			instance.TryValidate ( out exceptions );
 
 		public static void Save ( )
 		{

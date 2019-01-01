@@ -286,6 +286,7 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 		{
 			while ( messages.TryDequeue ( out _ ) )
 			{
+				// Just clearing the queue
 			}
 		}
 

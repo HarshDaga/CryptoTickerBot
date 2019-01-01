@@ -20,13 +20,14 @@ namespace CryptoTickerBot.Data.Converters
 					.FromUnixTimeSeconds ( l )
 					.UtcDateTime;
 
-			throw new Exception ( "Cannot un-marshall type long" );
+			throw new ArgumentException ( "Cannot un-marshall type long" );
 		}
 
 		public override void WriteJson ( JsonWriter writer,
 		                                 object untypedValue,
 		                                 JsonSerializer serializer )
 		{
+			// Not implemented
 		}
 	}
 }

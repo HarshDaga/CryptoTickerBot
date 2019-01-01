@@ -15,7 +15,7 @@ namespace CryptoTickerBot.Runner
 		public bool EnableGoogleSheetsService { get; set; } = true;
 		public bool EnableTelegramService { get; set; } = true;
 
-		public bool Validate ( out IList<Exception> exceptions )
+		public bool TryValidate ( out IList<Exception> exceptions )
 		{
 			exceptions = new List<Exception> ( );
 			return true;

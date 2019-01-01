@@ -20,7 +20,7 @@ namespace CryptoTickerBot.Runner
 
 		private static bool HasExceptions<TConfig> ( ) where TConfig : IConfig<TConfig>, new ( )
 		{
-			if ( ConfigManager<TConfig>.Validate ( out var exceptions ) )
+			if ( ConfigManager<TConfig>.TryValidate ( out var exceptions ) )
 				return false;
 
 			foreach ( var exception in exceptions )

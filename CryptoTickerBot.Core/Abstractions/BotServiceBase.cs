@@ -71,11 +71,5 @@ namespace CryptoTickerBot.Core.Abstractions
 		}
 
 		public override int GetHashCode ( ) => Guid.GetHashCode ( );
-
-		public static bool operator == ( BotServiceBase left,
-		                                 BotServiceBase right ) => Equals ( left, right );
-
-		public static bool operator != ( BotServiceBase left,
-		                                 BotServiceBase right ) => !Equals ( left, right );
 	}
 }

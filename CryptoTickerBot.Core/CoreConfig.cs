@@ -120,7 +120,7 @@ namespace CryptoTickerBot.Core
 			}
 		};
 
-		public bool Validate ( out IList<Exception> exceptions )
+		public bool TryValidate ( out IList<Exception> exceptions )
 		{
 			exceptions = new List<Exception> ( );
 

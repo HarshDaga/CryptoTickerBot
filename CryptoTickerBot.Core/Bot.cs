@@ -177,8 +177,6 @@ namespace CryptoTickerBot.Core
 				exchange.Next    += OnNextAsync;
 				exchange.Changed += OnChangedAsync;
 
-				//CompareTable.AddExchange ( exchange );
-
 				exchange.StartReceivingAsync ( Cts?.Token );
 			}
 

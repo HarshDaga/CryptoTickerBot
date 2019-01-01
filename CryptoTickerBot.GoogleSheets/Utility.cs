@@ -15,7 +15,6 @@ namespace CryptoTickerBot.GoogleSheets
 	internal static class Utility
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
-		public static readonly string[] Scopes = {SheetsService.Scope.Spreadsheets};
 
 		public static UserCredential GetCredentials ( string clientSecretPath,
 		                                              string credentialsPath )
@@ -23,15 +22,15 @@ namespace CryptoTickerBot.GoogleSheets
 			using ( var stream =
 				new FileStream ( clientSecretPath, FileMode.Open, FileAccess.Read ) )
 			{
-				credentialsPath = Path.GetFullPath ( credentialsPath );
+				var fullPath = Path.GetFullPath ( credentialsPath );
 
 				var credential = GoogleWebAuthorizationBroker.AuthorizeAsync (
 					GoogleClientSecrets.Load ( stream ).Secrets,
-					Scopes,
+					new[] {SheetsService.Scope.Spreadsheets},
 					"user",
 					CancellationToken.None,
-					new FileDataStore ( Path.GetFullPath ( credentialsPath ), true ) ).Result;
-				Logger.Info ( "Credential file saved to: " + credentialsPath );
+					new FileDataStore ( fullPath, true ) ).Result;
+				Logger.Info ( "Credential file saved to: " + fullPath );
 
 				return credential;
 			}

@@ -13,7 +13,7 @@ namespace CryptoTickerBot.Core.Interfaces
 	public delegate Task OnUpdateDelegate ( ICryptoExchange exchange,
 	                                        CryptoCoin coin );
 
-	public interface ICryptoExchange : IObservable<CryptoCoin>
+	public interface ICryptoExchange : IObservable<CryptoCoin>, IDisposable
 	{
 		CryptoExchangeId Id { get; }
 		string Name { get; }

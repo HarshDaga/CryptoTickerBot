@@ -62,7 +62,7 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 			SerializerSettings = serializerSettings;
 			FlushInterval      = flushInterval;
 
-			OpenCollections.Data[fileName] = this;
+			OpenCollections.Add ( this );
 
 			if ( !Load ( ) )
 			{
@@ -157,18 +157,14 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 		public void Dispose ( )
 		{
 			ForceSave ( );
-			OpenCollections.Data.TryRemove ( FileName, out _ );
+			OpenCollections.Remove ( FileName );
 			disposable?.Dispose ( );
 		}
-
-		protected static bool TryOpenCollection ( string fileName,
-		                                          out IPersistentCollection collection ) =>
-			OpenCollections.Data.TryGetValue ( fileName, out collection );
 
 		protected static TType GetOpenCollection<TType> ( string fileName )
 			where TType : PersistentCollection<T, TCollection>
 		{
-			if ( TryOpenCollection ( fileName, out var collection ) )
+			if ( OpenCollections.TryOpen ( fileName, out var collection ) )
 			{
 				if ( collection is TType result )
 					return result;

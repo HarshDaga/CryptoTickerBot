@@ -233,7 +233,7 @@ namespace CryptoTickerBot.Telegram
 		private async Task HandleSubscribeCommandAsync ( Message message )
 		{
 			var from = message.From;
-			message.ExtractCommand ( Self, out var command, out var parameters );
+			var (command, parameters) = message.ExtractCommand ( Self );
 
 			if ( parameters.Count < 3 )
 			{
@@ -373,7 +373,7 @@ namespace CryptoTickerBot.Telegram
 				if ( message is null || message.Type != MessageType.Text )
 					return;
 
-				message.ExtractCommand ( Self, out var command, out var parameters );
+				var (command, parameters) = message.ExtractCommand ( Self );
 				Logger.Debug ( $"Received from {message.From} : {command} {parameters.Join ( ", " )}" );
 
 				if ( !Data.Users.Contains ( message.From ) )

@@ -68,9 +68,9 @@ namespace CryptoTickerBot.UnitTests.ArbitrageTests
 
 			Assert.AreEqual ( nodeA, nodeA );
 			Assert.AreNotEqual ( nodeA, nodeB );
-			Assert.True ( nodeA == nodeDupA );
-			Assert.False ( nodeA == nodeB );
-			Assert.True ( nodeB != nodeDupA );
+			Assert.AreEqual ( nodeA, nodeDupA );
+			Assert.AreNotEqual ( nodeA, nodeB );
+			Assert.AreNotEqual ( nodeB, nodeDupA );
 			Assert.AreEqual ( nodeA.GetHashCode ( ), nodeDupA.GetHashCode ( ) );
 			Assert.AreEqual ( nodeA, nodeDupA );
 			Assert.AreNotSame ( nodeA, nodeDupA );

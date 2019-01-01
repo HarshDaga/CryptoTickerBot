@@ -76,15 +76,8 @@ namespace CryptoTickerBot.Data.Domain
 			return obj.GetType ( ) == GetType ( ) && Equals ( (CryptoCoin) obj );
 		}
 
-		// ReSharper disable once NonReadonlyMemberInGetHashCode
-		public override int GetHashCode ( )
-		{
-			unchecked
-			{
-				return ( ( Symbol?.CaseInsensitiveHashCode ( ) ?? 0 ) * 397 ) ^
-				       Time.GetHashCode ( );
-			}
-		}
+		public override int GetHashCode ( ) =>
+			Symbol?.CaseInsensitiveHashCode ( ) ?? 0;
 
 		public static bool operator == ( CryptoCoin left,
 		                                 CryptoCoin right ) => Equals ( left, right );

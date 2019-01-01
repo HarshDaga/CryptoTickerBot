@@ -41,7 +41,7 @@ namespace CryptoTickerBot.UnitTests
 			public List<string> ListWithDefaultValues { get; set; } = new List<string> {"One", "Two", "Three"};
 			public int SomeSecretKey { get; set; }
 
-			public bool Validate ( out IList<Exception> exceptions )
+			public bool TryValidate ( out IList<Exception> exceptions )
 			{
 				exceptions = new List<Exception> ( );
 
@@ -74,16 +74,6 @@ namespace CryptoTickerBot.UnitTests
 				Assert.IsInstanceOf<IOException> ( MockConfigManager.LastError );
 				MockConfigManager.ClearLastError ( );
 			}
-		}
-
-		[Test]
-		public void ConfigShouldHaveDefaultValuesOnCreation ( )
-		{
-			var config = MockConfigManager.Instance;
-			Assert.AreEqual ( config.IntValueWithDefault, 42 );
-			Assert.AreEqual ( config.StringValueWithDefault, "Foo" );
-			Assert.True ( config.ListWithDefaultValues.SequenceEqual ( new[] {"One", "Two", "Three"} ) );
-			Assert.AreEqual ( config.SomeSecretKey, default ( int ) );
 		}
 
 		[Test]
@@ -195,11 +185,21 @@ namespace CryptoTickerBot.UnitTests
 		}
 
 		[Test]
+		public void ConfigShouldHaveDefaultValuesOnCreation ( )
+		{
+			var config = MockConfigManager.Instance;
+			Assert.AreEqual ( config.IntValueWithDefault, 42 );
+			Assert.AreEqual ( config.StringValueWithDefault, "Foo" );
+			Assert.True ( config.ListWithDefaultValues.SequenceEqual ( new[] {"One", "Two", "Three"} ) );
+			Assert.AreEqual ( config.SomeSecretKey, default ( int ) );
+		}
+
+		[Test]
 		public void ConfigValidateTest ( )
 		{
 			var config = MockConfigManager.Instance;
 			Assert.AreEqual ( config.SomeSecretKey, 0 );
-			Assert.False ( config.Validate ( out var exceptions ) );
+			Assert.False ( config.TryValidate ( out var exceptions ) );
 			Assert.AreEqual ( exceptions.Count, 1 );
 			var ae = exceptions[0] as ArgumentException;
 			Assert.NotNull ( ae );

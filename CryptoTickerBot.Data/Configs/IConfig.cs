@@ -12,7 +12,7 @@ namespace CryptoTickerBot.Data.Configs
 		[JsonIgnore]
 		string ConfigFolderName { get; }
 
-		bool Validate ( out IList<Exception> exceptions );
+		bool TryValidate ( out IList<Exception> exceptions );
 
 		TConfig RestoreDefaults ( );
 	}

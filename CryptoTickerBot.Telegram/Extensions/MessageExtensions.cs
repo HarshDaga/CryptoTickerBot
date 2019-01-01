@@ -7,22 +7,22 @@ namespace CryptoTickerBot.Telegram.Extensions
 {
 	public static class MessageExtensions
 	{
-		public static void ExtractCommand ( this Message message,
-		                                    User self,
-		                                    out string command,
-		                                    out List<string> @params )
+		public static (string command, List<string> @params ) ExtractCommand ( this Message message,
+		                                                                       User self )
 		{
 			var text = message.Text;
-			command = text.Split ( ' ' ).First ( );
+			var command = text.Split ( ' ' ).First ( );
 
 			var index = command.IndexOf ( $"@{self.Username}", StringComparison.OrdinalIgnoreCase );
 			if ( index != -1 )
 				command = command.Substring ( 0, index );
 
-			@params = text
+			var @params = text
 				.Split ( new[] {' '}, StringSplitOptions.RemoveEmptyEntries )
 				.Skip ( 1 )
 				.ToList ( );
+
+			return ( command, @params );
 		}
 	}
 }
