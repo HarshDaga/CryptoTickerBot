@@ -24,4 +24,10 @@
     <ProjectReference Include="..\NLog.Targets.Sentry\NLog.Targets.Sentry.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="C:\Users\harsh\.nuget\packages\nlog.config\4.5.11\contentFiles\any\any\NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
