@@ -1,4 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/lme9yn9rx8642i1l/branch/master?svg=true)](https://ci.appveyor.com/project/DevilDaga/cryptotickerbot/branch/master) [![Build Status](https://travis-ci.com/HarshDaga/CryptoTickerBot.svg?branch=master)](https://travis-ci.com/HarshDaga/CryptoTickerBot)
+[![Build status](https://ci.appveyor.com/api/projects/status/lme9yn9rx8642i1l/branch/master?svg=true)](https://ci.appveyor.com/project/DevilDaga/cryptotickerbot/branch/master) [![Build Status](https://travis-ci.com/HarshDaga/CryptoTickerBot.svg?branch=master)](https://travis-ci.com/HarshDaga/CryptoTickerBot) [![CodeFactor](https://www.codefactor.io/repository/github/harshdaga/cryptotickerbot/badge/master)](https://www.codefactor.io/repository/github/harshdaga/cryptotickerbot/overview/master)
 
 # Crypto Ticker Bot
 
@@ -92,8 +92,8 @@ Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for details on our code of 
 
 ## Authors
 
-* **Harsh Daga** - *Initial work*
-* **Daniel Dudziński** - *Helping with deployment and CI*
+  - **Harsh Daga** - *Initial work*
+  - **Daniel Dudziński** - *Helping with deployment and CI*
 
 See also the list of [contributors](https://github.com/HarshDaga/CryptoTickerBot/graphs/contributors) who participated in this project.
 

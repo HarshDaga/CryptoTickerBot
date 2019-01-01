@@ -4,7 +4,7 @@ namespace CryptoTickerBot.Collections.Persistent.Base
 {
 	internal static class OpenCollections
 	{
-		public static ImmutableDictionary<string, IPersistentCollection> Data =
+		public static ImmutableDictionary<string, IPersistentCollection> Data { get; private set; } =
 			ImmutableDictionary<string, IPersistentCollection>.Empty;
 
 		public static bool Add ( IPersistentCollection collection )
