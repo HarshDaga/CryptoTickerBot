@@ -75,6 +75,9 @@ The tests can be run using [NUnit](https://www.nuget.org/packages/NUnit/).
       "SheetId": int, // spreadsheet number defaults to 0
       "ApplicationName": "<your application name from Google>"
       ```
+      Create folder **GoogleApi** and paste the **client_secret.json** file you got from [Google](https://developers.google.com/sheets/api/quickstart/dotnet) in it and name it **ClientSecret.json**.
+      On first run, a browser window will be launched and your *OAuth* token will be stored in the **GoogleApi** folder.
+      This is known to fail on Linux since the browser does not open. There is not workaround for this other than running the bot from Windows once and copying the **GoogleApi** folder over to Linux.
 
    4. If Telegram service was enabled, open **Configs\TelegramBot.json** and add this entry
 
