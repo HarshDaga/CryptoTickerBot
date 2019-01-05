@@ -72,15 +72,26 @@ namespace CryptoTickerBot.Core
 				var symbol = coin.Symbol.ReplaceLastOccurrence ( baseSymbol, "" );
 				this[baseSymbol, symbol] = coin;
 
-				Graph.UpsertEdge ( symbol, baseSymbol,
-				                   GetAdjustedSellPrice ( coin ) );
-				Graph.UpsertEdge ( baseSymbol, symbol,
-				                   1m / GetAdjustedBuyPrice ( coin ) );
+				UpdateGraph ( coin, symbol, baseSymbol );
 
 				return true;
 			}
 
 			return false;
+		}
+
+		private void UpdateGraph ( CryptoCoin coin,
+		                           string symbol,
+		                           string baseSymbol )
+		{
+			var price = GetAdjustedSellPrice ( coin );
+			if ( price != 0m )
+				Graph.UpsertEdge ( symbol, baseSymbol,
+				                   price );
+			price = GetAdjustedBuyPrice ( coin );
+			if ( price != 0 )
+				Graph.UpsertEdge ( baseSymbol, symbol,
+				                   1m / price );
 		}
 	}
 }

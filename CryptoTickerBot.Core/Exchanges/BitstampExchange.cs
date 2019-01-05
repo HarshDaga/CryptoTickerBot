@@ -26,8 +26,12 @@ namespace CryptoTickerBot.Core.Exchanges
 		{
 		}
 
-		private async Task FetchInitialDataAsync ( CancellationToken ct )
+		protected override async Task FetchInitialDataAsync ( CancellationToken ct )
 		{
+			Assets = await TradingPairsEndpoint
+				.GetJsonAsync<List<BitstampAsset>> ( ct )
+				.ConfigureAwait ( false );
+
 			foreach ( var asset in Assets )
 			{
 				var datum = await $"{TickerEndpoint}{asset.UrlSymbol}/"
@@ -50,11 +54,6 @@ namespace CryptoTickerBot.Core.Exchanges
 		protected override async Task GetExchangeDataAsync ( CancellationToken ct )
 		{
 			var closed = false;
-			Assets = await TradingPairsEndpoint
-				.GetJsonAsync<List<BitstampAsset>> ( ct )
-				.ConfigureAwait ( false );
-
-			await FetchInitialDataAsync ( ct ).ConfigureAwait ( false );
 
 			Client = new PurePusherClient ( TickerUrl, new PurePusherClientOptions
 			{

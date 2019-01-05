@@ -130,6 +130,7 @@ namespace CryptoTickerBot.Core.Abstractions
 				Logger.Debug ( $"Starting {Name,-12} receiver." );
 
 				ExchangeData = new ConcurrentDictionary<string, CryptoCoin> ( );
+				await FetchInitialDataAsync ( c ).ConfigureAwait ( false );
 				await GetExchangeDataAsync ( c ).ConfigureAwait ( false );
 
 				IsStarted = false;
@@ -209,6 +210,9 @@ namespace CryptoTickerBot.Core.Abstractions
 				? ( coin, GetAdjustedSellPrice ( coin ) )
 				: ( coin, 1m / GetAdjustedBuyPrice ( coin ) );
 		}
+
+		protected virtual Task FetchInitialDataAsync ( CancellationToken ct ) =>
+			Task.CompletedTask;
 
 		protected abstract Task GetExchangeDataAsync ( CancellationToken ct );
 

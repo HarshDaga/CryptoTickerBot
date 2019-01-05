@@ -5,19 +5,40 @@ using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Abstractions;
 using CryptoTickerBot.Data.Domain;
+using Flurl.Http;
 using Newtonsoft.Json;
 using NLog;
 using PureWebSockets;
 
 namespace CryptoTickerBot.Core.Exchanges
 {
-	public class BinanceExchange : CryptoExchangeBase<BinanceExchange.BinanceTickerDatum>
+	public class BinanceExchange : CryptoExchangeBase<BinanceExchange.ITickerDatum>
 	{
+		public const string RestBaseEndpoint = "https://api.binance.com";
+		public const string RestTickerEndpoint = "/api/v1/ticker/24hr";
+
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
 		public BinanceExchange ( ) : base ( CryptoExchangeId.Binance )
 		{
 			TickerUrl = $"{TickerUrl}@{PollingRate.TotalMilliseconds}ms";
+		}
+
+		protected override async Task FetchInitialDataAsync ( CancellationToken ct )
+		{
+			try
+			{
+				var data = await $"{RestBaseEndpoint}{RestTickerEndpoint}"
+					.GetJsonAsync<List<RestTickerDatum>> ( ct )
+					.ConfigureAwait ( false );
+
+				foreach ( var datum in data )
+					Update ( datum, datum.Symbol );
+			}
+			catch ( Exception e )
+			{
+				Logger.Error ( e );
+			}
 		}
 
 		protected override async Task GetExchangeDataAsync ( CancellationToken ct )
@@ -61,7 +82,7 @@ namespace CryptoTickerBot.Core.Exchanges
 			}
 		}
 
-		protected override void DeserializeData ( BinanceTickerDatum datum,
+		protected override void DeserializeData ( ITickerDatum datum,
 		                                          string id )
 		{
 			ExchangeData[id].LowestAsk  = datum.BestAskPrice;
@@ -73,7 +94,7 @@ namespace CryptoTickerBot.Core.Exchanges
 		{
 			try
 			{
-				var data = JsonConvert.DeserializeObject<List<BinanceTickerDatum>> ( json );
+				var data = JsonConvert.DeserializeObject<List<WebsocketTickerDatum>> ( json );
 
 				foreach ( var datum in data )
 					Update ( datum, datum.Symbol );
@@ -84,7 +105,75 @@ namespace CryptoTickerBot.Core.Exchanges
 			}
 		}
 
-		public class BinanceTickerDatum
+		public interface ITickerDatum
+		{
+			string Symbol { get; set; }
+			decimal Close { get; set; }
+			decimal BestBidPrice { get; set; }
+			decimal BestAskPrice { get; set; }
+		}
+
+		public class RestTickerDatum : ITickerDatum
+		{
+			[JsonProperty ( "symbol" )]
+			public string Symbol { get; set; }
+
+			[JsonProperty ( "priceChange" )]
+			public decimal PriceChange { get; set; }
+
+			[JsonProperty ( "priceChangePercent" )]
+			public decimal PriceChangePercent { get; set; }
+
+			[JsonProperty ( "weightedAvgPrice" )]
+			public decimal WeightedAvgPrice { get; set; }
+
+			[JsonProperty ( "prevClosePrice" )]
+			public decimal PrevClosePrice { get; set; }
+
+			[JsonProperty ( "lastPrice" )]
+			public decimal Close { get; set; }
+
+			[JsonProperty ( "lastQty" )]
+			public decimal LastQty { get; set; }
+
+			[JsonProperty ( "bidPrice" )]
+			public decimal BestBidPrice { get; set; }
+
+			[JsonProperty ( "askPrice" )]
+			public decimal BestAskPrice { get; set; }
+
+			[JsonProperty ( "openPrice" )]
+			public decimal OpenPrice { get; set; }
+
+			[JsonProperty ( "highPrice" )]
+			public decimal HighPrice { get; set; }
+
+			[JsonProperty ( "lowPrice" )]
+			public decimal LowPrice { get; set; }
+
+			[JsonProperty ( "volume" )]
+			public decimal Volume { get; set; }
+
+			[JsonProperty ( "quoteVolume" )]
+			public decimal QuoteVolume { get; set; }
+
+			[JsonProperty ( "openTime" )]
+			public long OpenTime { get; set; }
+
+			[JsonProperty ( "closeTime" )]
+			public long CloseTime { get; set; }
+
+			[JsonProperty ( "firstId" )]
+			public long FirstId { get; set; }
+
+			[JsonProperty ( "lastId" )]
+			public long LastId { get; set; }
+
+			[JsonProperty ( "count" )]
+			public long Count { get; set; }
+		}
+
+		public class WebsocketTickerDatum : ITickerDatum
 		{
 			[JsonProperty ( "e" )]
 			public string EventType { get; set; }

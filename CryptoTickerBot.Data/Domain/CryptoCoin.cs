@@ -57,7 +57,7 @@ namespace CryptoTickerBot.Data.Domain
 
 		[Pure]
 		public override string ToString ( ) =>
-			$"{Symbol,-9}: Highest Bid = {HighestBid,-10:N} Lowest Ask = {LowestAsk,-10:N}";
+			$"{Symbol,-12}: Highest Bid = {HighestBid,-10:N} Lowest Ask = {LowestAsk,-10:N}";
 
 		#region Equality Members
 
