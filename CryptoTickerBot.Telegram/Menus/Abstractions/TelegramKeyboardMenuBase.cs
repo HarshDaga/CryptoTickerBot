@@ -76,7 +76,7 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 		                       StringComparison comparison = StringComparison.OrdinalIgnoreCase ) =>
 			Labels.Any ( x => x.Any ( y => y.Equals ( label, comparison ) ) );
 
-		public async Task<Message> DisplayAsync ( )
+		public virtual async Task<Message> DisplayAsync ( )
 		{
 			var title = Chat.Type == ChatType.Private ? Title : $"{User}:\n{Title}";
 
@@ -154,7 +154,7 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 			Keyboard = Labels?.ToInlineKeyboardMarkup ( );
 		}
 
-		public async Task<ITelegramKeyboardMenu> SwitchToMenuAsync ( ITelegramKeyboardMenu menu )
+		public virtual async Task<ITelegramKeyboardMenu> SwitchToMenuAsync ( ITelegramKeyboardMenu menu )
 		{
 			if ( ReferenceEquals ( menu, this ) && LastId == Id )
 				return this;
@@ -186,6 +186,20 @@ namespace CryptoTickerBot.Telegram.Menus.Abstractions
 				                        disableWebPagePreview, disableNotification,
 				                        replyToMessageId,
 				                        replyMarkup,
+				                        CancellationToken )
+				.ConfigureAwait ( false );
+
+		protected async Task<Message> EditTextBlockAsync (
+			string text,
+			bool disableWebPagePreview = false,
+			InlineKeyboardMarkup markup = null
+		) =>
+			LastMessage = await Client
+				.EditMessageTextAsync ( Chat.Id,
+				                        Parent.Id,
+				                        text.ToMarkdown ( ), ParseMode.Markdown,
+				                        disableWebPagePreview,
+				                        markup,
 				                        CancellationToken )
 				.ConfigureAwait ( false );
 
