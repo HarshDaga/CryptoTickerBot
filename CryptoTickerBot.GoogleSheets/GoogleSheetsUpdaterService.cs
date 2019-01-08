@@ -12,6 +12,7 @@ using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using JetBrains.Annotations;
 using NLog;
+using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum;
 
 namespace CryptoTickerBot.GoogleSheets
 {
@@ -103,34 +104,34 @@ namespace CryptoTickerBot.GoogleSheets
 				previousCount = valueRange.Values.Count;
 
 				var request = Service.Spreadsheets.Values.Update ( valueRange, Config.SpreadSheetId, valueRange.Range );
-				request.ValueInputOption =
-					SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+				request.ValueInputOption = USERENTERED;
 
 				await request.ExecuteAsync ( Bot.Cts.Token ).ConfigureAwait ( false );
 
 				Update?.Invoke ( this );
 			}
-			catch ( TaskCanceledException tce )
-			{
-				if ( !Bot.Cts.IsCancellationRequested )
-					Logger.Warn ( tce );
-			}
-			catch ( OperationCanceledException oce )
-			{
-				if ( !Bot.Cts.IsCancellationRequested )
-					Logger.Warn ( oce );
-			}
 			catch ( Exception e )
 			{
-				if ( e is GoogleApiException gae && gae.Error?.Code == 429 )
-				{
-					Logger.Warn ( gae, "Too many Google Api requests. Cooling down." );
-					await Task.Delay ( Config.CooldownPeriod, Bot.Cts.Token ).ConfigureAwait ( false );
-				}
-				else
-				{
-					Logger.Error ( e );
-				}
+				await HandleUpdateExceptionAsync ( e ).ConfigureAwait ( false );
+			}
+		}
+
+		private async Task HandleUpdateExceptionAsync ( Exception e )
+		{
+			if ( e is GoogleApiException gae && gae.Error?.Code == 429 )
+			{
+				Logger.Warn ( gae, "Too many Google Api requests. Cooling down." );
+				await Task.Delay ( Config.CooldownPeriod, Bot.Cts.Token ).ConfigureAwait ( false );
+			}
+			else if ( !Bot.Cts.IsCancellationRequested &&
+			          ( e is TaskCanceledException ||
+			            e is OperationCanceledException ) )
+			{
+				Logger.Warn ( e );
+			}
+			else
+			{
+				Logger.Error ( e );
 			}
 		}
 

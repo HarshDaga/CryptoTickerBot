@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,21 +6,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using CryptoTickerBot.Core.Interfaces;
 using CryptoTickerBot.Data.Domain;
-using CryptoTickerBot.Data.Extensions;
 using CryptoTickerBot.Telegram.Extensions;
 using CryptoTickerBot.Telegram.Menus;
-using CryptoTickerBot.Telegram.Menus.Abstractions;
+using CryptoTickerBot.Telegram.Menus.Pages;
 using CryptoTickerBot.Telegram.Subscriptions;
 using EnumsNET;
 using Humanizer;
 using Humanizer.Localisation;
 using NLog;
-using Polly;
 using Tababular;
-using Telegram.Bot;
-using Telegram.Bot.Args;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 
@@ -29,93 +23,64 @@ using Telegram.Bot.Types.Enums;
 
 namespace CryptoTickerBot.Telegram
 {
-	public delegate Task CommandHandlerDelegate ( Message message );
-
-	public class TelegramBot
+	public class TelegramBot : TelegramBotBase
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger ( );
 
 		public IBot Ctb { get; }
 
-		public TelegramBotClient Client { get; }
-		public User Self { get; private set; }
 		public TelegramBotData Data { get; }
-		public TelegramBotConfig Config { get; set; }
-		public Policy Policy { get; set; }
-		public Policy RetryForeverPolicy { get; set; }
 
-		public CancellationToken CancellationToken => Ctb.Cts.Token;
-
-		private readonly Dictionary<string, (string usage, CommandHandlerDelegate handler)> commandHandlers;
-
-		private readonly ConcurrentDictionary<int, ITelegramKeyboardMenu> menuStates =
-			new ConcurrentDictionary<int, ITelegramKeyboardMenu> ( );
+		public override CancellationToken CancellationToken => Ctb.Cts.Token;
 
 		public TelegramBot ( TelegramBotConfig config,
-		                     IBot ctb )
+		                     IBot ctb ) : base ( config )
 		{
-			Config = config;
-			Ctb    = ctb;
-
-			Client                 =  new TelegramBotClient ( Config.BotToken );
-			Client.OnMessage       += OnMessage;
-			Client.OnInlineQuery   += OnInlineQuery;
-			Client.OnCallbackQuery += OnCallbackQuery;
-			Client.OnReceiveError  += OnError;
+			Ctb = ctb;
 
 			Data       =  new TelegramBotData ( );
 			Data.Error += exception => Logger.Error ( exception );
 
-			Policy = Policy
-				.Handle<Exception> ( )
-				.WaitAndRetryAsync (
-					Config.RetryLimit,
-					i => Config.RetryInterval,
-					( exception,
-					  retryCount,
-					  span ) =>
-					{
-						Logger.Error ( exception );
-						return Task.CompletedTask;
-					}
-				);
-
-			commandHandlers = new Dictionary<string, (string, CommandHandlerDelegate)>
-			{
-				["/menu"] = ( "/menu", HandleMenuCommandAsync ),
-				["/subscribe"] = ( "/subscribe [Exchange] [Percentage] [Silent=true/false] [Symbols]",
-				                   HandleSubscribeCommandAsync ),
-				["/status"]  = ( "/status", HandleStatusCommandAsync ),
-				["/restart"] = ( "/restart", HandleRestartCommandAsync )
-			};
+			AddCommandHandler ( "/menu", "/menu", HandleMenuCommandAsync );
+			AddCommandHandler ( "/subscribe",
+			                    "/subscribe [Exchange] [Percentage] [Silent=true/false] [Symbols]",
+			                    HandleSubscribeCommandAsync );
+			AddCommandHandler ( "/status", "/status", HandleStatusCommandAsync );
+			AddCommandHandler ( "/restart", "/restart", HandleRestartCommandAsync );
 		}
 
-		public async Task StartAsync ( )
+		protected override async Task OnStartAsync ( )
 		{
-			Logger.Info ( "Starting Telegram Bot" );
+			await ResumeSubscriptionsAsync ( ).ConfigureAwait ( false );
+		}
+
+		protected override async void OnInlineQuery ( InlineQuery query )
+		{
+			var from = query.From;
+			Logger.Info ( $"Received inline query from: {from.Id,-10} {from.FirstName}" );
+
+			if ( !Data.Users.Contains ( from ) )
+				Data.AddOrUpdate ( from, UserRole.Guest );
+
+			var words = query.Query.Split ( new[] {' '}, StringSplitOptions.RemoveEmptyEntries );
+			var inlineQueryResults = Ctb.Exchanges.Values
+				.Select ( x => x.ToInlineQueryResult ( words ) )
+				.ToList ( );
+
 			try
 			{
-				await Policy
-					.ExecuteAsync ( async ( ) =>
-					{
-						Self = await Client.GetMeAsync ( CancellationToken ).ConfigureAwait ( false );
-						Logger.Info ( $"Hello! My name is {Self.FirstName}" );
-
-						Client.StartReceiving ( cancellationToken: CancellationToken );
-					} ).ConfigureAwait ( false );
-
-				await ResumeSubscriptionsAsync ( ).ConfigureAwait ( false );
+				await Client
+					.AnswerInlineQueryAsync (
+						query.Id,
+						inlineQueryResults,
+						0,
+						cancellationToken: CancellationToken
+					).ConfigureAwait ( false );
 			}
-			catch ( Exception e )
+			catch ( Exception exception )
 			{
-				Logger.Error ( e );
-				throw;
+				Logger.Error ( exception );
 			}
-		}
-
-		public void Stop ( )
-		{
-			Client.StopReceiving ( );
 		}
 
 		#region Helpers
@@ -134,40 +99,6 @@ namespace CryptoTickerBot.Telegram
 
 				await subscription.ResumeAsync ( this ).ConfigureAwait ( false );
 			}
-		}
-
-		private void UpdateMenuState ( int id,
-		                               ITelegramKeyboardMenu menu )
-		{
-			menuStates.TryRemove ( id, out _ );
-			if ( menu != null )
-				menuStates[menu.Id] = menu;
-		}
-
-		private async Task<bool> MenuTextInputAsync ( Message message )
-		{
-			foreach ( var menu in GetOpenMenus ( message.From, message.Chat ) )
-				await menu.HandleMessageAsync ( message ).ConfigureAwait ( false );
-
-			return true;
-		}
-
-		private async Task CloseExistingMenusAsync ( User user )
-		{
-			foreach ( var menu in menuStates.Values.Where ( x => x != null && x.User == user ).ToList ( ) )
-			{
-				await menu.DeleteMenuAsync ( ).ConfigureAwait ( false );
-				menuStates.TryRemove ( menu.Id, out _ );
-			}
-		}
-
-		private IEnumerable<ITelegramKeyboardMenu> GetOpenMenus ( User user,
-		                                                          Chat chat )
-		{
-			foreach ( var menu in menuStates.Values
-				.Where ( x => x != null && x.User == user && x.Chat.Id == chat.Id )
-				.ToList ( ) )
-				yield return menu;
 		}
 
 		public async Task AddOrUpdateSubscriptionAsync ( TelegramPercentChangeSubscription subscription )
@@ -221,13 +152,18 @@ namespace CryptoTickerBot.Telegram
 
 		private async Task HandleMenuCommandAsync ( Message message )
 		{
-			var from = message.From;
+			var user = message.From;
+			var chat = message.Chat;
 
-			await CloseExistingMenusAsync ( message.From ).ConfigureAwait ( false );
+			if ( MenuManager.TryGetMenu ( user, chat.Id, out var menu ) )
+			{
+				await menu.DeleteAsync ( ).ConfigureAwait ( false );
+				MenuManager.Remove ( user, chat.Id );
+			}
 
-			var menu = new MainMenu ( this, from, message.Chat );
-			await menu.DisplayAsync ( ).ConfigureAwait ( false );
-			menuStates[menu.Id] = menu;
+			menu = new TelegramKeyboardMenu ( user, chat, this );
+			MenuManager.AddOrUpdateMenu ( menu );
+			await menu.DisplayAsync ( new MainPage ( menu ) ).ConfigureAwait ( false );
 		}
 
 		private async Task HandleSubscribeCommandAsync ( Message message )
@@ -238,7 +174,7 @@ namespace CryptoTickerBot.Telegram
 			if ( parameters.Count < 3 )
 			{
 				await Client.SendTextBlockAsync ( message.Chat,
-				                                  $"Usage:\n{commandHandlers[command].usage}",
+				                                  $"Usage:\n{CommandHandlers[command].usage}",
 				                                  cancellationToken: CancellationToken ).ConfigureAwait ( false );
 				return;
 			}
@@ -288,109 +224,6 @@ namespace CryptoTickerBot.Telegram
 			await Client.SendTextBlockAsync ( message.Chat,
 			                                  GetStatusString ( ),
 			                                  cancellationToken: CancellationToken ).ConfigureAwait ( false );
-		}
-
-		#endregion
-
-		#region TelegramBotClient Event Handlers
-
-		private async void OnCallbackQuery ( object sender,
-		                                     CallbackQueryEventArgs callbackQueryEventArgs )
-		{
-			var query = callbackQueryEventArgs.CallbackQuery;
-
-			if ( !menuStates.TryGetValue ( query.Message.MessageId, out var menu ) )
-			{
-				try
-				{
-					await Client
-						.AnswerCallbackQueryAsync ( query.Id,
-						                            "Menu was closed!",
-						                            cancellationToken: Ctb.Cts.Token ).ConfigureAwait ( false );
-					await Client.DeleteMessageAsync ( query.Message.Chat, query.Message.MessageId, Ctb.Cts.Token )
-						.ConfigureAwait ( false );
-				}
-				catch ( Exception e )
-				{
-					Logger.Error ( e );
-				}
-
-				return;
-			}
-
-			if ( menu == null )
-				return;
-
-			menu = await menu.HandleQueryAsync ( query ).ConfigureAwait ( false );
-			UpdateMenuState ( query.Message.MessageId, menu );
-		}
-
-		private static void OnError ( object sender,
-		                              ReceiveErrorEventArgs e )
-		{
-			Logger.Error (
-				e.ApiRequestException,
-				$"Error Code: {e.ApiRequestException.ErrorCode}"
-			);
-		}
-
-		private async void OnInlineQuery ( object sender,
-		                                   InlineQueryEventArgs e )
-		{
-			var from = e.InlineQuery.From;
-			Logger.Info ( $"Received inline query from: {from.Id,-10} {from.FirstName}" );
-			if ( !Data.Users.Contains ( from ) )
-				Data.AddOrUpdate ( from, UserRole.Guest );
-
-			var words = e.InlineQuery.Query.Split ( new[] {' '}, StringSplitOptions.RemoveEmptyEntries );
-			var inlineQueryResults = Ctb.Exchanges.Values
-				.Select ( x => x.ToInlineQueryResult ( words ) )
-				.ToList ( );
-
-			try
-			{
-				await Client
-					.AnswerInlineQueryAsync (
-						e.InlineQuery.Id,
-						inlineQueryResults,
-						0,
-						cancellationToken: CancellationToken
-					).ConfigureAwait ( false );
-			}
-			catch ( Exception exception )
-			{
-				Logger.Error ( exception );
-			}
-		}
-
-		private async void OnMessage ( object sender,
-		                               MessageEventArgs e )
-		{
-			try
-			{
-				var message = e.Message;
-
-				if ( message is null || message.Type != MessageType.Text )
-					return;
-
-				var (command, parameters) = message.ExtractCommand ( Self );
-				Logger.Debug ( $"Received from {message.From} : {command} {parameters.Join ( ", " )}" );
-
-				if ( !Data.Users.Contains ( message.From ) )
-					Data.AddOrUpdate ( message.From, UserRole.Guest );
-
-				if ( commandHandlers.TryGetValue ( command, out var tuple ) )
-				{
-					await tuple.handler ( message ).ConfigureAwait ( false );
-					return;
-				}
-
-				await MenuTextInputAsync ( message ).ConfigureAwait ( false );
-			}
-			catch ( Exception exception )
-			{
-				Logger.Error ( exception );
-			}
 		}
 
 		#endregion

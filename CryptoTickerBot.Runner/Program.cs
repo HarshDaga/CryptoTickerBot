@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Colorful;
 using CryptoTickerBot.Core;
+using CryptoTickerBot.Core.Interfaces;
 using CryptoTickerBot.CUI;
 using CryptoTickerBot.Data.Configs;
 using CryptoTickerBot.GoogleSheets;
@@ -61,33 +62,49 @@ namespace CryptoTickerBot.Runner
 
 			var bot = new Bot ( );
 
-			if ( RunnerConfig.EnableGoogleSheetsService )
-			{
-				var config = ConfigManager<SheetsConfig>.Instance;
-
-				var service = new GoogleSheetsUpdaterService ( config );
-
-				service.Update += updaterService =>
-				{
-					Logger.Debug ( $"Sheets Updated @ {service.LastUpdate}" );
-					return Task.CompletedTask;
-				};
-
-				await bot.AttachAsync ( service ).ConfigureAwait ( false );
-			}
-
-			if ( RunnerConfig.EnableConsoleService )
-				await bot.AttachAsync ( new ConsolePrintService ( ) ).ConfigureAwait ( false );
-
-			if ( RunnerConfig.EnableTelegramService )
-			{
-				var teleService = new TelegramBotService ( ConfigManager<TelegramBotConfig>.Instance );
-				await bot.AttachAsync ( teleService ).ConfigureAwait ( false );
-			}
+			await AttachServicesAsync ( bot ).ConfigureAwait ( false );
 
 			await bot.StartAsync ( ).ConfigureAwait ( false );
 
 			QuitEvent.WaitOne ( );
+		}
+
+		private static async Task AttachServicesAsync ( IBot bot )
+		{
+			if ( RunnerConfig.EnableGoogleSheetsService )
+				await AttachGoogleSheetsServiceAsync ( bot ).ConfigureAwait ( false );
+
+			if ( RunnerConfig.EnableConsoleService )
+				await AttachConsoleServiceAsync ( bot ).ConfigureAwait ( false );
+
+			if ( RunnerConfig.EnableTelegramService )
+				await AttachTelegramServiceAsync ( bot ).ConfigureAwait ( false );
+		}
+
+		private static async Task AttachTelegramServiceAsync ( IBot bot )
+		{
+			var teleService = new TelegramBotService ( ConfigManager<TelegramBotConfig>.Instance );
+			await bot.AttachAsync ( teleService ).ConfigureAwait ( false );
+		}
+
+		private static async Task AttachConsoleServiceAsync ( IBot bot )
+		{
+			await bot.AttachAsync ( new ConsolePrintService ( ) ).ConfigureAwait ( false );
+		}
+
+		private static async Task AttachGoogleSheetsServiceAsync ( IBot bot )
+		{
+			var config = ConfigManager<SheetsConfig>.Instance;
+
+			var service = new GoogleSheetsUpdaterService ( config );
+
+			service.Update += updaterService =>
+			{
+				Logger.Debug ( $"Sheets Updated @ {service.LastUpdate}" );
+				return Task.CompletedTask;
+			};
+
+			await bot.AttachAsync ( service ).ConfigureAwait ( false );
 		}
 	}
 }
