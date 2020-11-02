@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="Flurl" Version="2.8.0" />
-    <PackageReference Include="Flurl.Http" Version="2.4.0" />
+    <PackageReference Include="Flurl.Http" Version="3.0.0" />
     <PackageReference Include="GDAX.Api.ClientLibrary" Version="1.0.26" />
     <PackageReference Include="Nito.AsyncEx" Version="5.0.0-pre-05" />
     <PackageReference Include="PurePusherClient" Version="1.1.0" />
