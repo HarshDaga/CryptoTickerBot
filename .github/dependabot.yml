@@ -1,0 +1,28 @@
+version: 2
+updates:
+- package-ecosystem: nuget
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "11:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: Google.Apis.Sheets.v4
+    versions:
+    - 1.49.0.2175
+    - 1.50.0.2175
+    - 1.50.0.2231
+    - 1.50.0.2245
+    - 1.50.0.2259
+    - 1.51.0.2259
+    - 1.51.0.2266
+  - dependency-name: nunit
+    versions:
+    - 3.13.0
+    - 3.13.1
+  - dependency-name: Humanizer.Core
+    versions:
+    - 2.8.26
+  - dependency-name: Enums.NET
+    versions:
+    - 3.0.3
